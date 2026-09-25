@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+
+  --color-brand-50: oklch(0.97 0.02 265);
+  --color-brand-100: oklch(0.93 0.04 265);
+  --color-brand-400: oklch(0.7 0.15 265);
+  --color-brand-500: oklch(0.6 0.19 265);
+  --color-brand-600: oklch(0.52 0.2 265);
+  --color-brand-700: oklch(0.45 0.18 265);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+    @apply select-none;
+  }
+
+  input,
+  textarea {
+    @apply select-text;
+  }
+}
