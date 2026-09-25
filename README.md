@@ -43,3 +43,4 @@ src-tauri/               Rust backend
 1. Create the function in `src-tauri/src/commands/` with `#[tauri::command]` and re-export it from `commands/mod.rs`.
 2. Register it in `tauri::generate_handler![...]` in `src-tauri/src/lib.rs`.
 3. Add its argument/result types to `CommandMap` in `src/lib/tauri.ts`, then call it with `invokeCommand("name", args)`.
+ 
