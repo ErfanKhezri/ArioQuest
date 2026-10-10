@@ -67,6 +67,15 @@
   --fg: oklch(0.21 0.02 270);
   --muted: oklch(0.46 0.02 270);
   --subtle: oklch(0.6 0.015 270);
+  --brand: oklch(0.6 0.19 265);
+  --danger: oklch(0.6 0.22 18);
+  --warn: oklch(0.75 0.16 70);
+  --syn-key: oklch(0.5 0.2 265);
+  --syn-string: oklch(0.55 0.14 160);
+  --syn-number: oklch(0.6 0.15 65);
+  --syn-bool: oklch(0.58 0.2 350);
+  --syn-keyword: oklch(0.52 0.2 300);
+  --syn-tag: oklch(0.55 0.16 25);
   color-scheme: light;
 }
 
@@ -79,6 +88,12 @@
     --fg: oklch(0.96 0.005 270);
     --muted: oklch(0.74 0.012 270);
     --subtle: oklch(0.56 0.014 270);
+    --syn-key: oklch(0.8 0.1 265);
+    --syn-string: oklch(0.78 0.14 160);
+    --syn-number: oklch(0.8 0.14 75);
+    --syn-bool: oklch(0.76 0.16 350);
+    --syn-keyword: oklch(0.76 0.14 300);
+    --syn-tag: oklch(0.75 0.14 25);
     color-scheme: dark;
   }
 }
@@ -96,7 +111,9 @@
   }
 
   input,
-  textarea {
+  textarea,
+  .cm-content,
+  .selectable {
     @apply select-text;
   }
 
@@ -107,4 +124,17 @@
   ::-webkit-scrollbar-thumb {
     @apply rounded-full border-2 border-solid border-transparent bg-line bg-clip-padding;
   }
+}
+
+/* {{variable}} highlights inside CodeMirror editors */
+.cm-var {
+  border-radius: 3px;
+  padding: 0 1px;
+  background: color-mix(in oklch, var(--brand) 14%, transparent);
+  color: var(--syn-key);
+}
+
+.cm-var-missing {
+  background: color-mix(in oklch, var(--danger) 14%, transparent);
+  color: var(--danger);
 }

@@ -31,5 +31,7 @@ export default defineConfig({
     target: "chrome105",
     minify: !process.env.TAURI_ENV_DEBUG,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    // Assets load from disk inside the desktop app, so bundle size matters little.
+    chunkSizeWarningLimit: 1500,
   },
 });

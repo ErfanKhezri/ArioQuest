@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Kbd } from "@/components/ui/Kbd";
+import { useWorkspace } from "@/store/workspace";
 import { RequestPreview } from "./RequestPreview";
 
 interface HeroProps {
@@ -8,19 +9,26 @@ interface HeroProps {
   onQueryChange: (query: string) => void;
 }
 
-const protocols = ["REST", "GraphQL", "WebSocket", "gRPC", "SSE"];
+const protocols = ["REST", "GraphQL", "gRPC", "Protobuf"];
 
 export function Hero({ query, onQueryChange }: HeroProps) {
+  const newTab = useWorkspace((s) => s.newTab);
+  const openDialog = useWorkspace((s) => s.openDialog);
+
   return (
     <section className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
       <div className="motion-safe:animate-fade-up">
-        <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/25 bg-brand-500/8 py-1 pr-3 pl-1 text-xs font-medium text-brand-600 dark:text-brand-300">
+        <button
+          type="button"
+          onClick={() => openDialog({ type: "protoSet" })}
+          className="inline-flex items-center gap-2 rounded-full border border-brand-500/25 bg-brand-500/8 py-1 pr-3 pl-1 text-xs font-medium text-brand-600 dark:text-brand-300"
+        >
           <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white uppercase">
             New
           </span>
-          AI-generated test suites
+          gRPC straight from your .proto files
           <Icon name="chevronRight" size={13} />
-        </span>
+        </button>
 
         <h1 className="mt-5 text-5xl leading-[1.05] font-semibold tracking-tight text-balance xl:text-6xl">
           Every API,
@@ -32,12 +40,12 @@ export function Hero({ query, onQueryChange }: HeroProps) {
         </h1>
 
         <p className="mt-5 max-w-lg text-base leading-relaxed text-pretty text-muted">
-          Design, debug, test and mock your APIs in a fast native app — with scripting,
-          environments, visual flows and an AI copilot built in.
+          Send, debug and test HTTP and gRPC APIs in a fast native app — with environments,
+          assertions, JavaScript tests and a collection runner built in.
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-3">
-          <Button size="lg">
+          <Button size="lg" onClick={() => newTab("http")}>
             <Icon name="plus" size={16} />
             New request
             <span className="ml-1 flex gap-0.5 opacity-70">
@@ -45,7 +53,7 @@ export function Hero({ query, onQueryChange }: HeroProps) {
               <Kbd className="border-white/25 bg-white/15 text-white">N</Kbd>
             </span>
           </Button>
-          <Button size="lg" variant="secondary">
+          <Button size="lg" variant="secondary" onClick={() => openDialog({ type: "import" })}>
             <Icon name="import" size={16} />
             Import collection
           </Button>
@@ -56,13 +64,18 @@ export function Hero({ query, onQueryChange }: HeroProps) {
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search recent requests, collections…"
+            placeholder="Filter recent requests…"
             className="h-full flex-1 bg-transparent text-sm outline-none placeholder:text-subtle"
           />
-          <span className="flex gap-0.5">
+          <button
+            type="button"
+            title="Search everything"
+            onClick={() => openDialog({ type: "palette" })}
+            className="flex gap-0.5"
+          >
             <Kbd>Ctrl</Kbd>
             <Kbd>K</Kbd>
-          </span>
+          </button>
         </label>
 
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-subtle">

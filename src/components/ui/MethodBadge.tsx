@@ -1,16 +1,17 @@
 import { cn } from "@/lib/cn";
+import { methodTextClasses } from "./methodColors";
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "WS" | "GQL";
+export type HttpMethod =
+  "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS" | "WS" | "GQL" | "GRPC";
 
 const methodClasses: Record<HttpMethod, string> = {
-  GET: "text-emerald-600 dark:text-emerald-400",
-  POST: "text-amber-600 dark:text-amber-400",
-  PUT: "text-sky-600 dark:text-sky-400",
-  PATCH: "text-violet-600 dark:text-violet-400",
-  DELETE: "text-rose-600 dark:text-rose-400",
+  ...methodTextClasses,
   WS: "text-teal-600 dark:text-teal-400",
   GQL: "text-pink-600 dark:text-pink-400",
+  GRPC: "text-cyan-600 dark:text-cyan-400",
 };
+
+const labels: Partial<Record<HttpMethod, string>> = { DELETE: "DEL", OPTIONS: "OPT" };
 
 interface MethodBadgeProps {
   method: HttpMethod;
@@ -26,7 +27,7 @@ export function MethodBadge({ method, className }: MethodBadgeProps) {
         className,
       )}
     >
-      {method === "DELETE" ? "DEL" : method}
+      {labels[method] ?? method}
     </span>
   );
 }

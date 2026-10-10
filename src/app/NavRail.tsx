@@ -1,20 +1,22 @@
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
-import { navItems } from "./data";
+import { type SidebarSection, useWorkspace } from "@/store/workspace";
 
 interface RailButtonProps {
   label: string;
   icon: IconName;
   active?: boolean;
+  onClick: () => void;
 }
 
-function RailButton({ label, icon, active = false }: RailButtonProps) {
+function RailButton({ label, icon, active = false, onClick }: RailButtonProps) {
   return (
     <button
       type="button"
       title={label}
       aria-label={label}
       aria-current={active ? "page" : undefined}
+      onClick={onClick}
       className={cn(
         "relative flex size-10 items-center justify-center rounded-xl transition-colors",
         "focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:outline-none",
@@ -50,17 +52,57 @@ export function Logo({ className }: { className?: string }) {
   );
 }
 
+const sections: Array<{ id: SidebarSection; label: string; icon: IconName }> = [
+  { id: "collections", label: "Collections", icon: "folder" },
+  { id: "history", label: "History", icon: "history" },
+  { id: "environments", label: "Environments", icon: "globe" },
+  { id: "protos", label: "Proto files (gRPC)", icon: "layers" },
+];
+
 export function NavRail() {
+  const view = useWorkspace((s) => s.view);
+  const sidebar = useWorkspace((s) => s.sidebar);
+  const setView = useWorkspace((s) => s.setView);
+  const showSection = useWorkspace((s) => s.showSection);
+  const openDialog = useWorkspace((s) => s.openDialog);
+
   return (
     <nav className="flex w-16 shrink-0 flex-col items-center gap-1.5 border-r border-line bg-panel py-3">
-      <Logo className="mb-4" />
-      {navItems.map((item) => (
-        <RailButton key={item.id} label={item.label} icon={item.icon} active={item.id === "home"} />
+      <button
+        type="button"
+        aria-label="Home"
+        onClick={() => setView("home")}
+        className="mb-4 rounded-xl focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:outline-none"
+      >
+        <Logo />
+      </button>
+      <RailButton
+        label="Home"
+        icon="home"
+        active={view === "home"}
+        onClick={() => setView("home")}
+      />
+      {sections.map((item) => (
+        <RailButton
+          key={item.id}
+          label={item.label}
+          icon={item.icon}
+          active={view === "workspace" && sidebar === item.id}
+          onClick={() => showSection(item.id)}
+        />
       ))}
 
       <div className="mt-auto flex flex-col items-center gap-1.5">
-        <RailButton label="Documentation" icon="book" />
-        <RailButton label="Settings" icon="sliders" />
+        <RailButton
+          label="Command palette (Ctrl+K)"
+          icon="search"
+          onClick={() => openDialog({ type: "palette" })}
+        />
+        <RailButton
+          label="Import (Ctrl+O)"
+          icon="import"
+          onClick={() => openDialog({ type: "import" })}
+        />
         <div
           title="Local workspace"
           className="mt-2 flex size-8 items-center justify-center rounded-full bg-panel-2 text-xs font-semibold text-muted ring-1 ring-line"
