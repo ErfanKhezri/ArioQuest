@@ -72,6 +72,81 @@ const paths = {
   shield: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />,
   flow: <path d="M4 4h6v6H4zM14 14h6v6h-6zM7 10v2a3 3 0 0 0 3 3h4" />,
   chevronRight: <path d="m9 6 6 6-6 6" />,
+  chevronDown: <path d="m6 9 6 6 6-6" />,
+  x: <path d="M6 6l12 12M18 6 6 18" />,
+  trash: <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" />,
+  copy: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="2" />
+      <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </>
+  ),
+  dots: <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth={3} />,
+  save: <path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6" />,
+  play: <path d="M7 4v16l13-8z" />,
+  stop: <rect x="6" y="6" width="12" height="12" rx="1.5" />,
+  file: <path d="M6 3h8l4 4v14H6zM14 3v4h4" />,
+  filePlus: <path d="M6 3h8l4 4v14H6zM14 3v4h4M12 11v6M9 14h6" />,
+  folderPlus: (
+    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10v6M9 13h6" />
+  ),
+  upload: <path d="M12 21V9M7 14l5-5 5 5M5 3h14" />,
+  download: <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />,
+  edit: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />,
+  eye: (
+    <>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  eyeOff: (
+    <path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.6 9.6 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  ),
+  refresh: <path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4M4 13a8 8 0 0 0 14.9 3M20 20v-4h-4" />,
+  terminal: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="m7 9 3 3-3 3M13 15h4" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M12 3 2 20h20z" />
+      <path d="M12 10v4M12 17h.01" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
+  key: (
+    <>
+      <circle cx="8" cy="15" r="4" />
+      <path d="m11 12 9-9M17 6l3 3M15 8l2 2" />
+    </>
+  ),
+  beaker: (
+    <path d="M9 3h6M10 3v6L4 19a1.5 1.5 0 0 0 1.3 2h13.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7 14h10" />
+  ),
+  braces: (
+    <path d="M8 4H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 4h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1" />
+  ),
+  rows: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 12h18" />
+    </>
+  ),
+  columns: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M12 4v16" />
+    </>
+  ),
+  wrap: <path d="M4 6h16M4 12h13a3 3 0 0 1 0 6h-4M15 16l-2 2 2 2M4 18h5" />,
+  list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof paths;

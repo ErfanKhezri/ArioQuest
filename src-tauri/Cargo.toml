@@ -21,6 +21,24 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider", "charset", "http2", "multipart", "gzip", "brotli", "deflate", "cookies"] }
+tokio = { version = "1.53.2", features = ["rt-multi-thread", "macros", "time", "sync"] }
+tonic = { version = "0.14", features = ["transport", "tls-ring", "tls-native-roots", "tls-webpki-roots"] }
+tonic-reflection = { version = "0.14", default-features = false }
+prost = "0.14"
+prost-types = "0.14"
+prost-reflect = { version = "0.16", features = ["serde"] }
+protox = "0.10"
+base64 = "0.23.1"
+bytes = "1.12.1"
+futures-util = "0.3.34"
+http-body-util = "0.1.5"
+tokio-stream = "0.1.19"
+sha2 = "0.11.0"
+hex = "0.4.3"
+tauri-plugin-dialog = "2"
+rustls = { version = "0.23.45", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+miette = { version = "7", default-features = false }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

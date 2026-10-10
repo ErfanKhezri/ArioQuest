@@ -163,8 +163,8 @@ export function RequestPreview() {
           <Icon name="checkCircle" size={15} className="text-emerald-500" />
           <span className="font-medium">4 / 4 tests passed</span>
           <span className="ml-auto flex items-center gap-1 text-subtle">
-            <Icon name="sparkles" size={13} className="text-brand-500" />
-            Copilot suggested 2 more
+            <Icon name="play" size={13} className="text-brand-500" />
+            Run the whole collection
           </span>
         </div>
       </div>
