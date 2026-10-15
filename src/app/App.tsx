@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Aria } from "@/components/ui/Aria";
+import { Ario } from "@/components/ui/Ario";
 import { Toaster } from "@/components/ui/Toaster";
 import { LandingPage } from "@/features/auth/LandingPage";
 import { DialogHost } from "@/features/workspace/dialogs/DialogHost";
@@ -24,7 +24,7 @@ export function App() {
   if (!hydrated || session === undefined) {
     return (
       <div className="flex h-full items-center justify-center bg-canvas">
-        <Aria mood="thinking" size={48} label="Loading ArioQuest" className="text-accent" />
+        <Ario mood="thinking" size={48} label="Loading ArioQuest" className="text-accent" />
       </div>
     );
   }

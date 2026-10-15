@@ -1,7 +1,7 @@
-import type { AriaMood } from "./Aria";
+import type { ArioMood } from "./Ario";
 
-/** Aria's reaction to an HTTP status: 2xx happy, 3xx curious, 4xx sad, 5xx error. */
-export function moodForHttpStatus(status: number): AriaMood {
+/** Ario's reaction to an HTTP status: 2xx happy, 3xx curious, 4xx sad, 5xx error. */
+export function moodForHttpStatus(status: number): ArioMood {
   if (status >= 500) return "error";
   if (status >= 400) return "sad";
   if (status >= 300) return "curious";
@@ -17,13 +17,13 @@ const GRPC_SERVER_ERRORS = new Set([
   "DEADLINE_EXCEEDED",
 ]);
 
-export function moodForGrpcStatus(statusName: string): AriaMood {
+export function moodForGrpcStatus(statusName: string): ArioMood {
   if (statusName === "OK") return "happy";
   return GRPC_SERVER_ERRORS.has(statusName) ? "error" : "sad";
 }
 
 /** Text color that goes with a mood, so color still only carries meaning. */
-export const moodTextClass: Record<AriaMood, string> = {
+export const moodTextClass: Record<ArioMood, string> = {
   idle: "text-subtle",
   happy: "text-success",
   curious: "text-info",
@@ -34,8 +34,8 @@ export const moodTextClass: Record<AriaMood, string> = {
   sleepy: "text-subtle",
 };
 
-/** Words for screen readers: "Aria is upset". */
-export const moodLabel: Record<AriaMood, string> = {
+/** Words for screen readers: "Ario is upset". */
+export const moodLabel: Record<ArioMood, string> = {
   idle: "calm",
   happy: "happy",
   curious: "curious",

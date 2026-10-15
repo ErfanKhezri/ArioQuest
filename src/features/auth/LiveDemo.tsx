@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Aria } from "@/components/ui/Aria";
-import { moodForHttpStatus, moodTextClass } from "@/components/ui/ariaMood";
+import { Ario } from "@/components/ui/Ario";
+import { moodForHttpStatus, moodTextClass } from "@/components/ui/arioMood";
 import { statusTextClass } from "@/components/ui/methodColors";
 
 const VARIABLE = "{{baseUrl}}";
 
-// Two requests take turns, so the demo shows Aria cheering a 200 and sulking at a 404.
+// Two requests take turns, so the demo shows Ario cheering a 200 and sulking at a 404.
 const ROUNDS = [
   {
     url: `${VARIABLE}/users`,
@@ -110,7 +110,7 @@ export function LiveDemo() {
       <div className="h-36 px-3 py-2 font-mono text-xs">
         {step >= sending && (
           <div className="mb-2 flex items-center gap-2">
-            <Aria
+            <Ario
               key={`${roundIndex}-${mood}`}
               mood={mood}
               size={22}

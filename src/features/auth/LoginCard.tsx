@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Spinner } from "@/components/ui/controls";
 import { Tabs } from "@/components/ui/Tabs";
-import { AuthError, signIn, signUp, type Session } from "@/lib/auth";
+import { AuthError, DEFAULT_ACCOUNT, signIn, signUp, type Session } from "@/lib/auth";
 
 type Mode = "signin" | "signup";
 export type FieldName = "name" | "email" | "password";
 
-/** Card events the landing page turns into Aria's reactions. */
+/** Card events the landing page turns into Ario's reactions. */
 interface LoginCardProps {
   onSignedIn: (session: Session) => void;
   onSubmit: () => void;
@@ -103,10 +103,12 @@ export function LoginCard({
           </label>
         )}
         <label className="block">
-          <span className="mb-1 block text-xs text-muted">Email</span>
+          <span className="mb-1 block text-xs text-muted">
+            {mode === "signin" ? "Email or username" : "Email"}
+          </span>
           <Input
             autoFocus={mode === "signin"}
-            type="email"
+            type={mode === "signin" ? "text" : "email"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             name="email"
@@ -160,6 +162,23 @@ export function LoginCard({
           {mode === "signin" ? "Sign in" : "Create account"}
         </Button>
         {error && !error.field && <FieldError message={error.message} />}
+        {mode === "signin" && (
+          <p className="text-center text-xs text-subtle">
+            First time here?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setEmail(DEFAULT_ACCOUNT.username);
+                setPassword(DEFAULT_ACCOUNT.password);
+                setError(null);
+              }}
+              className="text-accent hover:underline"
+            >
+              Use the default account
+            </button>{" "}
+            ({DEFAULT_ACCOUNT.username} / {DEFAULT_ACCOUNT.password})
+          </p>
+        )}
       </form>
     </div>
   );
