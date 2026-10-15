@@ -1,12 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor";
-import { Aria, type AriaMood } from "@/components/ui/Aria";
+import { Ario, type ArioMood } from "@/components/ui/Ario";
 import {
   moodForGrpcStatus,
   moodForHttpStatus,
   moodLabel,
   moodTextClass,
-} from "@/components/ui/ariaMood";
+} from "@/components/ui/arioMood";
 import { EmptyState, ErrorNote, IconButton } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Kbd } from "@/components/ui/Kbd";
@@ -94,7 +94,7 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3 text-xs text-subtle">
-          {running && <Aria mood="thinking" size={20} className={moodTextClass.thinking} />}
+          {running && <Ario mood="thinking" size={20} className={moodTextClass.thinking} />}
           {running ? "Sending…" : "Response"}
           {toggle}
         </div>
@@ -114,7 +114,7 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
 
   const { outcome } = result;
   const passed = result.tests.filter((t) => t.passed).length;
-  const mood: AriaMood =
+  const mood: ArioMood =
     outcome.kind === "http"
       ? moodForHttpStatus(outcome.response.status)
       : outcome.kind === "grpc"
@@ -152,10 +152,10 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3">
-        <Aria
+        <Ario
           mood={running ? "thinking" : mood}
           size={20}
-          label={`Aria is ${moodLabel[running ? "thinking" : mood]}`}
+          label={`Ario is ${moodLabel[running ? "thinking" : mood]}`}
           className={moodTextClass[running ? "thinking" : mood]}
         />
         {outcome.kind === "http" && (
@@ -343,7 +343,7 @@ function GrpcTimeline({ result, response }: { result: RunResult; response: GrpcR
           <span className="w-24 shrink-0 font-mono text-subtle">{clock(finishedAt)}</span>
           {response.ok ? (
             <span className="flex items-center gap-2 text-success">
-              <Aria mood="happy" size={18} className="text-success" /> Completed · OK
+              <Ario mood="happy" size={18} className="text-success" /> Completed · OK
             </span>
           ) : (
             <ErrorNote
@@ -462,11 +462,11 @@ function TestsSection({ result }: { result: RunResult }) {
     );
   }
   const failed = result.tests.filter((t) => !t.passed).length;
-  const mood: AriaMood = failed ? "sad" : "happy";
+  const mood: ArioMood = failed ? "sad" : "happy";
   return (
     <ul className="min-h-0 flex-1 overflow-y-auto">
       <li className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm">
-        <Aria mood={mood} size={20} className={moodTextClass[mood]} />
+        <Ario mood={mood} size={20} className={moodTextClass[mood]} />
         {failed
           ? `${failed} of ${result.tests.length} failed`
           : `All ${result.tests.length} passed`}
