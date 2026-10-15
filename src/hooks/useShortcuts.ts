@@ -27,7 +27,7 @@ export function useShortcuts() {
       } else if (key === "n" && e.shiftKey) {
         s.createCollection("New collection");
         s.showSection("collections");
-        notify.info("Created a collection — rename it from the sidebar.");
+        notify.success("Created a collection.");
       } else if (key === "n") {
         s.newTab("http");
       } else if (key === "w" && tabId && inWorkspace) {
@@ -38,10 +38,8 @@ export function useShortcuts() {
         // Cycle through environments, including "none".
         const ids = [null, ...s.environments.map((env) => env.id)];
         const next = ids[(ids.indexOf(s.activeEnvironmentId) + 1) % ids.length] ?? null;
+        // The status bar shows the switch; no toast needed.
         s.setActiveEnvironment(next);
-        notify.info(
-          `Environment: ${s.environments.find((env) => env.id === next)?.name ?? "none"}`,
-        );
       } else if (key === "tab" && inWorkspace && s.tabs.length > 1) {
         const i = s.tabs.findIndex((t) => t.id === tabId);
         const next = s.tabs[(i + (e.shiftKey ? -1 : 1) + s.tabs.length) % s.tabs.length];

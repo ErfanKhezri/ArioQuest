@@ -69,7 +69,7 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
             { value: "test", label: `Post-response${request.testScript.trim() ? " •" : ""}` },
           ]}
         />
-        <span className="text-[11px] text-subtle">
+        <span className="text-xs text-subtle">
           {phase === "pre"
             ? "Runs before the request is sent. Edit aq.request or set variables."
             : "Runs after the response arrives. Use aq.test() and aq.expect(); pm.* also works."}
@@ -89,9 +89,7 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
           />
         </div>
         <aside className="hidden w-52 shrink-0 overflow-y-auto border-l border-line p-3 lg:block">
-          <p className="mb-2 text-[11px] font-semibold tracking-wide text-subtle uppercase">
-            Snippets
-          </p>
+          <p className="mb-2 text-xs font-medium text-subtle">Snippets</p>
           <ul className="space-y-0.5">
             {snippets.map((s) => (
               <li key={s.label}>
@@ -100,7 +98,7 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
                   onClick={() =>
                     set(value.trim() ? `${value.trimEnd()}\n\n${s.code}\n` : `${s.code}\n`)
                   }
-                  className="w-full rounded-md px-2 py-1.5 text-left text-xs text-brand-600 transition-colors hover:bg-panel-2 dark:text-brand-300"
+                  className="w-full rounded-md px-2 py-2 text-left text-xs text-accent hover:bg-panel-2"
                 >
                   {s.label}
                 </button>

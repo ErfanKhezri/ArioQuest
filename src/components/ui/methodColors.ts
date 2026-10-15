@@ -1,12 +1,20 @@
 import type { HttpMethodName } from "@/core/types";
 
-/** Text colour per HTTP method, shared by badges and the method picker. */
+/** Text color per HTTP method, shared by badges and the method picker. */
 export const methodTextClasses: Record<HttpMethodName, string> = {
-  GET: "text-emerald-600 dark:text-emerald-400",
-  POST: "text-amber-600 dark:text-amber-400",
-  PUT: "text-sky-600 dark:text-sky-400",
-  PATCH: "text-violet-600 dark:text-violet-400",
-  DELETE: "text-rose-600 dark:text-rose-400",
-  HEAD: "text-slate-500 dark:text-slate-400",
-  OPTIONS: "text-fuchsia-600 dark:text-fuchsia-400",
+  GET: "text-method-get",
+  POST: "text-method-post",
+  PUT: "text-method-put",
+  PATCH: "text-method-patch",
+  DELETE: "text-method-delete",
+  HEAD: "text-method-other",
+  OPTIONS: "text-method-other",
 };
+
+/** Text color for an HTTP status code: 2xx green, 3xx blue, 4xx amber, 5xx red. */
+export function statusTextClass(status: number): string {
+  if (status >= 500) return "text-status-5xx";
+  if (status >= 400) return "text-status-4xx";
+  if (status >= 300) return "text-status-3xx";
+  return "text-status-2xx";
+}

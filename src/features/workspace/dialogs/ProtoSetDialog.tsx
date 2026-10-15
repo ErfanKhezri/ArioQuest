@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { Button } from "@/components/ui/Button";
-import { IconButton, Input, Spinner } from "@/components/ui/controls";
+import { ErrorNote, IconButton, Input, Spinner } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
 import { newGrpcRequest } from "@/core/factory";
@@ -111,7 +111,7 @@ export function ProtoSetDialog({
     >
       {!protoSet ? (
         <div className="space-y-4 p-6">
-          <p className="text-xs leading-relaxed text-muted">
+          <p className="text-xs text-muted">
             Choose the <code className="font-mono">.proto</code> files that define your services.
             Pick a folder to keep import paths like{" "}
             <code className="font-mono">import "common/v1/types.proto"</code> working. Well-known
@@ -122,20 +122,20 @@ export function ProtoSetDialog({
             <button
               type="button"
               onClick={() => void addFiles(false)}
-              className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line px-6 py-8 text-center transition-colors hover:border-brand-500/50 hover:bg-brand-500/5"
+              className="flex flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-8 text-center hover:border-accent/50 hover:bg-panel-2"
             >
-              <Icon name="filePlus" size={22} className="text-brand-500" />
+              <Icon name="filePlus" size={20} className="text-subtle" />
               <span className="text-sm font-medium">Choose files</span>
-              <span className="text-[11px] text-subtle">One or more .proto files</span>
+              <span className="text-xs text-subtle">One or more .proto files</span>
             </button>
             <button
               type="button"
               onClick={() => void addFiles(true)}
-              className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line px-6 py-8 text-center transition-colors hover:border-brand-500/50 hover:bg-brand-500/5"
+              className="flex flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-8 text-center hover:border-accent/50 hover:bg-panel-2"
             >
-              <Icon name="folderPlus" size={22} className="text-brand-500" />
+              <Icon name="folderPlus" size={20} className="text-subtle" />
               <span className="text-sm font-medium">Choose a folder</span>
-              <span className="text-[11px] text-subtle">Every .proto file inside it</span>
+              <span className="text-xs text-subtle">Every .proto file inside it</span>
             </button>
           </div>
         </div>
@@ -167,15 +167,15 @@ export function ProtoSetDialog({
                     onClick={() => setViewing(viewing === f.path ? null : f.path)}
                     onKeyDown={(e) => e.key === "Enter" && setViewing(f.path)}
                     className={cn(
-                      "group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-panel-2",
-                      viewing === f.path && "bg-brand-500/10",
+                      "group flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs hover:bg-panel-2",
+                      viewing === f.path && "bg-panel-2",
                     )}
                   >
                     <Icon name="file" size={13} className="shrink-0 text-subtle" />
-                    <span className="min-w-0 flex-1 truncate font-mono text-[11px]" title={f.path}>
+                    <span className="min-w-0 flex-1 truncate font-mono text-xs" title={f.path}>
                       {f.path}
                     </span>
-                    <span className="text-[10px] text-subtle group-hover:hidden">
+                    <span className="text-xs text-subtle group-hover:hidden">
                       {formatBytes(f.content.length)}
                     </span>
                     <IconButton
@@ -198,7 +198,7 @@ export function ProtoSetDialog({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-rose-500 hover:text-rose-500"
+                className="text-danger hover:text-danger"
                 onClick={async () => {
                   if (await confirmAction(`Delete the proto set "${protoSet.name}"?`)) {
                     deleteProtoSet(protoSet.id);
@@ -227,7 +227,7 @@ export function ProtoSetDialog({
             ) : (
               <div className="min-h-0 flex-1 overflow-y-auto p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-xs font-semibold">Services</h3>
+                  <h3 className="text-xs font-medium">Services</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -248,9 +248,9 @@ export function ProtoSetDialog({
                   </p>
                 )}
                 {schemaState?.status === "error" && (
-                  <pre className="selectable rounded-lg border border-rose-500/25 bg-rose-500/8 p-3 font-mono text-[11px] whitespace-pre-wrap text-rose-600 dark:text-rose-400">
-                    {schemaState.error}
-                  </pre>
+                  <ErrorNote>
+                    <span className="font-mono">{schemaState.error}</span>
+                  </ErrorNote>
                 )}
                 {schemaState?.schema?.services.length === 0 && (
                   <p className="text-xs text-subtle">
@@ -260,8 +260,8 @@ export function ProtoSetDialog({
                 <div className="space-y-4">
                   {schemaState?.schema?.services.map((s) => (
                     <section key={s.name}>
-                      <h4 className="mb-1 font-mono text-xs font-semibold">{s.name}</h4>
-                      <ul className="overflow-hidden rounded-lg border border-line">
+                      <h4 className="mb-1 font-mono text-xs font-medium">{s.name}</h4>
+                      <ul className="overflow-hidden rounded-md border border-line">
                         {s.methods.map((m) => (
                           <li key={m.path} className="border-b border-line last:border-b-0">
                             <button
@@ -270,13 +270,13 @@ export function ProtoSetDialog({
                               className="group flex w-full items-center gap-3 px-3 py-2 text-left text-xs hover:bg-panel-2"
                             >
                               <span className="font-mono font-medium">{m.name}</span>
-                              <span className="hidden min-w-0 truncate font-mono text-[11px] text-subtle lg:inline">
+                              <span className="hidden min-w-0 truncate font-mono text-xs text-subtle lg:inline">
                                 {m.inputType.split(".").pop()} → {m.outputType.split(".").pop()}
                               </span>
-                              <span className="ml-auto shrink-0 rounded bg-panel-2 px-1.5 py-0.5 text-[10px] text-muted">
+                              <span className="ml-auto shrink-0 rounded-sm bg-panel-2 px-2 py-0.5 text-xs text-muted">
                                 {streamingLabel(m)}
                               </span>
-                              <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-brand-600 opacity-0 group-hover:opacity-100 dark:text-brand-300">
+                              <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-accent opacity-0 group-hover:opacity-100">
                                 New request <Icon name="arrowRight" size={12} />
                               </span>
                             </button>

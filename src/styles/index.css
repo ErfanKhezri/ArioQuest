@@ -1,55 +1,50 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Tailwind's default palette, radii, shadows and animations are
+ * reset so only these tokens exist: color carries meaning (methods, statuses),
+ * everything else is neutral gray plus one accent.
+ */
 @theme {
-  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Cascadia Code", "JetBrains Mono", Consolas, ui-monospace, monospace;
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
 
-  --color-brand-50: oklch(0.97 0.02 265);
-  --color-brand-100: oklch(0.93 0.04 265);
-  --color-brand-300: oklch(0.8 0.1 265);
-  --color-brand-400: oklch(0.7 0.15 265);
-  --color-brand-500: oklch(0.6 0.19 265);
-  --color-brand-600: oklch(0.52 0.2 265);
-  --color-brand-700: oklch(0.45 0.18 265);
+  --font-sans: Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
 
-  --color-accent-400: oklch(0.78 0.13 200);
-  --color-accent-500: oklch(0.7 0.14 205);
+  --text-*: initial;
+  --text-2xs: 11px;
+  --text-2xs--line-height: 16px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-md: 15px;
+  --text-md--line-height: 22px;
 
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-drift: drift 18s ease-in-out infinite alternate;
-  --animate-ping-slow: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --radius-*: initial;
+  --radius-sm: 4px;
+  --radius-md: 6px;
 
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+
+  --animate-*: initial;
+  --animate-spin: spin 0.8s linear infinite;
+
+  @keyframes spin {
     to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes drift {
-    from {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    to {
-      transform: translate3d(40px, 30px, 0) scale(1.15);
-    }
-  }
-
-  @keyframes ping-slow {
-    75%,
-    100% {
-      transform: scale(2.2);
-      opacity: 0;
+      transform: rotate(360deg);
     }
   }
 }
 
-/* Semantic surface tokens that follow the OS light/dark setting. */
 @theme inline {
+  /* Surfaces and text */
   --color-canvas: var(--canvas);
   --color-panel: var(--panel);
   --color-panel-2: var(--panel-2);
@@ -57,45 +52,79 @@
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-subtle: var(--subtle);
+
+  /* The one accent: focus, selection, primary action */
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  /* Meaning */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  /* HTTP methods (text color only) */
+  --color-method-get: var(--success);
+  --color-method-post: var(--warning);
+  --color-method-put: var(--info);
+  --color-method-patch: var(--violet);
+  --color-method-delete: var(--danger);
+  --color-method-other: var(--muted);
+
+  /* HTTP status classes */
+  --color-status-2xx: var(--success);
+  --color-status-3xx: var(--info);
+  --color-status-4xx: var(--warning);
+  --color-status-5xx: var(--danger);
 }
 
+/* Dark is the default theme. */
 :root {
-  --canvas: oklch(0.985 0.004 270);
-  --panel: oklch(1 0 0);
-  --panel-2: oklch(0.965 0.006 270);
-  --line: oklch(0.25 0.03 270 / 0.1);
-  --fg: oklch(0.21 0.02 270);
-  --muted: oklch(0.46 0.02 270);
-  --subtle: oklch(0.6 0.015 270);
-  --brand: oklch(0.6 0.19 265);
-  --danger: oklch(0.6 0.22 18);
-  --warn: oklch(0.75 0.16 70);
-  --syn-key: oklch(0.5 0.2 265);
-  --syn-string: oklch(0.55 0.14 160);
-  --syn-number: oklch(0.6 0.15 65);
-  --syn-bool: oklch(0.58 0.2 350);
-  --syn-keyword: oklch(0.52 0.2 300);
-  --syn-tag: oklch(0.55 0.16 25);
-  color-scheme: light;
+  --canvas: oklch(0.17 0.004 270);
+  --panel: oklch(0.2 0.004 270);
+  --panel-2: oklch(0.24 0.005 270);
+  --line: oklch(0.29 0.005 270);
+  --fg: oklch(0.93 0.003 270);
+  --muted: oklch(0.72 0.005 270);
+  --subtle: oklch(0.56 0.006 270);
+  --accent: oklch(0.66 0.15 255);
+  --accent-fg: oklch(0.99 0 0);
+  --success: oklch(0.74 0.15 150);
+  --warning: oklch(0.8 0.14 75);
+  --danger: oklch(0.68 0.19 25);
+  --info: oklch(0.72 0.12 240);
+  --violet: oklch(0.72 0.14 300);
+  --syn-key: oklch(0.78 0.1 255);
+  --syn-string: oklch(0.78 0.12 150);
+  --syn-number: oklch(0.8 0.12 75);
+  --syn-bool: oklch(0.75 0.13 330);
+  --syn-keyword: oklch(0.74 0.12 300);
+  --syn-tag: oklch(0.74 0.13 25);
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --canvas: oklch(0.155 0.012 270);
-    --panel: oklch(0.195 0.014 270);
-    --panel-2: oklch(0.235 0.016 270);
-    --line: oklch(1 0 0 / 0.08);
-    --fg: oklch(0.96 0.005 270);
-    --muted: oklch(0.74 0.012 270);
-    --subtle: oklch(0.56 0.014 270);
-    --syn-key: oklch(0.8 0.1 265);
-    --syn-string: oklch(0.78 0.14 160);
-    --syn-number: oklch(0.8 0.14 75);
-    --syn-bool: oklch(0.76 0.16 350);
-    --syn-keyword: oklch(0.76 0.14 300);
-    --syn-tag: oklch(0.75 0.14 25);
-    color-scheme: dark;
-  }
+:root[data-theme="light"] {
+  --canvas: oklch(0.975 0.002 270);
+  --panel: oklch(1 0 0);
+  --panel-2: oklch(0.955 0.003 270);
+  --line: oklch(0.9 0.004 270);
+  --fg: oklch(0.22 0.005 270);
+  --muted: oklch(0.45 0.006 270);
+  --subtle: oklch(0.6 0.006 270);
+  --accent: oklch(0.55 0.17 255);
+  --accent-fg: oklch(0.99 0 0);
+  --success: oklch(0.55 0.14 150);
+  --warning: oklch(0.6 0.14 65);
+  --danger: oklch(0.56 0.2 25);
+  --info: oklch(0.55 0.14 245);
+  --violet: oklch(0.55 0.17 300);
+  --syn-key: oklch(0.5 0.15 255);
+  --syn-string: oklch(0.5 0.12 150);
+  --syn-number: oklch(0.55 0.13 60);
+  --syn-bool: oklch(0.52 0.17 330);
+  --syn-keyword: oklch(0.5 0.16 300);
+  --syn-tag: oklch(0.52 0.15 25);
+  color-scheme: light;
 }
 
 @layer base {
@@ -106,7 +135,7 @@
   }
 
   body {
-    @apply bg-canvas text-fg antialiased;
+    @apply bg-canvas font-sans text-sm text-fg antialiased;
     @apply select-none;
   }
 
@@ -124,17 +153,27 @@
   ::-webkit-scrollbar-thumb {
     @apply rounded-full border-2 border-solid border-transparent bg-line bg-clip-padding;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 /* {{variable}} highlights inside CodeMirror editors */
 .cm-var {
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   padding: 0 1px;
-  background: color-mix(in oklch, var(--brand) 14%, transparent);
+  background: color-mix(in oklch, var(--accent) 16%, transparent);
   color: var(--syn-key);
 }
 
 .cm-var-missing {
-  background: color-mix(in oklch, var(--danger) 14%, transparent);
+  background: color-mix(in oklch, var(--danger) 16%, transparent);
   color: var(--danger);
 }

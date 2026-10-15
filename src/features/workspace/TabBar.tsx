@@ -1,11 +1,29 @@
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { IconButton } from "@/components/ui/controls";
-import { requestLabel } from "@/core/tree";
+import { findItem, requestLabel } from "@/core/tree";
 import { cn } from "@/lib/cn";
-import { isTabDirty, useWorkspace } from "@/store/workspace";
-import { EnvironmentPicker } from "./EnvironmentPicker";
+import { isTabDirty, type Tab, useWorkspace } from "@/store/workspace";
+
+/** Renames the saved item when the tab has one, otherwise just the draft. */
+function useRenameTab() {
+  const collections = useWorkspace((s) => s.collections);
+  const updateRequest = useWorkspace((s) => s.updateRequest);
+  const renameItem = useWorkspace((s) => s.renameItem);
+  return (tab: Tab, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === tab.request.name) return;
+    const origin = tab.origin;
+    const collection = origin && collections.find((c) => c.id === origin.collectionId);
+    if (origin && collection && findItem(collection.items, origin.itemId)) {
+      renameItem(origin.collectionId, origin.itemId, trimmed);
+    } else {
+      updateRequest(tab.id, (r) => ({ ...r, name: trimmed }));
+    }
+  };
+}
 
 export function TabBar() {
   const tabs = useWorkspace((s) => s.tabs);
@@ -16,32 +34,42 @@ export function TabBar() {
   const duplicateTab = useWorkspace((s) => s.duplicateTab);
   const newTab = useWorkspace((s) => s.newTab);
   const running = useWorkspace((s) => s.running);
+  const collections = useWorkspace((s) => s.collections);
+  const renameTab = useRenameTab();
+  const [renaming, setRenaming] = useState<string | null>(null);
 
   return (
-    <div className="flex h-10 shrink-0 items-end border-b border-line bg-panel-2/60 pl-2">
+    <div className="flex h-9 shrink-0 items-stretch border-b border-line bg-panel">
       <div
         role="tablist"
-        className="flex min-w-0 flex-1 [scrollbar-width:none] items-end gap-0.5 overflow-x-auto"
+        className="flex min-w-0 flex-1 [scrollbar-width:none] items-stretch overflow-x-auto"
       >
         {tabs.map((tab) => {
           const active = tab.id === activeTabId;
           const dirty = isTabDirty(tab);
+          const collection = collections.find((c) => c.id === tab.origin?.collectionId);
           return (
             <Menu
               key={tab.id}
               align="start"
               items={[
+                { label: "Rename", icon: "edit", onSelect: () => setRenaming(tab.id) },
                 { label: "Duplicate", icon: "copy", onSelect: () => duplicateTab(tab.id) },
-                { label: "Close tab", icon: "x", onSelect: () => closeTab(tab.id) },
-                { label: "Close other tabs", icon: "x", onSelect: () => closeOtherTabs(tab.id) },
+                { label: "Close", icon: "x", onSelect: () => closeTab(tab.id) },
+                { label: "Close others", icon: "x", onSelect: () => closeOtherTabs(tab.id) },
               ]}
               trigger={({ toggle }) => (
                 <div
                   role="tab"
                   aria-selected={active}
                   tabIndex={0}
-                  title={tab.request.name}
+                  title={
+                    collection
+                      ? `${collection.name} / ${tab.request.name}`
+                      : `${tab.request.name} (unsaved)`
+                  }
                   onClick={() => activateTab(tab.id)}
+                  onDoubleClick={() => setRenaming(tab.id)}
                   onKeyDown={(e) => e.key === "Enter" && activateTab(tab.id)}
                   onAuxClick={(e) => e.button === 1 && closeTab(tab.id)}
                   onContextMenu={(e) => {
@@ -49,39 +77,59 @@ export function TabBar() {
                     toggle(e);
                   }}
                   className={cn(
-                    "group relative flex h-8 max-w-56 min-w-32 shrink-0 cursor-pointer items-center gap-2 rounded-t-lg border border-b-0 px-3 text-xs transition-colors",
-                    active
-                      ? "border-line bg-panel text-fg"
-                      : "border-transparent text-subtle hover:bg-panel/60 hover:text-fg",
+                    "group relative flex max-w-56 min-w-28 shrink-0 cursor-pointer items-center gap-2 border-r border-line pr-1 pl-3 text-sm",
+                    active ? "bg-canvas text-fg" : "text-subtle hover:text-fg",
                   )}
                 >
-                  {active && <span className="absolute inset-x-0 -bottom-px h-px bg-panel" />}
-                  <MethodBadge method={requestLabel(tab.request)} className="w-auto text-[10px]" />
-                  <span className="min-w-0 flex-1 truncate">{tab.request.name}</span>
-                  {running[tab.id] ? (
-                    <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-brand-500" />
+                  {active && <span className="absolute inset-x-0 top-0 h-px bg-accent" />}
+                  <MethodBadge method={requestLabel(tab.request)} className="w-auto" />
+                  {renaming === tab.id ? (
+                    <input
+                      autoFocus
+                      defaultValue={tab.request.name}
+                      aria-label="Request name"
+                      onFocus={(e) => e.target.select()}
+                      onClick={(e) => e.stopPropagation()}
+                      onBlur={(e) => {
+                        renameTab(tab, e.target.value);
+                        setRenaming(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.currentTarget.blur();
+                        if (e.key === "Escape") setRenaming(null);
+                      }}
+                      className="h-6 min-w-0 flex-1 rounded-sm border border-accent bg-panel px-1 outline-none"
+                    />
                   ) : (
-                    dirty && (
-                      <span
-                        className="size-1.5 shrink-0 rounded-full bg-amber-500 group-hover:hidden"
-                        title="Unsaved changes"
-                      />
-                    )
+                    <span className="min-w-0 flex-1 truncate">{tab.request.name}</span>
                   )}
-                  <button
-                    type="button"
-                    aria-label={`Close ${tab.request.name}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(tab.id);
-                    }}
-                    className={cn(
-                      "-mr-1 hidden size-5 shrink-0 items-center justify-center rounded text-subtle group-hover:flex hover:bg-panel-2 hover:text-fg",
-                      active && !dirty && "flex",
+                  <span className="flex size-5 shrink-0 items-center justify-center">
+                    {running[tab.id] ? (
+                      <span className="size-1.5 rounded-full bg-accent" />
+                    ) : (
+                      dirty && (
+                        <span
+                          className="size-1.5 rounded-full bg-subtle group-hover:hidden"
+                          title="Unsaved changes"
+                        />
+                      )
                     )}
-                  >
-                    <Icon name="x" size={12} />
-                  </button>
+                    <button
+                      type="button"
+                      aria-label={`Close ${tab.request.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                      }}
+                      className={cn(
+                        "size-5 items-center justify-center rounded-sm text-subtle hover:bg-panel-2 hover:text-fg",
+                        running[tab.id] || dirty ? "hidden group-hover:flex" : "flex",
+                        !active && !running[tab.id] && !dirty && "invisible group-hover:visible",
+                      )}
+                    >
+                      <Icon name="x" size={12} />
+                    </button>
+                  </span>
                 </div>
               )}
             />
@@ -94,17 +142,9 @@ export function TabBar() {
             { label: "gRPC request", icon: "server", onSelect: () => newTab("grpc") },
           ]}
           trigger={({ toggle }) => (
-            <IconButton
-              icon="plus"
-              label="New tab (Ctrl+N)"
-              onClick={toggle}
-              className="mb-1 ml-1"
-            />
+            <IconButton icon="plus" label="New tab (Ctrl+N)" onClick={toggle} className="m-1" />
           )}
         />
-      </div>
-      <div className="flex h-full shrink-0 items-center px-3">
-        <EnvironmentPicker />
       </div>
     </div>
   );
