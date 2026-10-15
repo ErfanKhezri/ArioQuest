@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import { useToasts } from "@/store/toasts";
 import { Icon } from "./Icon";
-import { Mascot } from "./Mascot";
+import { Aria } from "./Aria";
 
 export function Toaster() {
   const toasts = useToasts((s) => s.toasts);
@@ -21,7 +21,7 @@ export function Toaster() {
           )}
         >
           {t.kind === "error" ? (
-            <Mascot mood="sad" size={20} className="text-danger" />
+            <Aria mood="sad" size={20} className="text-danger" />
           ) : (
             <Icon name="check" size={14} className="mt-px shrink-0 text-subtle" />
           )}

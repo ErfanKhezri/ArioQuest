@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Aria } from "@/components/ui/Aria";
 import { Toaster } from "@/components/ui/Toaster";
 import { LandingPage } from "@/features/auth/LandingPage";
 import { DialogHost } from "@/features/workspace/dialogs/DialogHost";
@@ -20,7 +21,13 @@ export function App() {
     void getSession().then(setSession);
   }, []);
 
-  if (!hydrated || session === undefined) return <div className="h-full bg-canvas" />;
+  if (!hydrated || session === undefined) {
+    return (
+      <div className="flex h-full items-center justify-center bg-canvas">
+        <Aria mood="thinking" size={48} label="Loading ArioQuest" className="text-accent" />
+      </div>
+    );
+  }
 
   if (!session) return <LandingPage onSignedIn={setSession} />;
 
