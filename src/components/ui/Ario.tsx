@@ -1,17 +1,17 @@
 import { cn } from "@/lib/cn";
 
-export type AriaMood =
+export type ArioMood =
   "idle" | "happy" | "curious" | "thinking" | "shy" | "sad" | "error" | "sleepy";
 
-interface AriaProps {
-  mood?: AriaMood;
+interface ArioProps {
+  mood?: ArioMood;
   size?: number;
   /**
    * One-off or looping motion, only used on the sign-in screen:
    * "idle" floats and blinks, "error" shakes once, "happy" hops once.
    */
   animate?: "idle" | "error" | "happy";
-  /** Accessible name; Aria is decorative unless one is given. */
+  /** Accessible name; Ario is decorative unless one is given. */
   label?: string;
   className?: string;
 }
@@ -20,7 +20,7 @@ const dot = (cx: number, cy: number) => (
   <circle cx={cx} cy={cy} r="1.25" fill="currentColor" stroke="none" />
 );
 
-function Eyes({ mood }: { mood: AriaMood }) {
+function Eyes({ mood }: { mood: ArioMood }) {
   switch (mood) {
     case "happy":
       // ^ ^
@@ -33,7 +33,7 @@ function Eyes({ mood }: { mood: AriaMood }) {
         <path d="M11.3 14.3l2.4 2.4M13.7 14.3l-2.4 2.4M18.3 14.3l2.4 2.4M20.7 14.3l-2.4 2.4" />
       );
     case "curious":
-      // Looking to the right, towards whatever she is curious about.
+      // Looking to the right, towards whatever caught Ario's attention.
       return (
         <>
           {dot(13.7, 15.5)}
@@ -57,7 +57,7 @@ function Eyes({ mood }: { mood: AriaMood }) {
   }
 }
 
-const mouths: Record<AriaMood, string> = {
+const mouths: Record<ArioMood, string> = {
   idle: "M13.5 19c1.5 1.2 3.5 1.2 5 0",
   happy: "M12.8 18.6c1.7 2.4 4.7 2.4 6.4 0z",
   curious: "M15.2 19.6a.8.8 0 1 0 1.6 0a.8.8 0 1 0-1.6 0",
@@ -69,11 +69,11 @@ const mouths: Record<AriaMood, string> = {
 };
 
 /**
- * Aria, ArioQuest's character and symbol. She shows the app's mood: happy on
+ * Ario, ArioQuest's character and symbol. She shows the app's mood: happy on
  * a 2xx, sad on a 4xx, an error face on 5xx or network failures, and so on.
  * Static by default; color comes from the caller (`text-*`).
  */
-export function Aria({ mood = "idle", size = 32, animate, label, className }: AriaProps) {
+export function Ario({ mood = "idle", size = 32, animate, label, className }: ArioProps) {
   const looping = animate === "idle";
   const worried = mood === "sad" || mood === "error";
   // SVG parts animate around their own box.
@@ -100,7 +100,7 @@ export function Aria({ mood = "idle", size = 32, animate, label, className }: Ar
         className,
       )}
     >
-      {/* antenna: the ball glows while she is thinking */}
+      {/* antenna: the ball glows while Ario is thinking */}
       <g className={cn(looping && `origin-bottom animate-mascot-antenna ${part}`)}>
         <path d="M16 7V4" />
         <circle

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Aria, type AriaMood } from "@/components/ui/Aria";
-import { moodLabel, moodTextClass } from "@/components/ui/ariaMood";
+import { Ario, type ArioMood } from "@/components/ui/Ario";
+import { moodLabel, moodTextClass } from "@/components/ui/arioMood";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import type { Session } from "@/lib/auth";
 import { LiveDemo } from "./LiveDemo";
@@ -14,13 +14,13 @@ const features: Array<{ icon: IconName; text: string }> = [
 
 type Phase = "idle" | "submitting" | "error" | "success";
 
-/** What Aria does and says, based on what the user is doing in the card. */
+/** What Ario does and says, based on what the user is doing in the card. */
 function reaction(
   phase: Phase,
   field: FieldName | null,
   passwordVisible: boolean,
   name: string,
-): { mood: AriaMood; line: string } {
+): { mood: ArioMood; line: string } {
   if (phase === "success") return { mood: "happy", line: `Let's go${name ? `, ${name}` : ""}!` };
   if (phase === "submitting") return { mood: "thinking", line: "Checking…" };
   if (phase === "error")
@@ -33,7 +33,7 @@ function reaction(
   if (field === "name")
     return { mood: "curious", line: "Nice to meet you! What should I call you?" };
   if (field === "email") return { mood: "curious", line: "Which email should we use?" };
-  return { mood: "idle", line: "Hi, I'm Aria — your API sidekick." };
+  return { mood: "idle", line: "Hi, I'm Ario — your API sidekick." };
 }
 
 function SpeechBubble({ children }: { children: string }) {
@@ -42,32 +42,32 @@ function SpeechBubble({ children }: { children: string }) {
       aria-live="polite"
       className="relative max-w-56 rounded-md border border-line bg-panel px-3 py-2 text-sm text-muted"
     >
-      {/* tail pointing at Aria */}
+      {/* tail pointing at Ario */}
       <span className="absolute top-1/2 -left-1.5 size-3 -translate-y-1/2 rotate-45 border-b border-l border-line bg-panel" />
       <span className="relative">{children}</span>
     </p>
   );
 }
 
-/** Pre-login screen: Aria and a live demo on the left, the sign-in card on the right. */
+/** Pre-login screen: Ario and a live demo on the left, the sign-in card on the right. */
 export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => void }) {
   const [phase, setPhase] = useState<Phase>("idle");
-  // The email field is autofocused, so Aria starts out looking at it.
+  // The email field is autofocused, so Ario starts out looking at it.
   const [field, setField] = useState<FieldName | null>("email");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [firstName, setFirstName] = useState("");
-  // Bumped on every failed attempt so Aria replays her shake.
+  // Bumped on every failed attempt so Ario replays the shake.
   const [errors, setErrors] = useState(0);
 
   const { mood, line } = reaction(phase, field, passwordVisible, firstName);
   const animate = phase === "error" ? "error" : phase === "success" ? "happy" : "idle";
-  const aria = (size: number) => (
-    <Aria
+  const ario = (size: number) => (
+    <Ario
       key={`${errors}-${phase === "success"}`}
       mood={mood}
       size={size}
       animate={animate}
-      label={`Aria is ${moodLabel[mood]}`}
+      label={`Ario is ${moodLabel[mood]}`}
       className={phase === "error" ? moodTextClass.error : "text-accent"}
     />
   );
@@ -80,7 +80,7 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
     },
     onFocusField: (next: FieldName | null) => {
       setField(next);
-      // Once the user goes back to the form, Aria stops sulking.
+      // Once the user goes back to the form, Ario stops sulking.
       setPhase((p) => (p === "error" && next ? "idle" : p));
     },
     onPasswordVisibleChange: setPasswordVisible,
@@ -88,7 +88,7 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
       const first = session.name.split(" ")[0] ?? "";
       setFirstName(first.charAt(0).toUpperCase() + first.slice(1));
       setPhase("success");
-      // Let Aria celebrate for a moment before the workspace opens.
+      // Let Ario celebrate for a moment before the workspace opens.
       setTimeout(() => onSignedIn(session), 700);
     },
   };
@@ -107,13 +107,16 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
 
       <section className="relative hidden w-[60%] flex-col items-center justify-center gap-8 px-12 motion-safe:animate-enter min-[900px]:flex">
         <div className="text-center">
-          <h1 className="text-display font-semibold">ArioQuest</h1>
+          <h1 className="flex items-center justify-center gap-3 text-display font-semibold">
+            <Ario size={48} className="text-accent" />
+            ArioQuest
+          </h1>
           <p className="mt-2 text-md text-muted">
             Send, test and chain HTTP &amp; gRPC requests — fast.
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {aria(128)}
+          {ario(128)}
           <SpeechBubble>{line}</SpeechBubble>
         </div>
         <LiveDemo />
@@ -128,9 +131,9 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
       </section>
 
       <section className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
-        {/* Narrow windows: Aria and the name stand in for the hero. */}
+        {/* Narrow windows: Ario and the name stand in for the hero. */}
         <div className="flex flex-col items-center gap-2 text-center min-[900px]:hidden">
-          {aria(64)}
+          {ario(64)}
           <span className="text-md font-medium">ArioQuest</span>
           <span className="text-sm text-muted">{line}</span>
         </div>

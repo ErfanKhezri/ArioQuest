@@ -44,6 +44,36 @@ console.log(aq.response.headers.get("content-type"));
 For gRPC, `aq.response.code` is the numeric status code, `aq.response.status` its name, and
 `aq.response.json()` the response message (an array for streaming responses).
 
+## Install on Windows
+
+**Download a ready-made installer.** The `Windows installer` GitHub Actions workflow builds
+`ArioQuest_<version>_x64-setup.exe` (and an `.msi`) on every push to `master`:
+
+1. Open the repository's **Actions** tab, pick the latest **Windows installer** run (or start one
+   with **Run workflow**).
+2. Download the **ArioQuest-windows-installer** artifact, unzip it and run the `-setup.exe`.
+
+Pushing a tag such as `v0.2.0` also attaches the installers to a GitHub Release.
+
+**Or build it yourself** on a Windows machine with the prerequisites below:
+
+```powershell
+pnpm install
+pnpm app:build
+```
+
+The installer is written to `src-tauri\target\release\bundle\nsis\ArioQuest_<version>_x64-setup.exe`
+(MSI: `bundle\msi\`).
+
+## Signing in
+
+Until the real backend exists, sign-in is a local mock (`src/lib/auth.ts`):
+
+- Use the built-in account **admin / admin** (or click "Use the default account" on the sign-in card).
+- Or create an account with any valid email and a password of 8+ characters.
+
+Sign out from the avatar button at the bottom of the nav rail.
+
 ## Prerequisites
 
 - Node.js 20+ and pnpm
