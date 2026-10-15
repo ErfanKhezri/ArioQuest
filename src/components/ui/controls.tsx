@@ -6,7 +6,7 @@ import {
 } from "react";
 import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "./Icon";
-import { Mascot } from "./Mascot";
+import { Aria, type AriaMood } from "./Aria";
 
 export const inputClass =
   "h-7 w-full rounded-md border border-line bg-panel px-2 text-sm text-fg outline-none placeholder:text-subtle focus:border-accent disabled:opacity-60";
@@ -151,24 +151,35 @@ export function Field({
 
 export function EmptyState({
   title,
+  mood = "idle",
   children,
   className,
 }: {
   title: string;
+  mood?: AriaMood;
   children?: ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn("flex flex-col items-center justify-center p-4 text-center", className)}>
-      <Mascot />
+      <Aria mood={mood} />
       <p className="mt-2 text-sm text-muted">{title}</p>
       {children && <div className="mt-1 max-w-xs text-xs text-subtle">{children}</div>}
     </div>
   );
 }
 
-/** Inline error message with the mascot beside it. */
-export function ErrorNote({ children, className }: { children: ReactNode; className?: string }) {
+/** Inline error message with a worried Aria beside it. */
+export function ErrorNote({
+  children,
+  mood = "sad",
+  className,
+}: {
+  children: ReactNode;
+  /** "error" for failures on the other side (5xx, network); "sad" otherwise. */
+  mood?: "sad" | "error";
+  className?: string;
+}) {
   return (
     <div
       role="alert"
@@ -177,7 +188,7 @@ export function ErrorNote({ children, className }: { children: ReactNode; classN
         className,
       )}
     >
-      <Mascot mood="sad" size={20} className="text-danger" />
+      <Aria mood={mood} size={20} className="text-danger" />
       <div className="selectable min-w-0 flex-1 break-words whitespace-pre-wrap">{children}</div>
     </div>
   );

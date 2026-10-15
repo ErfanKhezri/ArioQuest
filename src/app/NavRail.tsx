@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Aria } from "@/components/ui/Aria";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
 import type { Session } from "@/lib/auth";
@@ -64,6 +65,7 @@ export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }
 
   return (
     <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-2">
+      <Aria size={26} label="ArioQuest" className="mb-2 text-accent" />
       {sections.map((item) => {
         const active = sidebarOpen && sidebar === item.id;
         return (

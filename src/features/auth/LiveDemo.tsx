@@ -1,78 +1,98 @@
 import { useEffect, useState } from "react";
-import { Spinner } from "@/components/ui/controls";
+import { Aria } from "@/components/ui/Aria";
+import { moodForHttpStatus, moodTextClass } from "@/components/ui/ariaMood";
+import { statusTextClass } from "@/components/ui/methodColors";
 
-const URL = "{{baseUrl}}/users";
 const VARIABLE = "{{baseUrl}}";
-const JSON_LINES = [
-  "[",
-  '  { "id": 1, "name": "Ava Karimi", "role": "admin" },',
-  '  { "id": 2, "name": "Leo Novak", "role": "qa" }',
-  "]",
+
+// Two requests take turns, so the demo shows Aria cheering a 200 and sulking at a 404.
+const ROUNDS = [
+  {
+    url: `${VARIABLE}/users`,
+    status: 200,
+    chip: "200 OK · 84 ms",
+    lines: [
+      "[",
+      '  { "id": 1, "name": "Ava Karimi", "role": "admin" },',
+      '  { "id": 2, "name": "Leo Novak", "role": "qa" }',
+      "]",
+    ],
+  },
+  {
+    url: `${VARIABLE}/users/999`,
+    status: 404,
+    chip: "404 Not Found · 31 ms",
+    lines: ["{", '  "error": "User not found"', "}"],
+  },
 ];
 
-// Timeline: type the URL one character per step, send, reveal the response, hold.
-const SENDING = URL.length + 1;
-const FIRST_LINE = SENDING + 1;
-const LAST = FIRST_LINE + JSON_LINES.length;
+type Round = (typeof ROUNDS)[number];
 
-function delayAfter(step: number) {
-  if (step < URL.length) return 70;
-  if (step === URL.length) return 400;
-  if (step === SENDING) return 700;
-  if (step < LAST) return 160;
+// Timeline per round: type the URL one character per step, send, reveal the response, hold.
+const timeline = (round: Round) => {
+  const sending = round.url.length + 1;
+  return { sending, firstLine: sending + 1, last: sending + 1 + round.lines.length };
+};
+
+function delayAfter(step: number, round: Round) {
+  const { sending, last } = timeline(round);
+  if (step < round.url.length) return 70;
+  if (step === round.url.length) return 400;
+  if (step === sending) return 800;
+  if (step < last) return 160;
   return 3200;
 }
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const JSON_COLORS = [
+  { test: (p: string) => p.endsWith(":"), className: "text-[var(--syn-key)]" },
+  { test: (p: string) => p.startsWith('"'), className: "text-[var(--syn-string)]" },
+  { test: (p: string) => /^\d+$/.test(p), className: "text-[var(--syn-number)]" },
+];
 
 /** Colors JSON keys, strings and numbers with the editor's syntax tokens. */
 function JsonLine({ text }: { text: string }) {
   const parts = text.split(/("[^"]*"\s*:|"[^"]*"|\d+)/g);
   return (
     <div className="whitespace-pre">
-      {parts.map((p, i) => {
-        if (p.endsWith(":"))
-          return (
-            <span key={i} className="text-[var(--syn-key)]">
-              {p}
-            </span>
-          );
-        if (p.startsWith('"'))
-          return (
-            <span key={i} className="text-[var(--syn-string)]">
-              {p}
-            </span>
-          );
-        if (/^\d+$/.test(p))
-          return (
-            <span key={i} className="text-[var(--syn-number)]">
-              {p}
-            </span>
-          );
-        return (
-          <span key={i} className="text-muted">
-            {p}
-          </span>
-        );
-      })}
+      {parts.map((p, i) => (
+        <span key={i} className={JSON_COLORS.find((c) => c.test(p))?.className ?? "text-muted"}>
+          {p}
+        </span>
+      ))}
     </div>
   );
 }
 
-/** A request being typed and answered, looping slowly. Static when motion is reduced. */
+/** Requests being typed and answered, looping slowly. Static when motion is reduced. */
 export function LiveDemo() {
-  const [step, setStep] = useState(() => (reducedMotion() ? LAST : 0));
+  const [roundIndex, setRoundIndex] = useState(0);
+  const round = ROUNDS[roundIndex] as Round;
+  const { sending, firstLine, last } = timeline(round);
+  const [step, setStep] = useState(() => (reducedMotion() ? last : 0));
 
   useEffect(() => {
     if (reducedMotion()) return;
-    const timer = setTimeout(() => setStep(step >= LAST ? 0 : step + 1), delayAfter(step));
+    const timer = setTimeout(
+      () => {
+        if (step < last) {
+          setStep(step + 1);
+        } else {
+          setRoundIndex((roundIndex + 1) % ROUNDS.length);
+          setStep(0);
+        }
+      },
+      delayAfter(step, round),
+    );
     return () => clearTimeout(timer);
-  }, [step]);
+  }, [step, last, round, roundIndex]);
 
-  const typed = URL.slice(0, Math.min(step, URL.length));
+  const typed = round.url.slice(0, Math.min(step, round.url.length));
   const variable = typed.slice(0, VARIABLE.length);
   const rest = typed.slice(VARIABLE.length);
-  const typing = step <= URL.length;
+  const typing = step <= round.url.length;
+  const mood = step === sending ? "thinking" : moodForHttpStatus(round.status);
 
   return (
     <div className="w-full max-w-md overflow-hidden rounded-md border border-line bg-panel/80 text-left backdrop-blur-sm">
@@ -88,21 +108,30 @@ export function LiveDemo() {
         <span className="rounded-sm bg-accent px-2 py-0.5 font-sans text-accent-fg">Send</span>
       </div>
       <div className="h-36 px-3 py-2 font-mono text-xs">
-        {step === SENDING && (
-          <span className="flex items-center gap-2 text-subtle">
-            <Spinner className="text-accent" /> Sending…
-          </span>
+        {step >= sending && (
+          <div className="mb-2 flex items-center gap-2">
+            <Aria
+              key={`${roundIndex}-${mood}`}
+              mood={mood}
+              size={22}
+              animate={mood === "happy" ? "happy" : mood === "sad" ? "error" : undefined}
+              className={moodTextClass[mood]}
+            />
+            {step === sending ? (
+              <span className="text-subtle">Sending…</span>
+            ) : (
+              <span
+                className={`rounded-sm border border-line px-1 ${statusTextClass(round.status)}`}
+              >
+                {round.chip}
+              </span>
+            )}
+          </div>
         )}
-        {step >= FIRST_LINE && (
-          <>
-            <span className="mb-2 inline-block rounded-sm border border-line px-1 text-status-2xx">
-              200 OK · 84 ms
-            </span>
-            {JSON_LINES.slice(0, step - FIRST_LINE + 1).map((line) => (
-              <JsonLine key={line} text={line} />
-            ))}
-          </>
-        )}
+        {step >= firstLine &&
+          round.lines
+            .slice(0, step - firstLine + 1)
+            .map((line) => <JsonLine key={line} text={line} />)}
       </div>
     </div>
   );

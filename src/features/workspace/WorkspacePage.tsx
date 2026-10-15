@@ -1,5 +1,5 @@
 import { Kbd } from "@/components/ui/Kbd";
-import { Mascot } from "@/components/ui/Mascot";
+import { Aria } from "@/components/ui/Aria";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { requestLabel, requestTarget } from "@/core/tree";
 import { useWorkspace } from "@/store/workspace";
@@ -48,7 +48,7 @@ function NoTabs() {
     <div className="flex flex-1 justify-center overflow-y-auto bg-canvas p-4">
       <div className="mt-[12vh] w-full max-w-md">
         <div className="flex items-center gap-3">
-          <Mascot />
+          <Aria />
           <p className="text-sm text-muted">No open requests</p>
         </div>
 
