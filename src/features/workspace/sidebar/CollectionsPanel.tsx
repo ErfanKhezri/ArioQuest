@@ -15,7 +15,7 @@ import { useWorkspace } from "@/store/workspace";
 import { RenameInput, SidebarShell } from "./SidebarShell";
 
 const rowClass =
-  "group flex h-7 w-full cursor-pointer items-center gap-1.5 rounded-md pr-1 text-left text-xs transition-colors hover:bg-panel-2";
+  "group flex h-8 w-full cursor-pointer items-center gap-2 rounded-md pr-1 text-left text-sm hover:bg-panel-2";
 
 /** Returns items matching the filter, keeping folders that contain matches. */
 function filterItems(items: CollectionItem[], needle: string): CollectionItem[] {
@@ -70,27 +70,27 @@ export function CollectionsPanel() {
       }
     >
       {collections.length === 0 ? (
-        <EmptyState icon="folder" title="No collections yet">
+        <EmptyState title="No collections yet">
           Group requests into collections to save them, run them together and export them.
           <div className="mt-3 flex justify-center gap-3">
             <button
               type="button"
               onClick={newCollection}
-              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+              className="font-medium text-accent hover:underline"
             >
               Create collection
             </button>
             <button
               type="button"
               onClick={() => openDialog({ type: "import" })}
-              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+              className="font-medium text-accent hover:underline"
             >
               Import
             </button>
           </div>
         </EmptyState>
       ) : (
-        <ul className="px-2">
+        <ul className="px-1">
           {collections.map((c) => {
             const items = filterItems(c.items, needle);
             if (needle && items.length === 0 && !c.name.toLowerCase().includes(needle)) return null;
@@ -199,7 +199,7 @@ function CollectionNode({
           size={13}
           className="shrink-0 text-subtle"
         />
-        <Icon name="folder" size={14} className="shrink-0 text-amber-500" />
+        <Icon name="folder" size={14} className="shrink-0 text-subtle" />
         {renaming === collection.id ? (
           <RenameInput
             initial={collection.name}
@@ -211,7 +211,7 @@ function CollectionNode({
         ) : (
           <span className="min-w-0 flex-1 truncate">{collection.name}</span>
         )}
-        <span className="text-[10px] text-subtle group-hover:hidden">
+        <span className="text-xs text-subtle group-hover:hidden">
           {countRequests(collection.items)}
         </span>
         <IconButton
@@ -239,11 +239,11 @@ function CollectionNode({
       </div>
       {open && <ItemList collectionId={collection.id} items={items} depth={1} {...shared} />}
       {open && items.length === 0 && (
-        <p className="py-1.5 pl-9 text-[11px] text-subtle">
+        <p className="py-2 pl-9 text-xs text-subtle">
           Empty —{" "}
           <button
             type="button"
-            className="text-brand-600 hover:underline dark:text-brand-300"
+            className="text-accent hover:underline"
             onClick={() => store().addRequestTo(collection.id, null, newHttpRequest())}
           >
             add a request
@@ -397,16 +397,13 @@ function ItemNode({
   return (
     <li>
       <div
-        className={cn(
-          rowClass,
-          activeItemId === item.id && "bg-brand-500/10 hover:bg-brand-500/15",
-        )}
+        className={cn(rowClass, activeItemId === item.id && "bg-panel-2 hover:bg-panel-2")}
         style={indent}
         onClick={() => store().openCollectionRequest(collectionId, item.id)}
         title={r.kind === "http" ? r.url : `${r.target} ${r.method}`}
       >
         <span className="w-3 shrink-0" />
-        <MethodBadge method={requestLabel(r)} className="w-10 text-[10px]" />
+        <MethodBadge method={requestLabel(r)} className="w-10 text-xs" />
         {renaming === item.id ? (
           <RenameInput
             initial={r.name}

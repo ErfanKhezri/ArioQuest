@@ -5,6 +5,8 @@ import { MethodBadge, type HttpMethod } from "@/components/ui/MethodBadge";
 import { Modal } from "@/components/ui/Modal";
 import { flattenRequests, requestLabel, requestTarget } from "@/core/tree";
 import { cn } from "@/lib/cn";
+import { invokeCommand } from "@/lib/tauri";
+import { notify } from "@/store/toasts";
 import { useWorkspace } from "@/store/workspace";
 
 interface Command {
@@ -64,11 +66,12 @@ export function CommandPalette() {
         run: () => s.openDialog({ type: "environment", environmentId: "globals" }),
       },
       {
-        id: "home",
-        title: "Go to home",
+        id: "cookies",
+        title: "Clear cookies",
         group: "Actions",
-        icon: "home",
-        run: () => s.setView("home"),
+        icon: "trash",
+        run: () =>
+          void invokeCommand("clear_cookies").then(() => notify.success("Cookie jar cleared.")),
       },
     ];
     const runs: Command[] = collections.map((c) => ({
@@ -170,22 +173,18 @@ export function CommandPalette() {
           lastGroup = c.group;
           return (
             <li key={c.id}>
-              {header && (
-                <p className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wide text-subtle uppercase">
-                  {header}
-                </p>
-              )}
+              {header && <p className="px-3 pt-2 pb-1 text-xs font-medium text-subtle">{header}</p>}
               <button
                 type="button"
                 onMouseEnter={() => setIndex(i)}
                 onClick={() => choose(c)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-xs",
-                  i === index ? "bg-brand-500/12 text-fg" : "text-muted",
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-xs",
+                  i === index ? "bg-panel-2 text-fg" : "text-muted",
                 )}
               >
                 {c.method ? (
-                  <MethodBadge method={c.method} className="w-10 text-[10px]" />
+                  <MethodBadge method={c.method} className="w-10 text-xs" />
                 ) : (
                   <Icon
                     name={c.icon ?? "arrowRight"}
@@ -196,7 +195,7 @@ export function CommandPalette() {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium text-fg">{c.title}</span>
                   {c.subtitle && (
-                    <span className="block truncate text-[11px] text-subtle">{c.subtitle}</span>
+                    <span className="block truncate text-xs text-subtle">{c.subtitle}</span>
                   )}
                 </span>
                 {i === index && <Icon name="arrowRight" size={13} className="text-subtle" />}

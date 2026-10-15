@@ -11,7 +11,7 @@ import type { ApiRequest, Assertion, Extraction } from "@/core/types";
 import { cn } from "@/lib/cn";
 
 const cell =
-  "h-8 w-full min-w-0 bg-transparent px-2.5 font-mono text-xs outline-none placeholder:text-subtle/70 focus:bg-panel-2/60";
+  "h-8 w-full min-w-0 bg-transparent px-2 font-mono text-xs outline-none placeholder:text-subtle/70 focus:bg-panel-2/60";
 
 interface TestsEditorProps {
   request: ApiRequest;
@@ -38,8 +38,8 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
       <section>
         <header className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-semibold">Assertions</h3>
-            <p className="mt-0.5 text-[11px] text-subtle">
+            <h3 className="text-xs font-medium">Assertions</h3>
+            <p className="mt-0.5 text-xs text-subtle">
               Checked after each response. Expected values may use {"{{variables}}"}.
             </p>
           </div>
@@ -53,14 +53,14 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                 ],
               })
             }
-            className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-500 dark:text-brand-300"
+            className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
             <Icon name="plus" size={13} /> Add assertion
           </button>
         </header>
 
         {request.assertions.length > 0 && (
-          <div className="mt-2 overflow-hidden rounded-lg border border-line">
+          <div className="mt-2 overflow-hidden rounded-md border border-line">
             {request.assertions.map((a) => (
               <div
                 key={a.id}
@@ -131,22 +131,22 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
       <section className="mt-6">
         <header className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-semibold">Extract variables</h3>
-            <p className="mt-0.5 text-[11px] text-subtle">
+            <h3 className="text-xs font-medium">Extract variables</h3>
+            <p className="mt-0.5 text-xs text-subtle">
               Save response values into the active environment (or globals) to chain requests.
             </p>
           </div>
           <button
             type="button"
             onClick={() => onChange({ extractions: [...request.extractions, newExtraction()] })}
-            className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-500 dark:text-brand-300"
+            className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
             <Icon name="plus" size={13} /> Add variable
           </button>
         </header>
 
         {request.extractions.length > 0 && (
-          <div className="mt-2 overflow-hidden rounded-lg border border-line">
+          <div className="mt-2 overflow-hidden rounded-md border border-line">
             {request.extractions.map((e) => (
               <div
                 key={e.id}
@@ -208,8 +208,8 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
         )}
       </section>
 
-      <p className="mt-6 flex items-start gap-2 rounded-lg bg-panel-2/60 px-3 py-2.5 text-[11px] leading-relaxed text-muted">
-        <Icon name="info" size={14} className="mt-px shrink-0 text-brand-500" />
+      <p className="mt-6 flex items-start gap-2 rounded-md bg-panel-2/60 px-3 py-2 text-xs text-muted">
+        <Icon name="info" size={14} className="mt-px shrink-0 text-subtle" />
         Need more control? Write JavaScript tests in the Scripts tab — they run alongside these
         assertions, and the collection runner reports both.
       </p>

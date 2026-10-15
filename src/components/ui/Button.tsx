@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
 type Variant = "primary" | "secondary" | "ghost";
-type Size = "sm" | "md" | "lg";
+type Size = "sm" | "md";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -10,16 +10,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary:
-    "bg-brand-600 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 disabled:bg-brand-400",
-  secondary: "bg-panel text-fg ring-1 ring-line hover:bg-panel-2",
+  primary: "bg-accent text-accent-fg hover:bg-accent/90",
+  secondary: "border border-line bg-panel text-fg hover:bg-panel-2",
   ghost: "text-muted hover:bg-panel-2 hover:text-fg",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "h-8 gap-1.5 px-3 text-xs",
-  md: "h-9 gap-2 px-4 text-sm",
-  lg: "h-11 gap-2 px-5 text-sm",
+  sm: "h-6 gap-1 px-2 text-xs",
+  md: "h-7 gap-2 px-3 text-sm",
 };
 
 export function Button({
@@ -33,9 +31,9 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
-        "focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas focus-visible:outline-none",
-        "disabled:cursor-not-allowed",
+        "inline-flex shrink-0 items-center justify-center rounded-md font-medium whitespace-nowrap",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         variantClasses[variant],
         sizeClasses[size],
         className,

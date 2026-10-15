@@ -24,7 +24,7 @@ interface KeyValueEditorProps<T extends KeyValue> {
 }
 
 const cellInput =
-  "h-8 w-full min-w-0 bg-transparent px-2.5 font-mono text-xs outline-none placeholder:text-subtle/70 focus:bg-panel-2/60";
+  "h-8 w-full min-w-0 bg-transparent px-2 font-mono text-xs outline-none placeholder:text-subtle focus:bg-panel-2";
 
 function toBulk(rows: KeyValue[]): string {
   return rows
@@ -87,7 +87,7 @@ export function KeyValueEditor<T extends KeyValue>({
 
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
-      <div className="flex items-center justify-between px-4 pt-2 pb-1.5 text-[11px] text-subtle">
+      <div className="flex h-8 items-center justify-between px-3 text-xs text-subtle">
         <span>{rows.length > 0 ? `${enabledCount} of ${rows.length} enabled` : " "}</span>
         <span className="flex items-center gap-2">
           {secret && (
@@ -120,10 +120,10 @@ export function KeyValueEditor<T extends KeyValue>({
           onBlur={() => onChange(fromBulk(bulk, rows, createRow))}
           spellCheck={false}
           placeholder={"key: value\n// disabled-key: value"}
-          className="mx-4 mb-4 min-h-40 flex-1 resize-none rounded-lg border border-line bg-panel p-3 font-mono text-xs outline-none focus:border-brand-500/60"
+          className="mx-3 mb-3 min-h-40 flex-1 resize-none rounded-md border border-line bg-panel p-2 font-mono text-xs outline-none focus:border-accent"
         />
       ) : (
-        <div className="mx-4 mb-4 overflow-hidden rounded-lg border border-line">
+        <div className="mx-3 mb-3 overflow-hidden rounded-md border border-line">
           {allRows.map((row) => {
             const isGhost = row.id === ghostId;
             const set = (patch: Partial<T>) => update(row.id, patch);

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { VariableInput } from "@/components/editor/VariableInput";
 import { Button } from "@/components/ui/Button";
-import { Field, Input, Spinner } from "@/components/ui/controls";
+import { ErrorNote, Field, Input, Spinner } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { KeyValueEditor } from "@/components/ui/KeyValueEditor";
 import { Tabs } from "@/components/ui/Tabs";
@@ -83,9 +83,9 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center gap-2 p-3">
-        <div className="flex h-9 min-w-0 flex-1 items-center rounded-lg border border-line bg-panel-2/50 focus-within:border-brand-500/60 focus-within:ring-4 focus-within:ring-brand-500/10">
-          <span className="flex h-full items-center border-r border-line px-3 font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
+      <div className="flex items-center gap-2 p-2">
+        <div className="flex h-7 min-w-0 flex-1 items-center rounded-md border border-line bg-panel focus-within:border-accent">
+          <span className="flex h-full items-center border-r border-line px-2 font-mono text-xs font-medium">
             gRPC
           </span>
           <VariableInput
@@ -101,21 +101,19 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
             onClick={() => update((r) => ({ ...r, tls: !r.tls }))}
             title={request.tls ? "TLS enabled (grpcs)" : "Plaintext (no TLS)"}
             className={cn(
-              "mr-1 flex h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium transition-colors",
-              request.tls
-                ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
-                : "text-subtle hover:bg-panel-2",
+              "mr-1 flex h-5 items-center gap-1 rounded-sm px-1 text-xs",
+              request.tls ? "text-fg" : "text-subtle hover:text-fg",
             )}
           >
-            <Icon name="shield" size={13} />
+            <Icon name="shield" size={12} />
             {request.tls ? "TLS" : "No TLS"}
           </button>
         </div>
         <SendControls tab={tab} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 px-3 pb-3">
-        <label className="flex h-8 items-center gap-2 rounded-md border border-line bg-panel px-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 px-2 pb-2">
+        <label className="flex h-7 items-center gap-2 rounded-md border border-line bg-panel px-2 text-sm">
           <span className="text-subtle">Schema</span>
           <select
             aria-label="Schema source"
@@ -132,7 +130,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
                       : { type: "protoSet", protoSetId: value },
                 }));
             }}
-            className="max-w-48 cursor-pointer bg-transparent font-medium outline-none"
+            className="max-w-48 cursor-pointer bg-transparent outline-none"
           >
             <option value="reflection">Server reflection</option>
             {protoSets.length > 0 && (
@@ -151,13 +149,13 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
           </select>
         </label>
 
-        <label className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-panel px-2 text-xs">
+        <label className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-panel px-2 text-sm">
           <span className="text-subtle">Method</span>
           <select
             aria-label="Method"
             value={request.method}
             onChange={(e) => selectMethod(e.target.value)}
-            className="min-w-0 flex-1 cursor-pointer bg-transparent font-mono outline-none"
+            className="min-w-0 flex-1 cursor-pointer bg-transparent font-mono text-xs outline-none"
           >
             <option value="" disabled>
               {methods.length ? "Select a method…" : "Load the schema to list methods"}
@@ -183,8 +181,6 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         {source && (
           <Button
             variant="secondary"
-            size="sm"
-            className="h-8"
             disabled={schemaState?.status === "loading"}
             onClick={() => source && void loadSchema(source)}
             title={
@@ -200,12 +196,11 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
       </div>
 
       {(sourceError || schemaState?.status === "error" || !isTauri()) && (
-        <p className="selectable mx-3 mb-3 flex items-start gap-2 rounded-lg border border-rose-500/25 bg-rose-500/8 px-3 py-2 text-[11px] leading-relaxed whitespace-pre-wrap text-rose-600 dark:text-rose-400">
-          <Icon name="alert" size={14} className="mt-px shrink-0" />
+        <ErrorNote className="mx-2 mb-2">
           {!isTauri()
             ? "gRPC requires the desktop app. Run `pnpm app:dev` to call gRPC services."
             : (sourceError ?? schemaState?.error)}
-        </p>
+        </ErrorNote>
       )}
 
       <Tabs
@@ -221,7 +216,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
           {
             id: "scripts",
             label: "Scripts",
-            badge: request.preScript.trim() || request.testScript.trim() ? "•" : undefined,
+            badge: [request.preScript, request.testScript].filter((s) => s.trim()).length,
           },
           {
             id: "tests",
@@ -233,11 +228,11 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         trailing={
           section === "message" &&
           selected && (
-            <span className="flex items-center gap-2 text-[11px] text-subtle">
+            <span className="flex items-center gap-2 text-xs text-subtle">
               <span className="hidden font-mono xl:inline">
                 {selected.inputType} → {selected.outputType}
               </span>
-              <span className="rounded bg-panel-2 px-1.5 py-0.5">{streamingLabel(selected)}</span>
+              <span>{streamingLabel(selected)}</span>
             </span>
           )
         }
@@ -246,17 +241,17 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
       <div className="flex min-h-0 flex-1 flex-col">
         {section === "message" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex items-center gap-2 px-4 py-1.5 text-[11px] text-subtle">
+            <div className="flex h-8 items-center gap-2 px-3 text-xs text-subtle">
               {selected?.clientStreaming
                 ? "Client streaming: send a JSON array to stream several messages."
                 : "Request message as JSON (proto field names or lowerCamelCase)."}
               {selected && (
                 <button
                   type="button"
-                  className="ml-auto inline-flex items-center gap-1 font-medium text-brand-600 hover:text-brand-500 dark:text-brand-300"
+                  className="ml-auto text-accent hover:underline"
                   onClick={() => update((r) => ({ ...r, message: exampleMessage(selected) }))}
                 >
-                  <Icon name="sparkles" size={12} /> Generate example
+                  Generate example
                 </button>
               )}
             </div>
@@ -278,7 +273,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
               keyPlaceholder="authorization"
               valuePlaceholder="Bearer {{token}}"
             />
-            <p className="px-4 pb-4 text-[11px] text-subtle">
+            <p className="px-3 pb-3 text-xs text-subtle">
               Keys are lowercased. Keys ending in <code className="font-mono">-bin</code> take
               base64 values. Metadata is also sent with reflection requests.
             </p>
@@ -297,7 +292,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
           />
         )}
         {section === "settings" && (
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
             <Field label="Deadline (ms)" hint="Sent as grpc-timeout. 0 disables the deadline.">
               <Input
                 type="number"
@@ -315,7 +310,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
                 value={request.description ?? ""}
                 onChange={(e) => update((r) => ({ ...r, description: e.target.value }))}
                 rows={4}
-                className="w-full max-w-lg resize-y rounded-md border border-line bg-panel p-2.5 text-xs outline-none focus:border-brand-500/60"
+                className="w-full max-w-lg resize-y rounded-md border border-line bg-panel p-2 text-xs outline-none focus:border-accent"
               />
             </Field>
           </div>

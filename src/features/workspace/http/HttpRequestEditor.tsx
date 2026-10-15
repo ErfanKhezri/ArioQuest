@@ -17,6 +17,23 @@ import { SendControls } from "../SendControls";
 import { AuthEditor } from "./AuthEditor";
 import { BodyEditor } from "./BodyEditor";
 
+const bodyLabel: Partial<Record<HttpRequest["body"]["mode"], string>> = {
+  json: "JSON",
+  text: "Text",
+  xml: "XML",
+  html: "HTML",
+  urlencoded: "Form",
+  formdata: "Multipart",
+  graphql: "GraphQL",
+  binary: "File",
+};
+
+const authLabel: Partial<Record<HttpRequest["auth"]["type"], string>> = {
+  bearer: "Bearer",
+  basic: "Basic",
+  apikey: "API key",
+};
+
 type Section = "params" | "headers" | "body" | "auth" | "scripts" | "tests" | "settings";
 
 export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpRequest }) {
@@ -45,22 +62,23 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
 
   const count = (list: Array<{ enabled: boolean; key: string }>) =>
     list.filter((x) => x.enabled && x.key).length;
+  const scripts = [request.preScript, request.testScript].filter((s) => s.trim()).length;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center gap-2 p-3">
-        <div className="flex h-9 min-w-0 flex-1 items-center rounded-lg border border-line bg-panel-2/50 focus-within:border-brand-500/60 focus-within:ring-4 focus-within:ring-brand-500/10">
+      <div className="flex items-center gap-2 p-2">
+        <div className="flex h-7 min-w-0 flex-1 items-center rounded-md border border-line bg-panel focus-within:border-accent">
           <select
             aria-label="HTTP method"
             value={request.method}
             onChange={(e) => update((r) => ({ ...r, method: e.target.value as HttpMethodName }))}
             className={cn(
-              "h-full cursor-pointer rounded-l-lg border-r border-line bg-transparent pr-1 pl-3 font-mono text-xs font-bold outline-none",
+              "h-full cursor-pointer rounded-l-md border-r border-line bg-transparent pr-1 pl-2 font-mono text-xs font-medium outline-none",
               methodTextClasses[request.method],
             )}
           >
             {HTTP_METHODS.map((m) => (
-              <option key={m} value={m} className="text-fg">
+              <option key={m} value={m} className="bg-panel text-fg">
                 {m}
               </option>
             ))}
@@ -84,13 +102,9 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
         tabs={[
           { id: "params", label: "Params", badge: count(request.params) },
           { id: "headers", label: "Headers", badge: count(request.headers) },
-          { id: "body", label: "Body", badge: request.body.mode !== "none" ? "•" : undefined },
-          { id: "auth", label: "Auth", badge: request.auth.type !== "none" ? "•" : undefined },
-          {
-            id: "scripts",
-            label: "Scripts",
-            badge: request.preScript.trim() || request.testScript.trim() ? "•" : undefined,
-          },
+          { id: "body", label: "Body", badge: bodyLabel[request.body.mode] },
+          { id: "auth", label: "Auth", badge: authLabel[request.auth.type] },
+          { id: "scripts", label: "Scripts", badge: scripts },
           {
             id: "tests",
             label: "Tests",
@@ -121,7 +135,7 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
               keyPlaceholder="Header"
               showDescription
             />
-            <p className="px-4 pb-4 text-[11px] text-subtle">
+            <p className="px-3 pb-3 text-xs text-subtle">
               Content-Type, Authorization and User-Agent are added automatically from the body and
               auth settings unless you set them here.
             </p>
@@ -146,7 +160,7 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
           />
         )}
         {section === "settings" && (
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+          <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
             <div className="max-w-lg divide-y divide-line">
               <Toggle
                 label="Follow redirects"
@@ -191,7 +205,7 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
                     onChange={(e) => update((r) => ({ ...r, description: e.target.value }))}
                     rows={4}
                     placeholder="What does this request do?"
-                    className="w-full resize-y rounded-md border border-line bg-panel p-2.5 text-xs outline-none focus:border-brand-500/60"
+                    className="w-full resize-y rounded-md border border-line bg-panel p-2 text-sm outline-none focus:border-accent"
                   />
                 </Field>
               </div>

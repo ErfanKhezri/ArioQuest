@@ -47,7 +47,7 @@ export function EnvironmentDialog({ environmentId }: { environmentId: string | "
             />
           </div>
         )}
-        <p className="px-4 text-[11px] text-subtle">
+        <p className="px-4 text-xs text-subtle">
           {isGlobals
             ? "Globals are available in every request. Variables in the active environment override them."
             : "Changes are saved automatically. Scripts can update these with aq.environment.set()."}
