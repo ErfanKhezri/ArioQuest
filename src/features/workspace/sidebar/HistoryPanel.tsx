@@ -69,7 +69,7 @@ export function HistoryPanel() {
       }
     >
       {history.length === 0 ? (
-        <EmptyState title="No history yet">
+        <EmptyState title="No history yet" mood="sleepy">
           Every request you send is recorded here so you can reopen it later.
         </EmptyState>
       ) : (

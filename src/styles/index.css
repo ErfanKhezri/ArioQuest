@@ -44,6 +44,7 @@
   --animate-mascot-blink: mascot-blink 5s ease-in-out infinite;
   --animate-mascot-antenna: mascot-antenna 3s ease-in-out infinite;
   --animate-mascot-shake: mascot-shake 0.5s ease-in-out;
+  --animate-mascot-hop: mascot-hop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
   --animate-enter: enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-aurora: aurora 24s ease-in-out infinite alternate;
   --animate-caret: caret 1s steps(1) infinite;
@@ -88,6 +89,12 @@
     40%,
     80% {
       transform: translateX(8%) rotate(4deg);
+    }
+  }
+
+  @keyframes mascot-hop {
+    40% {
+      transform: translateY(-18%) scale(1.05);
     }
   }
 

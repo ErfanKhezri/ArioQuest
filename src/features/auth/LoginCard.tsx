@@ -6,18 +6,28 @@ import { Tabs } from "@/components/ui/Tabs";
 import { AuthError, signIn, signUp, type Session } from "@/lib/auth";
 
 type Mode = "signin" | "signup";
-type FieldName = "name" | "email" | "password";
+export type FieldName = "name" | "email" | "password";
 
+/** Card events the landing page turns into Aria's reactions. */
 interface LoginCardProps {
   onSignedIn: (session: Session) => void;
+  onSubmit: () => void;
   onError: () => void;
+  onFocusField: (field: FieldName | null) => void;
+  onPasswordVisibleChange: (visible: boolean) => void;
 }
 
 function FieldError({ message }: { message?: string }) {
   return message ? <p className="mt-1 text-xs text-danger">{message}</p> : null;
 }
 
-export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
+export function LoginCard({
+  onSignedIn,
+  onSubmit,
+  onError,
+  onFocusField,
+  onPasswordVisibleChange,
+}: LoginCardProps) {
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -30,6 +40,7 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    onSubmit();
     try {
       const session =
         mode === "signin" ? await signIn(email, password) : await signUp(name, email, password);
@@ -63,7 +74,20 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
         className="h-10 px-4"
       />
       {/* Remount per mode so the first field gets focus again. */}
-      <form key={mode} onSubmit={submit} className="space-y-4 p-4" noValidate>
+      <form
+        key={mode}
+        onSubmit={submit}
+        // Inputs carry their field in `name`; the toggle button has none.
+        onFocus={(e) => {
+          const field = e.target.getAttribute("name");
+          if (field) onFocusField(field as FieldName);
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) onFocusField(null);
+        }}
+        className="space-y-4 p-4"
+        noValidate
+      >
         {mode === "signup" && (
           <label className="block">
             <span className="mb-1 block text-xs text-muted">Name</span>
@@ -71,6 +95,7 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
+              name="name"
               autoComplete="name"
               className={`h-8 ${invalid("name")}`}
             />
@@ -84,6 +109,7 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            name="email"
             autoComplete="email"
             placeholder="you@company.com"
             className={`h-8 ${invalid("email")}`}
@@ -107,6 +133,7 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
           <span className="relative block">
             <Input
               id="auth-password"
+              name="password"
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -117,7 +144,10 @@ export function LoginCard({ onSignedIn, onError }: LoginCardProps) {
             <button
               type="button"
               aria-label={showPassword ? "Hide password" : "Show password"}
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => {
+                setShowPassword(!showPassword);
+                onPasswordVisibleChange(!showPassword);
+              }}
               className="absolute top-1/2 right-2 -translate-y-1/2 text-subtle hover:text-fg"
             >
               <Icon name={showPassword ? "eyeOff" : "eye"} size={14} />
