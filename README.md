@@ -46,14 +46,22 @@ For gRPC, `aq.response.code` is the numeric status code, `aq.response.status` it
 
 ## Install on Windows
 
-**Download a ready-made installer.** The `Windows installer` GitHub Actions workflow builds
-`ArioQuest_<version>_x64-setup.exe` (and an `.msi`) on every push to `master`:
+**Download a release.** Open the repository's **Releases** page and download
+`ArioQuest_<version>_x64-setup.exe` (or the `.msi`).
 
-1. Open the repository's **Actions** tab, pick the latest **Windows installer** run (or start one
-   with **Run workflow**).
-2. Download the **ArioQuest-windows-installer** artifact, unzip it and run the `-setup.exe`.
+**Publish a new release** from GitHub Actions, no local setup needed:
 
-Pushing a tag such as `v0.2.0` also attaches the installers to a GitHub Release.
+1. **Actions** tab → **Release** → **Run workflow**.
+2. Enter a version such as `0.2.0` (numbers only; the MSI format allows no suffixes), tick
+   **pre-release** if you want, and run it.
+3. About 10–20 minutes later the release appears under **Releases**, with the installers attached
+   and release notes generated from the merged pull requests.
+
+Pushing a tag works too: `git tag v0.2.0 && git push origin v0.2.0`. The version is written into
+the build automatically, so it does not have to be bumped in a commit first.
+
+Every push to `master` also runs the **Windows installer** workflow, a test build whose installers
+can be downloaded from the run's **Artifacts**.
 
 **Or build it yourself** on a Windows machine with the prerequisites below:
 
