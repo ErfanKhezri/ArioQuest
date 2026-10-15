@@ -37,7 +37,7 @@ export function CodeDialog({ tabId }: { tabId: string }) {
               type="checkbox"
               checked={resolve}
               onChange={(e) => setResolve(e.target.checked)}
-              className="accent-brand-600"
+              className="accent-accent"
             />
             Resolve variables
           </label>
@@ -63,7 +63,7 @@ export function CodeDialog({ tabId }: { tabId: string }) {
             { value: "fetch", label: "JavaScript fetch" },
           ]}
         />
-        <div className="h-72 overflow-hidden rounded-lg border border-line bg-panel-2/40">
+        <div className="h-72 overflow-hidden rounded-md border border-line bg-panel-2/40">
           <CodeEditor
             value={code}
             readOnly

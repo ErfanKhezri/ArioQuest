@@ -7,7 +7,7 @@ const chrome = EditorView.theme({
   "&": {
     backgroundColor: "transparent",
     color: "var(--fg)",
-    fontSize: "12.5px",
+    fontSize: "var(--text-xs)",
     height: "100%",
   },
   "&.cm-focused": { outline: "none" },
@@ -23,9 +23,9 @@ const chrome = EditorView.theme({
   ".cm-activeLine": { backgroundColor: "color-mix(in oklch, var(--panel-2) 55%, transparent)" },
   ".cm-activeLineGutter": { backgroundColor: "transparent", color: "var(--fg)" },
   "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-    { backgroundColor: "color-mix(in oklch, var(--brand) 28%, transparent)" },
+    { backgroundColor: "color-mix(in oklch, var(--accent) 28%, transparent)" },
   ".cm-matchingBracket": {
-    backgroundColor: "color-mix(in oklch, var(--brand) 20%, transparent)",
+    backgroundColor: "color-mix(in oklch, var(--accent) 20%, transparent)",
     outline: "none",
   },
   ".cm-foldPlaceholder": {
@@ -38,12 +38,11 @@ const chrome = EditorView.theme({
     backgroundColor: "var(--panel)",
     color: "var(--fg)",
     border: "1px solid var(--line)",
-    borderRadius: "8px",
-    boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.35)",
+    borderRadius: "var(--radius-md)",
     overflow: "hidden",
   },
   ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
-    backgroundColor: "color-mix(in oklch, var(--brand) 20%, transparent)",
+    backgroundColor: "color-mix(in oklch, var(--accent) 20%, transparent)",
     color: "var(--fg)",
   },
   ".cm-panels": {
@@ -51,10 +50,10 @@ const chrome = EditorView.theme({
     color: "var(--fg)",
     borderColor: "var(--line)",
   },
-  ".cm-panel input, .cm-panel button": { fontSize: "12px" },
-  ".cm-searchMatch": { backgroundColor: "color-mix(in oklch, var(--warn) 30%, transparent)" },
+  ".cm-panel input, .cm-panel button": { fontSize: "var(--text-xs)" },
+  ".cm-searchMatch": { backgroundColor: "color-mix(in oklch, var(--warning) 30%, transparent)" },
   ".cm-searchMatch.cm-searchMatch-selected": {
-    backgroundColor: "color-mix(in oklch, var(--warn) 55%, transparent)",
+    backgroundColor: "color-mix(in oklch, var(--warning) 55%, transparent)",
   },
   ".cm-lintRange-error": { backgroundImage: "none", borderBottom: "1px dashed var(--danger)" },
 });

@@ -1,9 +1,8 @@
 import { Icon } from "@/components/ui/Icon";
-import { IconButton } from "@/components/ui/controls";
 import { cn } from "@/lib/cn";
 import { useWorkspace } from "@/store/workspace";
 
-export function EnvironmentPicker({ compact = false }: { compact?: boolean }) {
+export function EnvironmentPicker() {
   const environments = useWorkspace((s) => s.environments);
   const activeId = useWorkspace((s) => s.activeEnvironmentId);
   const setActive = useWorkspace((s) => s.setActiveEnvironment);
@@ -11,20 +10,16 @@ export function EnvironmentPicker({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="flex items-center gap-1">
-      <label
-        className={cn(
-          "flex items-center gap-1.5 rounded-md border border-line bg-panel px-2 text-xs",
-          compact ? "h-6" : "h-7",
-        )}
-      >
-        <span
-          className={cn("size-1.5 rounded-full", activeId ? "bg-emerald-500" : "bg-subtle/50")}
-        />
+      <label className="flex h-5 items-center gap-1 rounded-sm px-1 hover:bg-panel-2">
+        <Icon name="globe" size={12} />
         <select
           aria-label="Active environment"
           value={activeId ?? ""}
           onChange={(e) => setActive(e.target.value || null)}
-          className="max-w-40 cursor-pointer appearance-none bg-transparent pr-1 outline-none"
+          className={cn(
+            "max-w-48 cursor-pointer appearance-none bg-transparent outline-none",
+            activeId ? "text-fg" : "text-subtle",
+          )}
         >
           <option value="">No environment</option>
           {environments.map((env) => (
@@ -33,15 +28,15 @@ export function EnvironmentPicker({ compact = false }: { compact?: boolean }) {
             </option>
           ))}
         </select>
-        <Icon name="chevronDown" size={12} className="pointer-events-none -ml-1 text-subtle" />
+        <Icon name="chevronDown" size={10} className="pointer-events-none" />
       </label>
-      {!compact && (
-        <IconButton
-          icon="eye"
-          label="View variables"
-          onClick={() => openDialog({ type: "environment", environmentId: activeId ?? "globals" })}
-        />
-      )}
+      <button
+        type="button"
+        onClick={() => openDialog({ type: "environment", environmentId: activeId ?? "globals" })}
+        className="rounded-sm px-1 hover:bg-panel-2 hover:text-fg"
+      >
+        Variables
+      </button>
     </div>
   );
 }

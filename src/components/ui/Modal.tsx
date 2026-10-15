@@ -42,8 +42,7 @@ export function Modal({ title, onClose, children, footer, className, bare = fals
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-6 pt-[10vh] backdrop-blur-[2px] motion-safe:animate-fade-up"
-      style={{ animationDuration: "0.2s" }}
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[10vh]"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -54,19 +53,19 @@ export function Modal({ title, onClose, children, footer, className, bare = fals
         aria-modal="true"
         aria-label={typeof title === "string" ? title : undefined}
         className={cn(
-          "flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/30",
+          "flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-md border border-line bg-panel",
           className,
         )}
       >
         {!bare && (
-          <header className="flex items-center justify-between border-b border-line px-5 py-3">
-            <h2 className="text-sm font-semibold">{title}</h2>
+          <header className="flex h-10 items-center justify-between border-b border-line pr-2 pl-4">
+            <h2 className="text-sm font-medium">{title}</h2>
             <IconButton icon="x" label="Close" onClick={onClose} />
           </header>
         )}
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         {footer && (
-          <footer className="flex items-center justify-end gap-2 border-t border-line bg-panel-2/40 px-5 py-3">
+          <footer className="flex items-center justify-end gap-2 border-t border-line px-4 py-3">
             {footer}
           </footer>
         )}

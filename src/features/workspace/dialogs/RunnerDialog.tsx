@@ -138,8 +138,8 @@ export function RunnerDialog({
         <>
           {rows.length > 0 && (
             <span className="mr-auto flex items-center gap-4 text-xs">
-              <span className="text-emerald-600 dark:text-emerald-400">{passed} passed</span>
-              <span className={allTests.length - passed ? "text-rose-500" : "text-subtle"}>
+              <span className="text-success">{passed} passed</span>
+              <span className={allTests.length - passed ? "text-danger" : "text-subtle"}>
                 {allTests.length - passed} failed
               </span>
               <span className="text-subtle">
@@ -163,8 +163,8 @@ export function RunnerDialog({
     >
       <div className="grid min-h-[420px] md:grid-cols-[260px_1fr]">
         <div className="border-b border-line p-4 md:border-r md:border-b-0">
-          <div className="mb-2 flex items-center justify-between text-[11px] text-subtle">
-            <span className="font-semibold uppercase">Requests</span>
+          <div className="mb-2 flex items-center justify-between text-xs text-subtle">
+            <span className="font-medium">Requests</span>
             <button
               type="button"
               className="hover:text-fg"
@@ -180,7 +180,7 @@ export function RunnerDialog({
           <ul className="max-h-56 space-y-0.5 overflow-y-auto">
             {scope.map((s) => (
               <li key={s.item.id}>
-                <label className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-xs hover:bg-panel-2">
+                <label className="flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1 text-xs hover:bg-panel-2">
                   <Checkbox
                     checked={selected.has(s.item.id)}
                     onChange={(checked) => {
@@ -190,7 +190,7 @@ export function RunnerDialog({
                       setSelected(next);
                     }}
                   />
-                  <MethodBadge method={requestLabel(s.item.request)} className="w-9 text-[10px]" />
+                  <MethodBadge method={requestLabel(s.item.request)} className="w-9 text-xs" />
                   <span className="truncate">{s.item.request.name}</span>
                 </label>
               </li>
@@ -225,7 +225,7 @@ export function RunnerDialog({
               checked={stopOnFailure}
               onChange={setStopOnFailure}
             />
-            <p className="text-[11px] leading-relaxed text-subtle">
+            <p className="text-xs text-subtle">
               Requests run in order with the active environment. Extracted variables carry over to
               the following requests.
             </p>
@@ -235,7 +235,7 @@ export function RunnerDialog({
         <div className="min-w-0">
           {rows.length === 0 && !running ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-xs text-subtle">
-              <Icon name="play" size={20} className="text-brand-500" />
+              <Icon name="play" size={20} className="text-subtle" />
               Results appear here as each request finishes.
             </div>
           ) : (
@@ -249,31 +249,24 @@ export function RunnerDialog({
                     <button
                       type="button"
                       onClick={() => setExpanded(open ? null : row.key)}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-xs hover:bg-panel-2/60"
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-xs hover:bg-panel-2/60"
                     >
                       <Icon
                         name={status.ok && failedTests === 0 ? "checkCircle" : "alert"}
                         size={15}
-                        className={
-                          status.ok && failedTests === 0 ? "text-emerald-500" : "text-rose-500"
-                        }
+                        className={status.ok && failedTests === 0 ? "text-success" : "text-danger"}
                       />
-                      <MethodBadge method={row.label} className="w-10 text-[10px]" />
+                      <MethodBadge method={row.label} className="w-10 text-xs" />
                       <span className="min-w-0 flex-1 truncate">
                         {row.path.length > 0 && (
                           <span className="text-subtle">{row.path.join(" / ")} / </span>
                         )}
                         <span className="font-medium">{row.name}</span>
                         {iterations > 1 && (
-                          <span className="ml-2 text-[10px] text-subtle">#{row.iteration}</span>
+                          <span className="ml-2 text-xs text-subtle">#{row.iteration}</span>
                         )}
                       </span>
-                      <span
-                        className={cn(
-                          "font-mono",
-                          status.ok ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500",
-                        )}
-                      >
+                      <span className={cn("font-mono", status.ok ? "text-success" : "text-danger")}>
                         {status.text}
                       </span>
                       <span className="w-16 text-right text-subtle">
@@ -291,9 +284,9 @@ export function RunnerDialog({
                       />
                     </button>
                     {open && (
-                      <div className="space-y-1 bg-panel-2/40 px-12 py-2.5 text-xs">
+                      <div className="space-y-1 bg-panel-2/40 px-12 py-2 text-xs">
                         {row.result.outcome.kind === "error" && (
-                          <p className="selectable font-mono break-words text-rose-500">
+                          <p className="selectable font-mono break-words text-danger">
                             {row.result.outcome.message}
                           </p>
                         )}
@@ -304,13 +297,13 @@ export function RunnerDialog({
                               size={13}
                               className={cn(
                                 "mt-px shrink-0",
-                                t.passed ? "text-emerald-500" : "text-rose-500",
+                                t.passed ? "text-success" : "text-danger",
                               )}
                             />
                             <span>
                               {t.name}
                               {t.message && (
-                                <span className="selectable block font-mono text-[11px] text-muted">
+                                <span className="selectable block font-mono text-xs text-muted">
                                   {t.message}
                                 </span>
                               )}
@@ -318,10 +311,7 @@ export function RunnerDialog({
                           </p>
                         ))}
                         {row.result.logs.map((l, i) => (
-                          <p
-                            key={`log-${i}`}
-                            className="selectable font-mono text-[11px] text-subtle"
-                          >
+                          <p key={`log-${i}`} className="selectable font-mono text-xs text-subtle">
                             {l}
                           </p>
                         ))}
@@ -336,8 +326,8 @@ export function RunnerDialog({
                 );
               })}
               {running && current && (
-                <li className="flex items-center gap-3 px-4 py-2.5 text-xs text-subtle">
-                  <Spinner className="text-brand-500" />
+                <li className="flex items-center gap-3 px-4 py-2 text-xs text-subtle">
+                  <Spinner className="text-accent" />
                   Running {scope.find((s) => s.item.id === current)?.item.request.name}…
                 </li>
               )}

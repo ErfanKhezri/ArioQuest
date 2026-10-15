@@ -2,8 +2,7 @@ import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor"
 import { Button } from "@/components/ui/Button";
 import { KeyValueEditor } from "@/components/ui/KeyValueEditor";
 import { Icon } from "@/components/ui/Icon";
-import { IconButton } from "@/components/ui/controls";
-import { Segmented } from "@/components/ui/Tabs";
+import { IconButton, Select } from "@/components/ui/controls";
 import { newKeyValue } from "@/core/factory";
 import type { BodyMode, FormField, HttpBodyConfig } from "@/core/types";
 import { formatBytes, pickFiles, readFileData } from "@/lib/files";
@@ -67,7 +66,13 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-        <Segmented value={body.mode} onChange={(mode) => set({ mode })} options={modes} />
+        <Select
+          aria-label="Body type"
+          className="w-36"
+          value={body.mode}
+          onChange={(e) => set({ mode: e.target.value as BodyMode })}
+          options={modes}
+        />
         {body.mode === "json" && (
           <Button
             variant="ghost"
@@ -121,7 +126,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                   value={row.type}
                   onChange={(e) => update({ type: e.target.value as FormField["type"] })}
                   aria-label="Field type"
-                  className="h-8 cursor-pointer bg-transparent px-2 text-[11px] text-muted outline-none"
+                  className="h-8 cursor-pointer bg-transparent px-2 text-xs text-muted outline-none"
                 >
                   <option value="text">Text</option>
                   <option value="file">File</option>
@@ -129,7 +134,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
               )}
               renderValue={(row, update) =>
                 row.type === "file" ? (
-                  <span className="flex h-8 min-w-0 flex-1 items-center gap-2 px-2.5 text-xs">
+                  <span className="flex h-8 min-w-0 flex-1 items-center gap-2 px-2 text-xs">
                     {row.file ? (
                       <>
                         <Icon name="file" size={13} className="shrink-0 text-subtle" />
@@ -146,7 +151,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                     ) : (
                       <button
                         type="button"
-                        className="text-brand-600 hover:underline dark:text-brand-300"
+                        className="text-accent hover:underline"
                         onClick={async () => {
                           const file = await chooseFile();
                           if (file)
@@ -166,7 +171,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
         {body.mode === "graphql" && (
           <div className="grid min-h-0 flex-1 grid-cols-[1.6fr_1fr]">
             <div className="flex min-h-0 flex-col">
-              <span className="px-4 pt-2 text-[11px] font-medium text-subtle">Query</span>
+              <span className="px-4 pt-2 text-xs font-medium text-subtle">Query</span>
               <CodeEditor
                 value={body.graphql.query}
                 onChange={(query) => set({ graphql: { ...body.graphql, query } })}
@@ -176,9 +181,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
               />
             </div>
             <div className="flex min-h-0 flex-col border-l border-line">
-              <span className="px-4 pt-2 text-[11px] font-medium text-subtle">
-                Variables (JSON)
-              </span>
+              <span className="px-4 pt-2 text-xs font-medium text-subtle">Variables (JSON)</span>
               <CodeEditor
                 value={body.graphql.variables}
                 onChange={(variables) => set({ graphql: { ...body.graphql, variables } })}

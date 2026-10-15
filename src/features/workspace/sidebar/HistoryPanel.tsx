@@ -69,15 +69,13 @@ export function HistoryPanel() {
       }
     >
       {history.length === 0 ? (
-        <EmptyState icon="history" title="No history yet">
+        <EmptyState title="No history yet">
           Every request you send is recorded here so you can reopen it later.
         </EmptyState>
       ) : (
         groups.map((group) => (
           <section key={group.label} className="px-2 pb-2">
-            <h3 className="px-2 pt-2 pb-1 text-[10px] font-semibold tracking-wide text-subtle uppercase">
-              {group.label}
-            </h3>
+            <h3 className="px-2 pt-2 pb-1 text-xs font-medium text-subtle">{group.label}</h3>
             <ul>
               {group.entries.map((h) => (
                 <li key={h.id}>
@@ -86,22 +84,16 @@ export function HistoryPanel() {
                     tabIndex={0}
                     onClick={() => openHistoryEntry(h.id)}
                     onKeyDown={(e) => e.key === "Enter" && openHistoryEntry(h.id)}
-                    className="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-panel-2"
+                    className="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-panel-2"
                     title={historyTarget(h)}
                   >
-                    <MethodBadge method={requestLabel(h.request)} className="w-10 text-[10px]" />
+                    <MethodBadge method={requestLabel(h.request)} className="w-10 text-xs" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-mono text-[11px]">
+                      <span className="block truncate font-mono text-xs">
                         {historyTarget(h) || h.request.name}
                       </span>
-                      <span className="flex gap-2 text-[10px] text-subtle">
-                        <span
-                          className={cn(
-                            h.summary.ok
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-500",
-                          )}
-                        >
+                      <span className="flex gap-2 text-xs text-subtle">
+                        <span className={cn(h.summary.ok ? "text-success" : "text-danger")}>
                           {h.summary.status}
                         </span>
                         {h.summary.timeMs !== undefined && (
