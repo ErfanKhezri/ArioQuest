@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { Menu } from "@/components/ui/Menu";
+import type { Session } from "@/lib/auth";
 import { cn } from "@/lib/cn";
 import { type SidebarSection, useWorkspace } from "@/store/workspace";
 
@@ -41,11 +43,13 @@ const sections: Array<{ id: SidebarSection; label: string; icon: IconName }> = [
 ];
 
 interface NavRailProps {
+  session: Session;
+  onSignOut: () => void;
   sidebarOpen: boolean;
   onSidebarOpenChange: (open: boolean) => void;
 }
 
-export function NavRail({ sidebarOpen, onSidebarOpenChange }: NavRailProps) {
+export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }: NavRailProps) {
   const sidebar = useWorkspace((s) => s.sidebar);
   const showSection = useWorkspace((s) => s.showSection);
   const openDialog = useWorkspace((s) => s.openDialog);
@@ -90,6 +94,23 @@ export function NavRail({ sidebarOpen, onSidebarOpenChange }: NavRailProps) {
           label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           icon={theme === "dark" ? "sun" : "moon"}
           onClick={toggleTheme}
+        />
+        <Menu
+          align="start"
+          items={[
+            { label: `Sign out (${session.email})`, icon: "arrowRight", onSelect: onSignOut },
+          ]}
+          trigger={({ toggle }) => (
+            <button
+              type="button"
+              title={`${session.name} — ${session.email}`}
+              aria-label="Account"
+              onClick={toggle}
+              className="mt-1 flex size-7 items-center justify-center rounded-full border border-line bg-panel-2 text-xs text-muted uppercase hover:text-fg focus-visible:outline-2 focus-visible:outline-accent"
+            >
+              {session.name.slice(0, 1) || "?"}
+            </button>
+          )}
         />
       </div>
     </nav>
