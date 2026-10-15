@@ -26,7 +26,7 @@ export function ProtosPanel() {
       }
     >
       {protoSets.length === 0 ? (
-        <EmptyState title="No proto files yet">
+        <EmptyState title="No proto files yet" mood="curious">
           Import <code className="font-mono">.proto</code> files (or a whole folder) to call gRPC
           services without server reflection. Imports and google/protobuf types are resolved
           automatically.

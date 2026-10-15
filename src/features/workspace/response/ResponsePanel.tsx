@@ -1,6 +1,13 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor";
-import { EmptyState, ErrorNote, IconButton, Spinner } from "@/components/ui/controls";
+import { Aria, type AriaMood } from "@/components/ui/Aria";
+import {
+  moodForGrpcStatus,
+  moodForHttpStatus,
+  moodLabel,
+  moodTextClass,
+} from "@/components/ui/ariaMood";
+import { EmptyState, ErrorNote, IconButton } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Kbd } from "@/components/ui/Kbd";
 import { statusTextClass } from "@/components/ui/methodColors";
@@ -87,14 +94,14 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3 text-xs text-subtle">
-          Response
-          {running && <Spinner className="text-accent" />}
+          {running && <Aria mood="thinking" size={20} className={moodTextClass.thinking} />}
+          {running ? "Sending…" : "Response"}
           {toggle}
         </div>
         {running ? (
-          <p className="p-4 text-xs text-subtle">Waiting for response…</p>
+          <EmptyState title="Waiting for the response…" mood="thinking" className="flex-1" />
         ) : (
-          <EmptyState title="No response yet" className="flex-1">
+          <EmptyState title="No response yet" mood="sleepy" className="flex-1">
             <span className="inline-flex items-center gap-1">
               Press <Kbd>Ctrl</Kbd>
               <Kbd>Enter</Kbd> to send
@@ -107,6 +114,12 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
 
   const { outcome } = result;
   const passed = result.tests.filter((t) => t.passed).length;
+  const mood: AriaMood =
+    outcome.kind === "http"
+      ? moodForHttpStatus(outcome.response.status)
+      : outcome.kind === "grpc"
+        ? moodForGrpcStatus(outcome.response.statusName)
+        : "error";
   const tabs: Array<{ id: Section; label: string; badge?: ReactNode }> = [
     { id: "body", label: outcome.kind === "grpc" ? "Messages" : "Body" },
   ];
@@ -139,6 +152,12 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3">
+        <Aria
+          mood={running ? "thinking" : mood}
+          size={20}
+          label={`Aria is ${moodLabel[running ? "thinking" : mood]}`}
+          className={moodTextClass[running ? "thinking" : mood]}
+        />
         {outcome.kind === "http" && (
           <>
             <Chip className={statusTextClass(outcome.response.status)}>
@@ -157,7 +176,6 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
           </>
         )}
         {outcome.kind === "error" && <Chip className="text-danger">Error</Chip>}
-        {running && <Spinner className="text-accent" />}
         {toggle}
       </div>
       <Tabs value={current} onChange={setSection} tabs={tabs} />
@@ -199,7 +217,7 @@ function BodySection({ result }: { result: RunResult }) {
 
   if (outcome.kind === "error") {
     return (
-      <ErrorNote className="m-3">
+      <ErrorNote mood="error" className="m-3">
         <p className="font-medium">Could not get a response</p>
         <p className="mt-1 font-mono text-fg">{outcome.message}</p>
       </ErrorNote>
@@ -257,7 +275,7 @@ function BodySection({ result }: { result: RunResult }) {
             />
           )
         ) : http?.isBinary ? (
-          <EmptyState title="Binary response">
+          <EmptyState title="Binary response" mood="curious">
             {formatBytes(http.size)} of binary data
             {http.bodyBase64 && canPreview ? " — switch to Preview to view it." : "."}
           </EmptyState>
@@ -324,9 +342,14 @@ function GrpcTimeline({ result, response }: { result: RunResult; response: GrpcR
           <span className="w-4" />
           <span className="w-24 shrink-0 font-mono text-subtle">{clock(finishedAt)}</span>
           {response.ok ? (
-            <span className="text-success">Completed · OK</span>
+            <span className="flex items-center gap-2 text-success">
+              <Aria mood="happy" size={18} className="text-success" /> Completed · OK
+            </span>
           ) : (
-            <ErrorNote className="flex-1">
+            <ErrorNote
+              mood={moodForGrpcStatus(response.statusName) === "error" ? "error" : "sad"}
+              className="flex-1"
+            >
               {response.statusName}
               {response.statusMessage && `: ${response.statusMessage}`}
             </ErrorNote>
@@ -433,13 +456,21 @@ function HeadersSection({ result }: { result: RunResult }) {
 function TestsSection({ result }: { result: RunResult }) {
   if (result.tests.length === 0) {
     return (
-      <EmptyState title="No tests ran" className="flex-1">
+      <EmptyState title="No tests ran" mood="curious" className="flex-1">
         Add assertions in the request's Tests tab, or use aq.test() in a script.
       </EmptyState>
     );
   }
+  const failed = result.tests.filter((t) => !t.passed).length;
+  const mood: AriaMood = failed ? "sad" : "happy";
   return (
     <ul className="min-h-0 flex-1 overflow-y-auto">
+      <li className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm">
+        <Aria mood={mood} size={20} className={moodTextClass[mood]} />
+        {failed
+          ? `${failed} of ${result.tests.length} failed`
+          : `All ${result.tests.length} passed`}
+      </li>
       {result.tests.map((t, i) => (
         <li key={i} className="flex items-start gap-2 border-b border-line px-3 py-2 text-xs">
           <Icon

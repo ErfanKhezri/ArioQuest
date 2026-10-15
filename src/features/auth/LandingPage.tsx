@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Aria, type AriaMood } from "@/components/ui/Aria";
+import { moodLabel, moodTextClass } from "@/components/ui/ariaMood";
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { Mascot } from "@/components/ui/Mascot";
 import type { Session } from "@/lib/auth";
 import { LiveDemo } from "./LiveDemo";
-import { LoginCard } from "./LoginCard";
+import { LoginCard, type FieldName } from "./LoginCard";
 
 const features: Array<{ icon: IconName; text: string }> = [
   { icon: "layers", text: "HTTP & gRPC" },
@@ -11,29 +12,86 @@ const features: Array<{ icon: IconName; text: string }> = [
   { icon: "folder", text: "Collections & environments" },
 ];
 
-function Logo() {
+type Phase = "idle" | "submitting" | "error" | "success";
+
+/** What Aria does and says, based on what the user is doing in the card. */
+function reaction(
+  phase: Phase,
+  field: FieldName | null,
+  passwordVisible: boolean,
+  name: string,
+): { mood: AriaMood; line: string } {
+  if (phase === "success") return { mood: "happy", line: `Let's go${name ? `, ${name}` : ""}!` };
+  if (phase === "submitting") return { mood: "thinking", line: "Checking…" };
+  if (phase === "error")
+    return { mood: "sad", line: "Hmm, that didn't work. Mind checking the form?" };
+  if (field === "password") {
+    return passwordVisible
+      ? { mood: "curious", line: "Oops, I can see it now…" }
+      : { mood: "shy", line: "Don't worry, I'm not looking!" };
+  }
+  if (field === "name")
+    return { mood: "curious", line: "Nice to meet you! What should I call you?" };
+  if (field === "email") return { mood: "curious", line: "Which email should we use?" };
+  return { mood: "idle", line: "Hi, I'm Aria — your API sidekick." };
+}
+
+function SpeechBubble({ children }: { children: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex size-7 items-center justify-center rounded-md bg-accent text-accent-fg">
-        <svg viewBox="0 0 24 24" width={16} height={16} fill="none" aria-hidden="true">
-          <path
-            d="M5 19 12 5l7 14M8.2 13.5h7.6"
-            stroke="currentColor"
-            strokeWidth={2.4}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span className="text-md font-medium">ArioQuest</span>
-    </div>
+    <p
+      aria-live="polite"
+      className="relative max-w-56 rounded-md border border-line bg-panel px-3 py-2 text-sm text-muted"
+    >
+      {/* tail pointing at Aria */}
+      <span className="absolute top-1/2 -left-1.5 size-3 -translate-y-1/2 rotate-45 border-b border-l border-line bg-panel" />
+      <span className="relative">{children}</span>
+    </p>
   );
 }
 
-/** Pre-login screen: hero with a live demo on the left, sign-in card on the right. */
+/** Pre-login screen: Aria and a live demo on the left, the sign-in card on the right. */
 export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => void }) {
-  // Bumped on every failed attempt so the mascot replays its error animation.
+  const [phase, setPhase] = useState<Phase>("idle");
+  // The email field is autofocused, so Aria starts out looking at it.
+  const [field, setField] = useState<FieldName | null>("email");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  // Bumped on every failed attempt so Aria replays her shake.
   const [errors, setErrors] = useState(0);
+
+  const { mood, line } = reaction(phase, field, passwordVisible, firstName);
+  const animate = phase === "error" ? "error" : phase === "success" ? "happy" : "idle";
+  const aria = (size: number) => (
+    <Aria
+      key={`${errors}-${phase === "success"}`}
+      mood={mood}
+      size={size}
+      animate={animate}
+      label={`Aria is ${moodLabel[mood]}`}
+      className={phase === "error" ? moodTextClass.error : "text-accent"}
+    />
+  );
+
+  const cardEvents = {
+    onSubmit: () => setPhase("submitting"),
+    onError: () => {
+      setPhase("error");
+      setErrors((n) => n + 1);
+    },
+    onFocusField: (next: FieldName | null) => {
+      setField(next);
+      // Once the user goes back to the form, Aria stops sulking.
+      setPhase((p) => (p === "error" && next ? "idle" : p));
+    },
+    onPasswordVisibleChange: setPasswordVisible,
+    onSignedIn: (session: Session) => {
+      const first = session.name.split(" ")[0] ?? "";
+      setFirstName(first.charAt(0).toUpperCase() + first.slice(1));
+      setPhase("success");
+      // Let Aria celebrate for a moment before the workspace opens.
+      setTimeout(() => onSignedIn(session), 700);
+    },
+  };
 
   return (
     <div className="relative flex h-full overflow-hidden bg-canvas text-fg">
@@ -54,7 +112,10 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
             Send, test and chain HTTP &amp; gRPC requests — fast.
           </p>
         </div>
-        <Mascot animate="idle" size={120} className="text-accent" />
+        <div className="flex items-center gap-4">
+          {aria(128)}
+          <SpeechBubble>{line}</SpeechBubble>
+        </div>
         <LiveDemo />
         <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted">
           {features.map((f) => (
@@ -67,22 +128,17 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
       </section>
 
       <section className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
-        <div className="min-[900px]:hidden">
-          <Logo />
+        {/* Narrow windows: Aria and the name stand in for the hero. */}
+        <div className="flex flex-col items-center gap-2 text-center min-[900px]:hidden">
+          {aria(64)}
+          <span className="text-md font-medium">ArioQuest</span>
+          <span className="text-sm text-muted">{line}</span>
         </div>
         <div
-          className="relative w-full max-w-sm motion-safe:animate-enter"
+          className="w-full max-w-sm motion-safe:animate-enter"
           style={{ animationDelay: "120ms" }}
         >
-          {errors > 0 && (
-            <Mascot
-              key={errors}
-              animate="error"
-              size={36}
-              className="absolute -top-9 right-4 text-danger"
-            />
-          )}
-          <LoginCard onSignedIn={onSignedIn} onError={() => setErrors((n) => n + 1)} />
+          <LoginCard {...cardEvents} />
           <p className="mt-4 text-center text-xs text-subtle">
             Your requests and collections stay on this device.
           </p>

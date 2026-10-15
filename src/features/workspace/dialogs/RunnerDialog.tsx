@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { Aria } from "@/components/ui/Aria";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, Field, Input, Spinner, Toggle } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
@@ -138,6 +139,23 @@ export function RunnerDialog({
         <>
           {rows.length > 0 && (
             <span className="mr-auto flex items-center gap-4 text-xs">
+              <Aria
+                mood={
+                  running
+                    ? "thinking"
+                    : allTests.length > passed || failedRequests
+                      ? "sad"
+                      : "happy"
+                }
+                size={20}
+                className={
+                  running
+                    ? "text-accent"
+                    : allTests.length > passed || failedRequests
+                      ? "text-warning"
+                      : "text-success"
+                }
+              />
               <span className="text-success">{passed} passed</span>
               <span className={allTests.length - passed ? "text-danger" : "text-subtle"}>
                 {allTests.length - passed} failed
