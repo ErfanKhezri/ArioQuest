@@ -34,10 +34,9 @@ export function EnvironmentsPanel() {
         </>
       }
       footer={
-        <p className="text-[11px] leading-relaxed text-subtle">
-          Reference variables as{" "}
-          <code className="font-mono text-brand-600 dark:text-brand-300">{"{{name}}"}</code> in
-          URLs, headers, bodies and metadata. The active environment wins over globals.
+        <p className="text-xs text-subtle">
+          Reference variables as <code className="font-mono text-fg">{"{{name}}"}</code> in URLs,
+          headers, bodies and metadata. The active environment wins over globals.
         </p>
       }
     >
@@ -45,24 +44,18 @@ export function EnvironmentsPanel() {
         <button
           type="button"
           onClick={() => openDialog({ type: "environment", environmentId: "globals" })}
-          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-xs hover:bg-panel-2"
+          className="flex min-h-8 w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm hover:bg-panel-2"
         >
           <Icon name="globe" size={14} className="text-subtle" />
           <span className="flex-1 font-medium">Globals</span>
-          <span className="text-[10px] text-subtle">{globals.length} vars</span>
+          <span className="text-xs text-subtle">{globals.length} vars</span>
         </button>
 
-        <h3 className="px-2 pt-3 pb-1 text-[10px] font-semibold tracking-wide text-subtle uppercase">
-          Environments
-        </h3>
+        <h3 className="px-2 pt-3 pb-1 text-xs font-medium text-subtle">Environments</h3>
         {environments.length === 0 && (
           <p className="px-2 py-2 text-xs text-subtle">
             None yet.{" "}
-            <button
-              type="button"
-              onClick={create}
-              className="text-brand-600 hover:underline dark:text-brand-300"
-            >
+            <button type="button" onClick={create} className="text-accent hover:underline">
               Create one
             </button>{" "}
             for each stage (local, staging, production…).
@@ -81,8 +74,8 @@ export function EnvironmentsPanel() {
                     e.key === "Enter" && openDialog({ type: "environment", environmentId: env.id })
                   }
                   className={cn(
-                    "group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-panel-2",
-                    active && "bg-emerald-500/8",
+                    "group flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-sm hover:bg-panel-2",
+                    active && "",
                   )}
                 >
                   <button
@@ -95,14 +88,14 @@ export function EnvironmentsPanel() {
                     className={cn(
                       "flex size-4 shrink-0 items-center justify-center rounded-full border",
                       active
-                        ? "border-emerald-500 bg-emerald-500 text-white"
-                        : "border-line hover:border-emerald-500",
+                        ? "border-accent bg-accent text-accent-fg"
+                        : "border-line hover:border-accent",
                     )}
                   >
                     {active && <Icon name="check" size={10} strokeWidth={3} />}
                   </button>
                   <span className="min-w-0 flex-1 truncate font-medium">{env.name}</span>
-                  <span className="text-[10px] text-subtle group-hover:hidden">
+                  <span className="text-xs text-subtle group-hover:hidden">
                     {env.variables.length} vars
                   </span>
                   <Menu

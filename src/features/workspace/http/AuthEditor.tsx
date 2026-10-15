@@ -27,7 +27,7 @@ export function AuthEditor({
             options={authTypes}
           />
         </Field>
-        <p className="mt-3 text-[11px] leading-relaxed text-subtle">
+        <p className="mt-3 text-xs text-subtle">
           The auth header is generated when the request is sent. A header you add yourself takes
           precedence. Values can use {"{{variables}}"}.
         </p>

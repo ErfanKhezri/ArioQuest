@@ -68,7 +68,7 @@ export function SplitPane({
       >
         <span
           className={cn(
-            "absolute z-10 transition-colors group-hover:bg-brand-500/40",
+            "absolute z-10 group-hover:bg-accent/40",
             vertical ? "inset-x-0 -top-1 h-2" : "inset-y-0 -left-1 w-2",
           )}
         />

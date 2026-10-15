@@ -69,7 +69,7 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
           <div
             ref={menuRef}
             role="menu"
-            className="fixed z-[60] min-w-44 rounded-xl border border-line bg-panel p-1 shadow-xl shadow-black/20"
+            className="fixed z-[60] min-w-44 rounded-md border border-line bg-panel p-1"
             style={position ?? { top: -9999, left: -9999 }}
           >
             {items.map((item) => (
@@ -85,8 +85,8 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
                     item.onSelect();
                   }}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors disabled:opacity-40",
-                    item.danger ? "text-rose-500 hover:bg-rose-500/10" : "text-fg hover:bg-panel-2",
+                    "flex h-7 w-full items-center gap-2 rounded-sm px-2 text-left text-sm hover:bg-panel-2 disabled:opacity-40",
+                    item.danger ? "text-danger" : "text-fg",
                   )}
                 >
                   {item.icon && (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
+import { ErrorNote } from "@/components/ui/controls";
 import { Segmented } from "@/components/ui/Tabs";
 import { looksLikeCurl, parseCurl } from "@/core/curl";
 import { importJson, type ImportResult } from "@/core/importers";
@@ -107,9 +108,9 @@ export function ImportDialog() {
           <button
             type="button"
             onClick={() => void chooseFiles()}
-            className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-line px-6 py-10 text-center transition-colors hover:border-brand-500/50 hover:bg-brand-500/5"
+            className="flex w-full flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-10 text-center hover:border-accent/50 hover:bg-panel-2"
           >
-            <Icon name="upload" size={22} className="text-brand-500" />
+            <Icon name="upload" size={20} className="text-subtle" />
             <span className="text-sm font-medium">Choose files to import</span>
             <span className="text-xs text-muted">
               Postman collections (v2.0 / v2.1), Postman environments and ArioQuest exports
@@ -128,18 +129,13 @@ export function ImportDialog() {
                 ? "curl -X POST https://api.example.com/v1/items \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"name\":\"x\"}'"
                 : '{ "info": { "name": "My API", "schema": "…/collection/v2.1.0/collection.json" }, "item": [] }'
             }
-            className="w-full resize-y rounded-lg border border-line bg-panel-2/40 p-3 font-mono text-xs outline-none focus:border-brand-500/60"
+            className="w-full resize-y rounded-md border border-line bg-panel-2/40 p-3 font-mono text-xs outline-none focus:border-accent/60"
           />
         )}
 
-        {error && (
-          <p className="flex items-start gap-2 rounded-lg border border-rose-500/25 bg-rose-500/8 px-3 py-2 text-xs text-rose-600 dark:text-rose-400">
-            <Icon name="alert" size={14} className="mt-px shrink-0" />
-            {error}
-          </p>
-        )}
+        {error && <ErrorNote>{error}</ErrorNote>}
 
-        <p className="text-[11px] text-subtle">
+        <p className="text-xs text-subtle">
           Tip: paste a cURL command straight into a request's URL bar to convert it.
         </p>
       </div>

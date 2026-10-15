@@ -15,7 +15,7 @@ interface TabsProps<T extends string> {
   trailing?: ReactNode;
 }
 
-/** Underlined tab strip, matching the request preview on the landing page. */
+/** Underlined tab strip. Badges show counts, e.g. "Headers 3". */
 export function Tabs<T extends string>({
   tabs,
   value,
@@ -26,7 +26,10 @@ export function Tabs<T extends string>({
   return (
     <div
       role="tablist"
-      className={cn("flex items-center gap-4 border-b border-line px-4 text-xs", className)}
+      className={cn(
+        "flex h-8 shrink-0 items-stretch gap-4 border-b border-line px-3 text-sm",
+        className,
+      )}
     >
       {tabs.map((tab) => {
         const active = tab.id === value;
@@ -38,15 +41,13 @@ export function Tabs<T extends string>({
             aria-selected={active}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "-mb-px flex items-center gap-1 border-b-2 pt-2 pb-2 transition-colors focus-visible:outline-none",
-              active
-                ? "border-brand-500 font-medium text-fg"
-                : "border-transparent text-subtle hover:text-fg",
+              "-mb-px flex items-center gap-1 border-b focus-visible:text-fg focus-visible:outline-none",
+              active ? "border-accent text-fg" : "border-transparent text-subtle hover:text-fg",
             )}
           >
             {tab.label}
             {tab.badge !== undefined && tab.badge !== null && tab.badge !== 0 && (
-              <span className="text-[10px] text-subtle">{tab.badge}</span>
+              <span className="text-xs text-subtle tabular-nums">{tab.badge}</span>
             )}
           </button>
         );
@@ -56,7 +57,7 @@ export function Tabs<T extends string>({
   );
 }
 
-/** Pill-style segmented control for small option sets. */
+/** Segmented control for small option sets. */
 export function Segmented<T extends string>({
   options,
   value,
@@ -69,17 +70,15 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn("inline-flex flex-wrap gap-0.5 rounded-lg bg-panel-2 p-0.5", className)}>
+    <div className={cn("inline-flex flex-wrap rounded-md border border-line", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cn(
-            "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
-            o.value === value
-              ? "bg-panel text-fg shadow-sm ring-1 ring-line"
-              : "text-subtle hover:text-fg",
+            "h-6 px-2 text-xs first:rounded-l-md last:rounded-r-md",
+            o.value === value ? "bg-panel-2 text-fg" : "text-subtle hover:text-fg",
           )}
         >
           {o.label}

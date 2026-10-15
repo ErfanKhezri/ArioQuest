@@ -26,7 +26,7 @@ export function ProtosPanel() {
       }
     >
       {protoSets.length === 0 ? (
-        <EmptyState icon="file" title="No proto files yet">
+        <EmptyState title="No proto files yet">
           Import <code className="font-mono">.proto</code> files (or a whole folder) to call gRPC
           services without server reflection. Imports and google/protobuf types are resolved
           automatically.
@@ -34,25 +34,25 @@ export function ProtosPanel() {
             <button
               type="button"
               onClick={() => openDialog({ type: "protoSet" })}
-              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+              className="font-medium text-accent hover:underline"
             >
               Import .proto files
             </button>
           </div>
         </EmptyState>
       ) : (
-        <ul className="px-2">
+        <ul className="px-1">
           {protoSets.map((p) => (
             <li key={p.id}>
               <button
                 type="button"
                 onClick={() => openDialog({ type: "protoSet", protoSetId: p.id })}
-                className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-xs hover:bg-panel-2"
+                className="flex min-h-8 w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm hover:bg-panel-2"
               >
-                <Icon name="layers" size={14} className="shrink-0 text-cyan-500" />
+                <Icon name="layers" size={14} className="shrink-0 text-fg" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{p.name}</span>
-                  <span className="block truncate text-[10px] text-subtle">
+                  <span className="block truncate text-xs text-subtle">
                     {p.files.length} file{p.files.length === 1 ? "" : "s"} ·{" "}
                     {p.files.map((f) => f.path.split("/").pop()).join(", ")}
                   </span>
