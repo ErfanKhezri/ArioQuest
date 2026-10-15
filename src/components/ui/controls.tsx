@@ -6,7 +6,7 @@ import {
 } from "react";
 import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "./Icon";
-import { Aria, type AriaMood } from "./Aria";
+import { Ario, type ArioMood } from "./Ario";
 
 export const inputClass =
   "h-7 w-full rounded-md border border-line bg-panel px-2 text-sm text-fg outline-none placeholder:text-subtle focus:border-accent disabled:opacity-60";
@@ -156,20 +156,20 @@ export function EmptyState({
   className,
 }: {
   title: string;
-  mood?: AriaMood;
+  mood?: ArioMood;
   children?: ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn("flex flex-col items-center justify-center p-4 text-center", className)}>
-      <Aria mood={mood} />
+      <Ario mood={mood} />
       <p className="mt-2 text-sm text-muted">{title}</p>
       {children && <div className="mt-1 max-w-xs text-xs text-subtle">{children}</div>}
     </div>
   );
 }
 
-/** Inline error message with a worried Aria beside it. */
+/** Inline error message with a worried Ario beside it. */
 export function ErrorNote({
   children,
   mood = "sad",
@@ -188,7 +188,7 @@ export function ErrorNote({
         className,
       )}
     >
-      <Aria mood={mood} size={20} className="text-danger" />
+      <Ario mood={mood} size={20} className="text-danger" />
       <div className="selectable min-w-0 flex-1 break-words whitespace-pre-wrap">{children}</div>
     </div>
   );
