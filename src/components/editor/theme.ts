@@ -2,40 +2,23 @@ import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
 import { tags as t } from "@lezer/highlight";
 
-/** Editor chrome driven by the app's CSS tokens, so it follows light/dark mode. */
-const chrome = EditorView.theme({
-  "&": {
-    backgroundColor: "transparent",
-    color: "var(--fg)",
-    fontSize: "var(--text-xs)",
-    height: "100%",
-  },
+/**
+ * Layout and popups (tooltips, search panel) shared by every editor. Popups use
+ * the app's CSS tokens so they match the rest of the UI whatever the syntax theme.
+ */
+export const editorChrome = EditorView.theme({
+  "&": { height: "100%" },
   "&.cm-focused": { outline: "none" },
-  ".cm-scroller": { fontFamily: "var(--font-mono)", lineHeight: "1.6" },
-  ".cm-content": { caretColor: "var(--fg)", padding: "8px 0" },
-  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--fg)" },
-  ".cm-gutters": {
-    backgroundColor: "transparent",
-    color: "var(--subtle)",
-    border: "none",
-    paddingLeft: "4px",
-  },
-  ".cm-activeLine": { backgroundColor: "color-mix(in oklch, var(--panel-2) 55%, transparent)" },
-  ".cm-activeLineGutter": { backgroundColor: "transparent", color: "var(--fg)" },
-  "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-    { backgroundColor: "color-mix(in oklch, var(--accent) 28%, transparent)" },
-  ".cm-matchingBracket": {
-    backgroundColor: "color-mix(in oklch, var(--accent) 20%, transparent)",
-    outline: "none",
-  },
+  ".cm-content": { padding: "8px 0" },
+  ".cm-gutters": { border: "none", paddingLeft: "4px" },
   ".cm-foldPlaceholder": {
     backgroundColor: "var(--panel-2)",
     border: "none",
     color: "var(--muted)",
   },
-  ".cm-placeholder": { color: "var(--subtle)" },
   ".cm-tooltip": {
-    backgroundColor: "var(--panel)",
+    backgroundColor: "var(--glass)",
+    backdropFilter: "blur(24px) saturate(1.6)",
     color: "var(--fg)",
     border: "1px solid var(--line)",
     borderRadius: "var(--radius-md)",
@@ -74,4 +57,27 @@ const highlight = HighlightStyle.define([
   { tag: t.invalid, color: "var(--danger)" },
 ]);
 
-export const editorTheme = [chrome, syntaxHighlighting(highlight)];
+/** Colors driven by the app's CSS tokens, so they follow light/dark mode. */
+const appColors = EditorView.theme({
+  "&": {
+    backgroundColor: "transparent",
+    color: "var(--fg)",
+    fontSize: "var(--text-xs)",
+  },
+  ".cm-scroller": { fontFamily: "var(--font-mono)", lineHeight: "1.6" },
+  ".cm-content": { caretColor: "var(--fg)" },
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--fg)" },
+  ".cm-gutters": { backgroundColor: "transparent", color: "var(--subtle)" },
+  ".cm-activeLine": { backgroundColor: "color-mix(in oklch, var(--panel-2) 55%, transparent)" },
+  ".cm-activeLineGutter": { backgroundColor: "transparent", color: "var(--fg)" },
+  "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
+    { backgroundColor: "color-mix(in oklch, var(--accent) 28%, transparent)" },
+  ".cm-matchingBracket": {
+    backgroundColor: "color-mix(in oklch, var(--accent) 20%, transparent)",
+    outline: "none",
+  },
+  ".cm-placeholder": { color: "var(--subtle)" },
+});
+
+/** The fixed app-token theme, used by single-line inputs (code editors use `themeExtension.ts`). */
+export const editorTheme = [editorChrome, appColors, syntaxHighlighting(highlight)];

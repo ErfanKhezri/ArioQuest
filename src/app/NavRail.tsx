@@ -64,7 +64,7 @@ export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }
   };
 
   return (
-    <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-2">
+    <nav className="glass-panel flex w-12 shrink-0 flex-col items-center gap-1 bg-panel py-2">
       <Ario size={26} label="ArioQuest" className="mb-2 text-accent" />
       {sections.map((item) => {
         const active = sidebarOpen && sidebar === item.id;
@@ -91,6 +91,11 @@ export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }
           label="Search (Ctrl+K)"
           icon="search"
           onClick={() => openDialog({ type: "palette" })}
+        />
+        <RailButton
+          label="Settings"
+          icon="sliders"
+          onClick={() => openDialog({ type: "settings" })}
         />
         <RailButton
           label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}

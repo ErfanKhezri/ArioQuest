@@ -154,6 +154,12 @@ const paths = {
     </>
   ),
   moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />,
+  palette: (
+    <>
+      <path d="M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.7 1.7-1.7H17a4 4 0 0 0 4-4c0-4.5-4-8.2-9-8.2z" />
+      <path d="M7.5 11.5h.01M10.5 7.5h.01M15 8h.01" strokeWidth={2.5} />
+    </>
+  ),
   arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
   arrowDown: <path d="M12 5v14M6 13l6 6 6-6" />,
 } satisfies Record<string, ReactNode>;

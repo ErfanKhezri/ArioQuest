@@ -10,7 +10,7 @@ export function StatusBar() {
   const desktop = isTauri();
 
   return (
-    <footer className="flex h-6 shrink-0 items-center justify-between border-t border-line bg-panel px-2 text-xs text-subtle">
+    <footer className="-mb-1 flex h-6 shrink-0 items-center justify-between px-2 text-xs text-subtle">
       <EnvironmentPicker />
       <span
         className="flex items-center gap-2"

@@ -69,7 +69,7 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
           <div
             ref={menuRef}
             role="menu"
-            className="fixed z-[60] min-w-44 rounded-md border border-line bg-panel p-1"
+            className="fixed z-[60] min-w-44 glass rounded-md border border-line p-1"
             style={position ?? { top: -9999, left: -9999 }}
           >
             {items.map((item) => (

@@ -9,8 +9,16 @@
   }
 
   body {
-    @apply bg-canvas font-sans text-sm text-fg antialiased;
+    @apply font-sans text-sm text-fg antialiased;
     @apply select-none;
+    background:
+      var(--wall-image) fixed,
+      var(--wall);
+  }
+
+  /* Native dropdown lists can't show through, so they get the solid panel color. */
+  option {
+    @apply bg-panel-solid text-fg;
   }
 
   input,
@@ -25,7 +33,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full border-2 border-solid border-transparent bg-line bg-clip-padding;
+    @apply rounded-full border-2 border-solid border-transparent bg-subtle/40 bg-clip-padding;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -37,6 +45,24 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+/* Frosted surface for things that float over content: dialogs, menus, toasts. */
+.glass {
+  background-color: var(--glass);
+  backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    var(--glass-shadow);
+}
+
+/* A floating layout panel (nav rail, sidebar, workspace): a lit top edge, no blur. */
+.glass-panel {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    0 8px 32px oklch(0 0 0 / 0.12);
 }
 
 /* {{variable}} highlights inside CodeMirror editors */

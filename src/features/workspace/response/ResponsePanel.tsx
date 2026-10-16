@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor";
+import { ThemeMenu } from "@/components/editor/ThemeMenu";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
 import {
   moodForGrpcStatus,
@@ -242,6 +243,7 @@ function BodySection({ result }: { result: RunResult }) {
           ]}
         />
         <span className="ml-auto flex items-center">
+          <ThemeMenu />
           <IconButton
             icon="wrap"
             label={wrap ? "Disable line wrap" : "Wrap lines"}

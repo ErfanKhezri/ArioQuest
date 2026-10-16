@@ -11,6 +11,7 @@ import { describeGrpc, schemaKey } from "@/core/grpc";
 import { cancelRequest } from "@/core/http";
 import type { ImportResult } from "@/core/importers";
 import { executeRequest } from "@/core/runner";
+import { defaultEditorSettings, type EditorSettings } from "@/components/editor/themes";
 import type { VariableStore } from "@/core/script";
 import { findItem, insertAfter, insertItem, mapItem, removeItem } from "@/core/tree";
 import type {
@@ -50,6 +51,7 @@ export type Dialog =
   | { type: "save"; tabId: string }
   | { type: "runner"; collectionId: string; folderId?: string }
   | { type: "palette" }
+  | { type: "settings" }
   | { type: "protoSet"; protoSetId?: string; assignToTabId?: string };
 
 export interface SchemaState {
@@ -71,6 +73,7 @@ interface PersistedState {
   activeTabId: string | null;
   sidebar: SidebarSection;
   seeded: boolean;
+  editorSettings: EditorSettings;
 }
 
 interface UiState {
@@ -128,6 +131,8 @@ interface Actions {
   updateProtoSet: (id: string, patch: Partial<Omit<ProtoSet, "id">>) => void;
   deleteProtoSet: (id: string) => void;
   loadSchema: (source: GrpcSchemaSource) => Promise<SchemaState>;
+
+  updateEditorSettings: (patch: Partial<EditorSettings>) => void;
 
   importData: (result: ImportResult) => void;
   variableStore: () => VariableStore;
@@ -200,6 +205,7 @@ export const useWorkspace = create<WorkspaceState>()(
         activeTabId: null,
         sidebar: "collections",
         seeded: false,
+        editorSettings: defaultEditorSettings,
 
         hydrated: false,
         view: "home",
@@ -511,6 +517,9 @@ export const useWorkspace = create<WorkspaceState>()(
           return state;
         },
 
+        updateEditorSettings: (patch) =>
+          set({ editorSettings: { ...get().editorSettings, ...patch } }),
+
         importData: (result) => {
           const existingProtoIds = new Set(get().protoSets.map((p) => p.id));
           set({
@@ -572,7 +581,17 @@ export const useWorkspace = create<WorkspaceState>()(
         activeTabId: s.activeTabId,
         sidebar: s.sidebar,
         seeded: s.seeded,
+        editorSettings: s.editorSettings,
       }),
+      // Fill settings added after the workspace was first saved.
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<PersistedState>;
+        return {
+          ...current,
+          ...saved,
+          editorSettings: { ...defaultEditorSettings, ...saved.editorSettings },
+        };
+      },
       onRehydrateStorage: () => (state) => {
         const store = useWorkspace;
         if (state && !state.seeded) {

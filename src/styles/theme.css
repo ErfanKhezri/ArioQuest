@@ -29,6 +29,8 @@
   --radius-*: initial;
   --radius-sm: 4px;
   --radius-md: 6px;
+  /* Floating glass panels */
+  --radius-lg: 12px;
 
   --shadow-*: initial;
   --inset-shadow-*: initial;
@@ -121,6 +123,7 @@
   --color-canvas: var(--canvas);
   --color-panel: var(--panel);
   --color-panel-2: var(--panel-2);
+  --color-panel-solid: var(--panel-solid);
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
@@ -151,12 +154,27 @@
   --color-status-5xx: var(--danger);
 }
 
+/*
+ * Liquid glass: a soft gradient wallpaper sits behind the whole app and every
+ * surface is a translucent tint over it. Layout surfaces only see the static
+ * wallpaper, so they need no blur; floating ones (.glass) blur what is under them.
+ */
+
 /* Dark is the default theme. */
 :root {
-  --canvas: oklch(0.17 0.004 270);
-  --panel: oklch(0.2 0.004 270);
-  --panel-2: oklch(0.24 0.005 270);
-  --line: oklch(0.29 0.005 270);
+  --wall: oklch(0.16 0.015 270);
+  --wall-image:
+    radial-gradient(55vmax 45vmax at 10% 15%, oklch(0.42 0.09 265 / 0.45), transparent 70%),
+    radial-gradient(45vmax 40vmax at 90% 10%, oklch(0.4 0.08 320 / 0.3), transparent 70%),
+    radial-gradient(55vmax 45vmax at 65% 95%, oklch(0.44 0.06 200 / 0.3), transparent 70%);
+  --canvas: oklch(0.14 0.015 270 / 0.32);
+  --panel: oklch(0.18 0.015 270 / 0.42);
+  --panel-2: oklch(1 0 0 / 0.07);
+  --panel-solid: oklch(0.2 0.006 270);
+  --line: oklch(1 0 0 / 0.09);
+  --glass: oklch(0.2 0.014 270 / 0.62);
+  --glass-edge: oklch(1 0 0 / 0.14);
+  --glass-shadow: 0 16px 48px oklch(0 0 0 / 0.45);
   --fg: oklch(0.93 0.003 270);
   --muted: oklch(0.72 0.005 270);
   --subtle: oklch(0.56 0.006 270);
@@ -177,10 +195,19 @@
 }
 
 :root[data-theme="light"] {
-  --canvas: oklch(0.975 0.002 270);
-  --panel: oklch(1 0 0);
-  --panel-2: oklch(0.955 0.003 270);
-  --line: oklch(0.9 0.004 270);
+  --wall: oklch(0.95 0.006 270);
+  --wall-image:
+    radial-gradient(55vmax 45vmax at 10% 15%, oklch(0.86 0.05 255 / 0.6), transparent 70%),
+    radial-gradient(45vmax 40vmax at 90% 10%, oklch(0.88 0.04 330 / 0.45), transparent 70%),
+    radial-gradient(55vmax 45vmax at 65% 95%, oklch(0.9 0.04 190 / 0.45), transparent 70%);
+  --canvas: oklch(1 0 0 / 0.35);
+  --panel: oklch(1 0 0 / 0.5);
+  --panel-2: oklch(0.25 0.02 270 / 0.06);
+  --panel-solid: oklch(1 0 0);
+  --line: oklch(0.25 0.02 270 / 0.1);
+  --glass: oklch(1 0 0 / 0.68);
+  --glass-edge: oklch(1 0 0 / 0.85);
+  --glass-shadow: 0 16px 48px oklch(0.3 0.04 270 / 0.18);
   --fg: oklch(0.22 0.005 270);
   --muted: oklch(0.45 0.006 270);
   --subtle: oklch(0.6 0.006 270);

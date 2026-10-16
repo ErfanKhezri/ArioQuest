@@ -78,7 +78,7 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
             )}
           >
             {HTTP_METHODS.map((m) => (
-              <option key={m} value={m} className="bg-panel text-fg">
+              <option key={m} value={m} className="bg-panel-solid text-fg">
                 {m}
               </option>
             ))}
