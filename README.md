@@ -1,140 +1,79 @@
 ﻿# ArioQuest
 
-A Postman-style API client for testing HTTP and gRPC APIs. Windows desktop app built with
-**Tauri 2**, **React 19**, **TypeScript**, and **Tailwind CSS v4**.
+A Postman-style API client for Windows. Send HTTP and gRPC requests, test them with scripts, run
+whole collections, and let Ario, the app's mascot, tell you how each response went.
+
+**[Website](https://erfankhezri.github.io/ArioQuest/)** ·
+**[Try it in your browser](https://erfankhezri.github.io/ArioQuest/app/)** ·
+**[Download for Windows](https://github.com/ErfanKhezri/ArioQuest/releases/latest)**
 
 ## Features
 
-- **HTTP requests** — every method; params synced with the URL; headers; JSON, text, XML, HTML,
-  URL-encoded, multipart (with files), binary and GraphQL bodies; bearer / basic / API-key auth;
-  timeout, redirect and TLS-verification settings. Requests are sent from Rust, so there are no
-  CORS limits, and cookies persist between requests like a browser (clear them from the status bar).
-- **gRPC from `.proto` files** — import files or a whole folder; imports and
-  `google/protobuf/*` well-known types resolve automatically (no `protoc` needed). Or load
-  services through **server reflection**. Pick a method, generate an example message, add
-  metadata, and call unary, server-, client- or bidirectional-streaming methods (TLS optional).
-- **Testing** — no-code assertions (status, gRPC status, header, JSON path, body, response time),
-  JavaScript pre-request and test scripts with an `aq` API that is also exposed as `pm`, so most
-  Postman scripts run unchanged, and variable extraction to chain requests.
-- **Collection runner** — run a collection or folder in order, for several iterations, with a
-  per-request breakdown of test results.
-- **Collections, environments, globals and history** — folders, `{{variables}}` with highlighting,
-  hover values and autocomplete, dynamic values like `{{$guid}}` and `{{$timestamp}}`.
-- **Import / export** — Postman collections (v2.0/v2.1) and environments, cURL (also by pasting
-  into the URL bar), ArioQuest JSON; export to Postman v2.1 or ArioQuest; generate cURL or `fetch`.
-- **Keyboard first** — `Ctrl+K` command palette, `Ctrl+Enter` send, `Ctrl+S` save, `Ctrl+N` new
-  tab, `Ctrl+W` close tab, `Ctrl+E` cycle environments, `Ctrl+O` import.
+- **HTTP**: every method, headers, JSON / form / multipart / GraphQL / binary bodies, bearer,
+  basic and API-key auth. Requests go out from Rust, so there are no CORS limits.
+- **gRPC**: load `.proto` files or use server reflection; unary and all three streaming kinds.
+  No `protoc` needed.
+- **Tests**: no-code assertions, or JavaScript scripts with an `aq` API that is also available as
+  `pm`, so most Postman scripts run unchanged.
+- **Collection runner**: run a collection or folder for several iterations and see the results
+  per request.
+- **Collections, environments and history** with `{{variables}}`.
+- **Import / export**: Postman collections and environments, cURL (paste it into the URL bar),
+  `fetch`.
+- **Keyboard first**: `Ctrl+K` command palette, `Ctrl+Enter` send, `Ctrl+S` save.
 
-The workspace is saved to `store/workspace.json` in the app data directory.
+## Install
 
-### Script API
+Download `ArioQuest_<version>_x64-setup.exe` (or the `.msi`) from the
+[latest release](https://github.com/ErfanKhezri/ArioQuest/releases/latest) and run it.
 
-```js
-// Pre-request: edit the outgoing request or set run-scoped variables
-aq.request.headers["X-Request-Id"] = crypto.randomUUID();
-aq.variables.set("now", new Date().toISOString());
+Sign in with **admin / admin**. Sign-in is a local mock until the real backend exists.
 
-// Tests: aq.test / aq.expect (chai or jest style); pm.* works too
-aq.test("created", () => aq.response.to.have.status(201));
-aq.test("has an id", () => aq.expect(aq.response.json().id).to.exist);
-aq.environment.set("orderId", aq.response.json().id);
-console.log(aq.response.headers.get("content-type"));
-```
+## Development
 
-For gRPC, `aq.response.code` is the numeric status code, `aq.response.status` its name, and
-`aq.response.json()` the response message (an array for streaming responses).
-
-## Install on Windows
-
-**Download a release.** Open the repository's **Releases** page and download
-`ArioQuest_<version>_x64-setup.exe` (or the `.msi`).
-
-**Publish a new release** from GitHub Actions, no local setup needed:
-
-1. **Actions** tab → **Release** → **Run workflow**.
-2. Enter a version such as `0.2.0` (numbers only; the MSI format allows no suffixes), tick
-   **pre-release** if you want, and run it.
-3. About 10–20 minutes later the release appears under **Releases**, with the installers attached
-   and release notes generated from the merged pull requests.
-
-Pushing a tag works too: `git tag v0.2.0 && git push origin v0.2.0`. The version is written into
-the build automatically, so it does not have to be bumped in a commit first.
-
-Every push to `master` also runs the **Windows installer** workflow, a test build whose installers
-can be downloaded from the run's **Artifacts**.
-
-**Or build it yourself** on a Windows machine with the prerequisites below:
+You need Node.js 20+, pnpm, [Rust](https://rustup.rs) (MSVC toolchain), and Visual Studio Build
+Tools with the "Desktop development with C++" workload.
 
 ```powershell
 pnpm install
-pnpm app:build
+pnpm dev          # run everything in the browser (addresses below)
+pnpm app:dev      # run the desktop app with hot reload
+pnpm app:build    # build the Windows installers into src-tauri/target/release/bundle/
 ```
 
-The installer is written to `src-tauri\target\release\bundle\nsis\ArioQuest_<version>_x64-setup.exe`
-(MSI: `bundle\msi\`).
+`pnpm dev` (or `yarn dev`, `npm run dev`) starts all three dev servers:
 
-## Signing in
+| Address                    | What                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| http://localhost:1440/     | Website                                                    |
+| http://localhost:1440/app/ | Web demo through the website (also at localhost:1430/app/) |
+| http://localhost:1420/     | The app in a browser, with sign-in (CORS applies, no gRPC) |
 
-Until the real backend exists, sign-in is a local mock (`src/lib/auth.ts`):
+| Command           | What it does                                                  |
+| ----------------- | ------------------------------------------------------------- |
+| `pnpm dev:app`    | Run only the app frontend (what `app:dev` uses)               |
+| `pnpm dev:site`   | Run only the website                                          |
+| `pnpm dev:demo`   | Run only the web demo                                         |
+| `pnpm site:build` | Build the website and the web demo into `website/dist`        |
+| `pnpm lint`       | Lint                                                          |
+| `pnpm typecheck`  | Type-check                                                    |
+| `pnpm test`       | Run the unit tests (Rust tests: `cargo test` in `src-tauri/`) |
 
-- Use the built-in account **admin / admin** (or click "Use the default account" on the sign-in card).
-- Or create an account with any valid email and a password of 8+ characters.
-
-Sign out from the avatar button at the bottom of the nav rail.
-
-## Prerequisites
-
-- Node.js 20+ and pnpm
-- Rust (stable, MSVC toolchain) via [rustup](https://rustup.rs)
-- Visual Studio Build Tools with the "Desktop development with C++" workload
-- Microsoft Edge WebView2 (preinstalled on Windows 11)
-
-## Scripts
-
-| Command          | Description                                         |
-| ---------------- | --------------------------------------------------- |
-| `pnpm install`   | Install dependencies                                |
-| `pnpm app:dev`   | Run the desktop app with hot reload                 |
-| `pnpm app:build` | Build the Windows installers (`.exe` NSIS + `.msi`) |
-| `pnpm dev`       | Run only the web frontend in a browser              |
-| `pnpm typecheck` | Type-check the frontend                             |
-| `pnpm lint`      | Lint with ESLint                                    |
-| `pnpm test`      | Run the frontend unit tests (Vitest)                |
-| `pnpm format`    | Format with Prettier                                |
-
-Installers are written to `src-tauri/target/release/bundle/`. Rust unit tests run with
-`cargo test` inside `src-tauri/`.
-
-`pnpm dev` runs the UI in a browser for quick iteration: HTTP falls back to `fetch` (so CORS
-applies) and gRPC is unavailable — use `pnpm app:dev` for the full app.
-
-## Project structure
+## Project layout
 
 ```
-src/                     React frontend
-  app/                   Root shell: nav rail, status bar
-  core/                  Framework-free logic: request model, variables, runner, scripts,
-                         assertions, cURL and Postman import/export (unit-tested)
-  store/                 Zustand workspace store (persisted) and toasts
-  features/landing/      Home / welcome screen (hero, quick actions, recents)
-  features/workspace/    Tabs, HTTP and gRPC editors, response viewer, sidebar panels, dialogs
-  components/editor/     CodeMirror editors with {{variable}} support
-  components/ui/         Reusable presentational components
-  hooks/                 React hooks (app info, keyboard shortcuts)
-  lib/                   Utilities, storage, files and the typed Tauri command bridge
-  styles/                Tailwind entry and theme tokens
-src-tauri/               Rust backend
-  src/commands/          Tauri commands exposed to the frontend (HTTP, gRPC, storage)
-  src/grpc/              Dynamic gRPC: proto compilation, reflection, codec, invocation
-  capabilities/          Permission sets for webview windows
-  tauri.conf.json        App, window and bundle configuration
+src/          React frontend (the app)
+src-tauri/    Rust backend: HTTP, gRPC and storage commands
+website/      Marketing site; reuses the app's theme, mascot and cURL parser
 ```
 
-## Adding a backend command
+A new Rust command is registered by its module path in `src-tauri/src/lib.rs`
+(`pub use` re-exports don't work with `generate_handler!`), and its types are added to
+`CommandMap` in `src/lib/tauri.ts`.
 
-1. Create the function in a module under `src-tauri/src/commands/` with `#[tauri::command]`
-   (declare the module as `pub mod` in `commands/mod.rs`).
-2. Register it by its module path, e.g. `http::send_http_request`, in
-   `tauri::generate_handler![...]` in `src-tauri/src/lib.rs`. Re-exporting a command with
-   `pub use` does not work: the macro cannot see the hidden items it generates.
-3. Add its argument/result types to `CommandMap` in `src/lib/tauri.ts`, then call it with `invokeCommand("name", args)`.
+## Releases and deploys
+
+- **Release**: Actions → **Release** → Run workflow with a version like `0.2.0`, or push a tag
+  (`git tag v0.2.0 && git push origin v0.2.0`). The installers are attached to the release.
+- **Website**: every push to `master` deploys it to GitHub Pages. One-time setup: Settings →
+  Pages → Source: **GitHub Actions**.

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { VariableInput } from "@/components/editor/VariableInput";
+import { Ario } from "@/components/ui/Ario";
 import { Button } from "@/components/ui/Button";
 import { ErrorNote, Field, Input, Spinner } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
@@ -11,6 +12,7 @@ import type { GrpcMethodInfo, GrpcRequest } from "@/core/types";
 import { interpolate } from "@/core/variables";
 import { cn } from "@/lib/cn";
 import { isTauri } from "@/lib/tauri";
+import { isWebDemo, RELEASES_URL } from "@/lib/demo";
 import { type Tab, useWorkspace } from "@/store/workspace";
 import { useRequestUpdater } from "../hooks";
 import { ScriptsEditor } from "../shared/ScriptsEditor";
@@ -26,6 +28,31 @@ function exampleMessage(method: GrpcMethodInfo) {
   if (!method.clientStreaming) return method.inputTemplate;
   const indented = method.inputTemplate.replace(/\n/g, "\n  ");
   return `[\n  ${indented}\n]`;
+}
+
+/** Shown in the web demo: browsers can't open the HTTP/2 connections gRPC needs. */
+function GrpcInDesktopApp() {
+  return (
+    <div className="mx-2 mb-2 flex items-center gap-3 rounded-md bg-panel-2 px-3 py-3 text-sm">
+      <Ario mood="shy" size={36} className="text-info" />
+      <div className="min-w-0 flex-1">
+        <p className="font-medium text-fg">gRPC lives in the desktop app</p>
+        <p className="text-muted">
+          Browsers can&apos;t open raw HTTP/2 connections, so I can&apos;t call gRPC services from
+          here. Grab the Windows app and this request will work as is.
+        </p>
+      </div>
+      <a
+        href={RELEASES_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex h-7 shrink-0 items-center gap-2 rounded-md bg-accent px-3 font-medium text-accent-fg hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+      >
+        <Icon name="download" size={13} />
+        Download for Windows
+      </a>
+    </div>
+  );
 }
 
 export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcRequest }) {
@@ -195,12 +222,16 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         )}
       </div>
 
-      {(sourceError || schemaState?.status === "error" || !isTauri()) && (
-        <ErrorNote className="mx-2 mb-2">
-          {!isTauri()
-            ? "gRPC requires the desktop app. Run `pnpm app:dev` to call gRPC services."
-            : (sourceError ?? schemaState?.error)}
-        </ErrorNote>
+      {isWebDemo ? (
+        <GrpcInDesktopApp />
+      ) : (
+        (sourceError || schemaState?.status === "error" || !isTauri()) && (
+          <ErrorNote className="mx-2 mb-2">
+            {!isTauri()
+              ? "gRPC requires the desktop app. Run `pnpm app:dev` to call gRPC services."
+              : (sourceError ?? schemaState?.error)}
+          </ErrorNote>
+        )
       )}
 
       <Tabs

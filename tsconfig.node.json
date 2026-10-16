@@ -9,5 +9,5 @@
     "types": ["node"],
     "strict": true
   },
-  "include": ["vite.config.ts", "eslint.config.js"]
+  "include": ["vite.config.ts", "eslint.config.js", "website/vite.config.ts"]
 }

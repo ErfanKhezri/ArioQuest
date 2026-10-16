@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/ario.svg" />
+    <meta name="theme-color" content="#16171a" />
+    <title>ArioQuest — API client for HTTP and gRPC on Windows</title>
+    <meta
+      name="description"
+      content="ArioQuest is a Postman-style API client for Windows. HTTP and gRPC requests, Postman-compatible test scripts, a collection runner, and Ario, who reacts to every response."
+    />
+    <script>
+      // Set the theme before first paint; shared with the web demo at /app.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("aq-theme") || "dark";
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
