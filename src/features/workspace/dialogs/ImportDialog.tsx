@@ -113,7 +113,7 @@ export function ImportDialog() {
             <Icon name="upload" size={20} className="text-subtle" />
             <span className="text-sm font-medium">Choose files to import</span>
             <span className="text-xs text-muted">
-              Postman collections (v2.0 / v2.1), Postman environments and ArioQuest exports
+              Collection files (v2.0 / v2.1), environment files and ArioQuest exports
             </span>
           </button>
         )}

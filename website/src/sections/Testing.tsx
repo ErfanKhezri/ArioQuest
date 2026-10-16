@@ -99,7 +99,7 @@ export default function Testing() {
       <div className="lg:col-span-4">
         <div className="flex flex-col gap-6 lg:sticky lg:top-28">
           <m.h2 variants={rise} className="text-title font-semibold">
-            Most Postman scripts just run
+            Existing scripts just run
           </m.h2>
           <m.p variants={rise} className="max-w-[44ch]">
             Pre-request and test scripts get an <code>aq</code> API that is also exposed as{" "}

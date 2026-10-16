@@ -8,7 +8,7 @@ import { LoginCard, type FieldName } from "./LoginCard";
 
 const features: Array<{ icon: IconName; text: string }> = [
   { icon: "layers", text: "HTTP & gRPC" },
-  { icon: "beaker", text: "No-code tests & Postman-compatible scripts" },
+  { icon: "beaker", text: "No-code tests & JavaScript test scripts" },
   { icon: "folder", text: "Collections & environments" },
 ];
 

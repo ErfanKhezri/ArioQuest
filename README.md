@@ -1,6 +1,6 @@
 ﻿# ArioQuest
 
-A Postman-style API client for Windows. Send HTTP and gRPC requests, test them with scripts, run
+An API client for Windows. Send HTTP and gRPC requests, test them with scripts, run
 whole collections, and let Ario, the app's mascot, tell you how each response went.
 
 **[Website](https://erfankhezri.github.io/ArioQuest/)** ·
@@ -14,11 +14,11 @@ whole collections, and let Ario, the app's mascot, tell you how each response we
 - **gRPC**: load `.proto` files or use server reflection; unary and all three streaming kinds.
   No `protoc` needed.
 - **Tests**: no-code assertions, or JavaScript scripts with an `aq` API that is also available as
-  `pm`, so most Postman scripts run unchanged.
+  `pm`, so most existing `pm` scripts run unchanged.
 - **Collection runner**: run a collection or folder for several iterations and see the results
   per request.
 - **Collections, environments and history** with `{{variables}}`.
-- **Import / export**: Postman collections and environments, cURL (paste it into the URL bar),
+- **Import / export**: v2.0 / v2.1 collection files and environments, cURL (paste it into the URL bar),
   `fetch`.
 - **Keyboard first**: `Ctrl+K` command palette, `Ctrl+Enter` send, `Ctrl+S` save.
 

@@ -313,7 +313,7 @@ export function Hero() {
 
       <div className="flex flex-col gap-8 lg:col-span-4 lg:pt-44">
         <m.p variants={rise} className="text-lead max-w-[34ch] text-fg">
-          ArioQuest is a Windows API client for HTTP and gRPC. Send requests, run your Postman
+          ArioQuest is a Windows API client for HTTP and gRPC. Send requests, run your test
           scripts and whole collections, and Ario tells you how each one went.
         </m.p>
         <m.div variants={rise}>

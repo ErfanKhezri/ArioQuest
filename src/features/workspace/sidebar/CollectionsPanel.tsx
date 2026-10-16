@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Menu, type MenuItem } from "@/components/ui/Menu";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { newGrpcRequest, newHttpRequest } from "@/core/factory";
-import { exportNative, exportPostman } from "@/core/importers";
+import { exportNative, exportCollectionV2 } from "@/core/importers";
 import { countRequests, requestLabel } from "@/core/tree";
 import type { Collection, CollectionItem } from "@/core/types";
 import { cn } from "@/lib/cn";
@@ -129,10 +129,12 @@ function CollectionNode({
   const store = useWorkspace.getState;
   const { toggle, renaming, setRenaming } = shared;
 
-  const exportAs = async (format: "native" | "postman") => {
+  const exportAs = async (format: "native" | "v2") => {
     const contents =
-      format === "native" ? exportNative({ collections: [collection] }) : exportPostman(collection);
-    const suffix = format === "native" ? "arioquest" : "postman_collection";
+      format === "native"
+        ? exportNative({ collections: [collection] })
+        : exportCollectionV2(collection);
+    const suffix = format === "native" ? "arioquest" : "collection_v2.1";
     try {
       if (await saveTextFile(`${safeFileName(collection.name)}.${suffix}.json`, contents))
         notify.success("Collection exported.");
@@ -175,7 +177,7 @@ function CollectionNode({
       onSelect: () => store().duplicateCollection(collection.id),
     },
     { label: "Export (ArioQuest)", icon: "download", onSelect: () => void exportAs("native") },
-    { label: "Export (Postman v2.1)", icon: "download", onSelect: () => void exportAs("postman") },
+    { label: "Export (Collection v2.1)", icon: "download", onSelect: () => void exportAs("v2") },
     {
       label: "Delete",
       icon: "trash",

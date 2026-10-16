@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseCurl, shellSplit, toCurl } from "../curl";
 import { buildHttpPayload } from "../http";
-import { exportPostman, importJson } from "../importers";
+import { exportCollectionV2, importJson } from "../importers";
 import { newHttpRequest, newKeyValue } from "../factory";
 
 describe("shellSplit", () => {
@@ -102,8 +102,8 @@ describe("buildHttpPayload", () => {
   });
 });
 
-describe("Postman import/export", () => {
-  const postman = {
+describe("v2.1 collection import/export", () => {
+  const v2Collection = {
     info: {
       name: "Demo",
       schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -136,7 +136,7 @@ describe("Postman import/export", () => {
   };
 
   it("imports folders, auth, scripts and variables", () => {
-    const result = importJson(JSON.stringify(postman));
+    const result = importJson(JSON.stringify(v2Collection));
     const col = result.collections[0]!;
     expect(col.name).toBe("Demo");
     const folder = col.items[0]!;
@@ -157,7 +157,7 @@ describe("Postman import/export", () => {
       value: "https://demo.io",
     });
 
-    const exported = JSON.parse(exportPostman(col));
+    const exported = JSON.parse(exportCollectionV2(col));
     expect(exported.item[0].item[0].request.method).toBe("POST");
     expect(importJson(JSON.stringify(exported)).collections[0]?.items).toHaveLength(2);
   });
