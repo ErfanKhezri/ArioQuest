@@ -66,6 +66,13 @@ export function CommandPalette() {
         run: () => s.openDialog({ type: "environment", environmentId: "globals" }),
       },
       {
+        id: "settings",
+        title: "Editor theme and settings",
+        group: "Actions",
+        icon: "palette",
+        run: () => s.openDialog({ type: "settings" }),
+      },
+      {
         id: "cookies",
         title: "Clear cookies",
         group: "Actions",

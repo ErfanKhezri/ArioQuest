@@ -6,6 +6,7 @@ import { ImportDialog } from "./ImportDialog";
 import { ProtoSetDialog } from "./ProtoSetDialog";
 import { RunnerDialog } from "./RunnerDialog";
 import { SaveDialog } from "./SaveDialog";
+import { SettingsDialog } from "./SettingsDialog";
 
 export function DialogHost() {
   const dialog = useWorkspace((s) => s.dialog);
@@ -30,6 +31,8 @@ export function DialogHost() {
       );
     case "palette":
       return <CommandPalette />;
+    case "settings":
+      return <SettingsDialog />;
     case "protoSet":
       return (
         <ProtoSetDialog

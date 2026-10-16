@@ -7,7 +7,8 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useMemo } from "react";
 import { cn } from "@/lib/cn";
-import { editorTheme } from "./theme";
+import { editorChrome } from "./theme";
+import { sharedThemeExtension } from "./themeExtension";
 import { useVariableExtensions } from "./variables";
 
 export type EditorLanguage = "json" | "javascript" | "xml" | "html" | "text";
@@ -32,6 +33,8 @@ interface CodeEditorProps {
   /** Highlight and autocomplete `{{variables}}`. */
   variables?: boolean;
   extraExtensions?: Extension[];
+  /** A fixed theme instead of the shared one from settings (the theme preview). */
+  themeOverride?: Extension;
 }
 
 export function CodeEditor({
@@ -45,17 +48,19 @@ export function CodeEditor({
   wrap = false,
   variables = false,
   extraExtensions,
+  themeOverride,
 }: CodeEditorProps) {
   const variableExtensions = useVariableExtensions();
   const extensions = useMemo(
     () => [
-      ...editorTheme,
+      editorChrome,
+      themeOverride ?? sharedThemeExtension(),
       ...languages[language](),
       ...(wrap ? [EditorView.lineWrapping] : []),
       ...(variables ? variableExtensions : []),
       ...(extraExtensions ?? []),
     ],
-    [language, wrap, variables, variableExtensions, extraExtensions],
+    [language, wrap, variables, variableExtensions, extraExtensions, themeOverride],
   );
 
   return (

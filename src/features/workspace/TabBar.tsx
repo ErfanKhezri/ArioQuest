@@ -39,7 +39,7 @@ export function TabBar() {
   const [renaming, setRenaming] = useState<string | null>(null);
 
   return (
-    <div className="flex h-9 shrink-0 items-stretch border-b border-line bg-panel">
+    <div className="flex h-9 shrink-0 items-stretch border-b border-line">
       <div
         role="tablist"
         className="flex min-w-0 flex-1 [scrollbar-width:none] items-stretch overflow-x-auto"
@@ -78,7 +78,7 @@ export function TabBar() {
                   }}
                   className={cn(
                     "group relative flex max-w-56 min-w-28 shrink-0 cursor-pointer items-center gap-2 border-r border-line pr-1 pl-3 text-sm",
-                    active ? "bg-canvas text-fg" : "text-subtle hover:text-fg",
+                    active ? "bg-panel-2 text-fg" : "text-subtle hover:text-fg",
                   )}
                 >
                   {active && <span className="absolute inset-x-0 top-0 h-px bg-accent" />}

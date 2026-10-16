@@ -42,7 +42,7 @@ export function Modal({ title, onClose, children, footer, className, bare = fals
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[10vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 p-4 pt-[10vh] backdrop-blur-[2px]"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -53,7 +53,7 @@ export function Modal({ title, onClose, children, footer, className, bare = fals
         aria-modal="true"
         aria-label={typeof title === "string" ? title : undefined}
         className={cn(
-          "flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-md border border-line bg-panel",
+          "flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden glass rounded-md border border-line",
           className,
         )}
       >

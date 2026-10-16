@@ -11,7 +11,7 @@ interface SidebarShellProps {
 
 export function SidebarShell({ title, actions, search, children, footer }: SidebarShellProps) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-panel">
+    <aside className="glass-panel flex w-64 shrink-0 flex-col overflow-hidden bg-panel">
       <header className="flex h-9 shrink-0 items-center justify-between border-b border-line pr-1 pl-3">
         <h2 className="text-xs text-muted">{title}</h2>
         <div className="flex items-center">{actions}</div>

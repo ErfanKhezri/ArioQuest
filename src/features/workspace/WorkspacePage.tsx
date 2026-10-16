@@ -45,7 +45,7 @@ function NoTabs() {
   };
 
   return (
-    <div className="flex flex-1 justify-center overflow-y-auto bg-canvas p-4">
+    <div className="flex flex-1 justify-center overflow-y-auto p-4">
       <div className="mt-[12vh] w-full max-w-md">
         <div className="flex items-center gap-3">
           <Ario />
@@ -102,9 +102,9 @@ function NoTabs() {
 export function WorkspacePage({ sidebarOpen }: { sidebarOpen: boolean }) {
   const tab = useActiveTab();
   return (
-    <div className="flex min-h-0 min-w-0 flex-1">
+    <div className="flex min-h-0 min-w-0 flex-1 gap-2">
       {sidebarOpen && <Sidebar />}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="glass-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-canvas">
         <TabBar />
         {tab ? <RequestPane key={tab.id} tab={tab} /> : <NoTabs />}
       </div>

@@ -25,7 +25,7 @@ export function App() {
 
   if (!hydrated || session === undefined) {
     return (
-      <div className="flex h-full items-center justify-center bg-canvas">
+      <div className="flex h-full items-center justify-center">
         <Ario mood="thinking" size={48} label="Loading ArioQuest" className="text-accent" />
       </div>
     );
@@ -34,16 +34,16 @@ export function App() {
   if (!session) return <LandingPage onSignedIn={setSession} />;
 
   return (
-    <div className="flex h-full flex-col bg-canvas text-fg">
+    <div className="flex h-full flex-col text-fg">
       {isWebDemo && <DemoBanner />}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 gap-2 p-2">
         <NavRail
           session={session}
           onSignOut={() => void signOut().then(() => setSession(null))}
           sidebarOpen={sidebarOpen}
           onSidebarOpenChange={setSidebarOpen}
         />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex min-h-0 flex-1">
             <WorkspacePage sidebarOpen={sidebarOpen} />
           </div>

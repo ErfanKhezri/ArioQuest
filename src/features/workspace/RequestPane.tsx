@@ -20,7 +20,7 @@ export function RequestPane({ tab }: { tab: Tab }) {
       key={layout}
       direction={layout}
       initial={0.5}
-      className="flex-1 bg-canvas"
+      className="flex-1"
       first={editor}
       second={
         <ResponsePanel
