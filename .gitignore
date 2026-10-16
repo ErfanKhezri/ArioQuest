@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Design tooling output (screenshots, direction sheet)
+.taste-skill/

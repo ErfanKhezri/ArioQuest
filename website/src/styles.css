@@ -1,0 +1,66 @@
+@import "tailwindcss";
+/* The app's tokens: colors, radii, interface text sizes and Ario's keyframes. */
+@import "../../src/styles/theme.css";
+@source "../../src/components/ui";
+
+/* Page sizes, on top of the app's interface sizes (2xs–md) used inside the fragments. */
+@theme {
+  --font-sans: "Inter Variable", Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+
+  --text-hero: clamp(44px, 6.4vw, 96px);
+  --text-hero--line-height: 0.98;
+  --text-hero--letter-spacing: -0.035em;
+  --text-title: clamp(32px, 3.6vw, 52px);
+  --text-title--line-height: 1.04;
+  --text-title--letter-spacing: -0.03em;
+  --text-lead: 20px;
+  --text-lead--line-height: 1.5;
+  --text-body: 17px;
+  --text-body--line-height: 1.55;
+  --text-small: 14px;
+  --text-small--line-height: 1.45;
+}
+
+/*
+ * The app's dark accent gives white button text only 3:1. The site's buttons are
+ * larger and carry the main actions, so it uses a deeper step of the same blue.
+ */
+:root:not([data-theme="light"]) {
+  --accent: oklch(0.55 0.16 255);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+  }
+
+  body {
+    @apply text-body bg-canvas font-sans text-fg antialiased;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--accent) 40%, transparent);
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}
+
+/* One page grid: tight margins, wide measure. */
+@utility page {
+  @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8;
+}

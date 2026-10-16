@@ -1,5 +1,6 @@
 import { EnvironmentPicker } from "@/features/workspace/EnvironmentPicker";
 import { cn } from "@/lib/cn";
+import { isWebDemo } from "@/lib/demo";
 import { isTauri } from "@/lib/tauri";
 import { useWorkspace } from "@/store/workspace";
 
@@ -20,7 +21,13 @@ export function StatusBar() {
         }
       >
         <span className={cn("size-1.5 rounded-full", desktop ? "bg-success" : "bg-warning")} />
-        {running > 0 ? `Sending ${running}…` : desktop ? "Ready" : "Browser preview"}
+        {running > 0
+          ? `Sending ${running}…`
+          : desktop
+            ? "Ready"
+            : isWebDemo
+              ? "Web demo"
+              : "Browser preview"}
       </span>
     </footer>
   );

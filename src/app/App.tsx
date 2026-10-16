@@ -6,7 +6,9 @@ import { DialogHost } from "@/features/workspace/dialogs/DialogHost";
 import { WorkspacePage } from "@/features/workspace/WorkspacePage";
 import { useShortcuts } from "@/hooks/useShortcuts";
 import { getSession, signOut, type Session } from "@/lib/auth";
+import { isWebDemo } from "@/lib/demo";
 import { useWorkspace } from "@/store/workspace";
+import { DemoBanner } from "./DemoBanner";
 import { NavRail } from "./NavRail";
 import { StatusBar } from "./StatusBar";
 
@@ -32,18 +34,21 @@ export function App() {
   if (!session) return <LandingPage onSignedIn={setSession} />;
 
   return (
-    <div className="flex h-full bg-canvas text-fg">
-      <NavRail
-        session={session}
-        onSignOut={() => void signOut().then(() => setSession(null))}
-        sidebarOpen={sidebarOpen}
-        onSidebarOpenChange={setSidebarOpen}
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex min-h-0 flex-1">
-          <WorkspacePage sidebarOpen={sidebarOpen} />
+    <div className="flex h-full flex-col bg-canvas text-fg">
+      {isWebDemo && <DemoBanner />}
+      <div className="flex min-h-0 flex-1">
+        <NavRail
+          session={session}
+          onSignOut={() => void signOut().then(() => setSession(null))}
+          sidebarOpen={sidebarOpen}
+          onSidebarOpenChange={setSidebarOpen}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1">
+            <WorkspacePage sidebarOpen={sidebarOpen} />
+          </div>
+          <StatusBar />
         </div>
-        <StatusBar />
       </div>
       <DialogHost />
       <Toaster />

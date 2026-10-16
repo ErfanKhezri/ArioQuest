@@ -1,3 +1,4 @@
+import { isWebDemo } from "./demo";
 import { invokeCommand, isTauri } from "./tauri";
 
 /**
@@ -46,7 +47,10 @@ async function writeSession(session: Session | null): Promise<void> {
   else localStorage.setItem(`arioquest:${SESSION_KEY}`, value);
 }
 
-export const getSession = readSession;
+/** The web demo skips sign-in. */
+const GUEST: Session = { name: "Guest", email: "guest", token: "web-demo" };
+
+export const getSession = () => (isWebDemo ? Promise.resolve(GUEST) : readSession());
 
 /** `email` may also be a username (the default account is just "admin"). */
 export async function signIn(email: string, password: string): Promise<Session> {
