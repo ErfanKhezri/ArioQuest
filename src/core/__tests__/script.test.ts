@@ -104,7 +104,7 @@ describe("assertions", () => {
 });
 
 describe("runScript", () => {
-  it("supports Postman-style and jest-style tests", async () => {
+  it("supports pm-style and jest-style tests", async () => {
     const store = memoryStore();
     const out = await runScript(
       `

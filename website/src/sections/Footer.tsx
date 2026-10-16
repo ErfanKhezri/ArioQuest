@@ -9,7 +9,7 @@ export default function Footer() {
     <footer className="grid gap-2 p-2 sm:grid-cols-2 lg:grid-cols-12">
       <div className={`${tile} lg:col-span-5`}>
         <p className="text-lead max-w-[30ch]">
-          A Postman-style API client for Windows, built with Tauri, React and Rust.
+          An API client for Windows, built with Tauri, React and Rust.
         </p>
         <p className="text-small text-muted">© 2026 ArioQuest</p>
       </div>

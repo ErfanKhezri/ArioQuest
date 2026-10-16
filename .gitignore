@@ -25,3 +25,20 @@ dist-ssr
 
 # Design tooling output (screenshots, direction sheet)
 .taste-skill/
+
+# Secrets: env files, keys, certificates (.env.demo holds no secrets and stays tracked)
+.env
+.env.*
+!.env.demo
+*.pem
+*.key
+*.pfx
+*.p12
+*.keystore
+*.jks
+id_rsa*
+*.tauri-signing*
+.npmrc
+
+# Local Claude Code settings
+.claude/settings.local.json

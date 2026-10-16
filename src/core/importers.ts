@@ -45,12 +45,12 @@ export function importJson(text: string): ImportResult {
   const obj = data as Record<string, unknown>;
 
   if (obj.format === NATIVE_FORMAT) return importNative(obj as unknown as NativeExport);
-  if (isPostmanCollection(obj)) return importPostmanCollection(obj);
+  if (isV2Collection(obj)) return importV2Collection(obj);
   if (Array.isArray(obj.values) && typeof obj.name === "string") {
-    return { collections: [], environments: [importPostmanEnvironment(obj)], protoSets: [] };
+    return { collections: [], environments: [importV2Environment(obj)], protoSets: [] };
   }
   throw new Error(
-    "Unrecognized format. Supported: ArioQuest exports, Postman collections (v2.0/v2.1) and Postman environments.",
+    "Unrecognized format. Supported: ArioQuest exports, v2.0/v2.1 collection files and environment files.",
   );
 }
 
@@ -89,7 +89,7 @@ export function exportNative(
   return JSON.stringify(payload, null, 2);
 }
 
-/* ---------------- Postman ---------------- */
+/* ---------------- Collection format v2.x ---------------- */
 
 type PmKV = {
   key?: string;
@@ -126,12 +126,8 @@ interface PmItem {
   auth?: PmAuth;
 }
 
-const isPostmanCollection = (obj: Record<string, unknown>) => {
-  const info = obj.info as { schema?: string } | undefined;
-  return (
-    Array.isArray(obj.item) && (!!info?.schema?.includes("postman") || typeof info === "object")
-  );
-};
+const isV2Collection = (obj: Record<string, unknown>) =>
+  Array.isArray(obj.item) && typeof obj.info === "object";
 
 const text = (v: unknown) =>
   typeof v === "string" ? v : v === undefined || v === null ? "" : String(v);
@@ -155,7 +151,7 @@ function authParams(auth: PmAuth, type: string): Record<string, string> {
   return {};
 }
 
-function applyPostmanAuth(request: HttpRequest, auth: PmAuth | undefined) {
+function applyV2Auth(request: HttpRequest, auth: PmAuth | undefined) {
   if (!auth?.type) return;
   if (auth.type === "bearer") {
     request.auth.type = "bearer";
@@ -175,7 +171,7 @@ function applyPostmanAuth(request: HttpRequest, auth: PmAuth | undefined) {
   }
 }
 
-function convertPostmanRequest(item: PmItem, inheritedAuth?: PmAuth): ApiRequest {
+function convertV2Request(item: PmItem, inheritedAuth?: PmAuth): ApiRequest {
   const pm: PmRequest =
     typeof item.request === "string" ? { url: item.request } : (item.request ?? {});
   const method = (pm.method ?? "GET").toUpperCase() as HttpMethodName;
@@ -223,7 +219,7 @@ function convertPostmanRequest(item: PmItem, inheritedAuth?: PmAuth): ApiRequest
     };
   }
 
-  applyPostmanAuth(request, pm.auth ?? inheritedAuth);
+  applyV2Auth(request, pm.auth ?? inheritedAuth);
 
   for (const event of item.event ?? []) {
     const exec = event.script?.exec;
@@ -234,27 +230,27 @@ function convertPostmanRequest(item: PmItem, inheritedAuth?: PmAuth): ApiRequest
   return request;
 }
 
-function convertPostmanItems(items: PmItem[], auth?: PmAuth): CollectionItem[] {
+function convertV2Items(items: PmItem[], auth?: PmAuth): CollectionItem[] {
   return items.map((item) =>
     Array.isArray(item.item)
       ? {
           type: "folder",
           id: uid("fld"),
           name: item.name ?? "Folder",
-          items: convertPostmanItems(item.item, item.auth ?? auth),
+          items: convertV2Items(item.item, item.auth ?? auth),
         }
-      : { type: "request", id: uid("item"), request: convertPostmanRequest(item, auth) },
+      : { type: "request", id: uid("item"), request: convertV2Request(item, auth) },
   );
 }
 
-function importPostmanCollection(obj: Record<string, unknown>): ImportResult {
+function importV2Collection(obj: Record<string, unknown>): ImportResult {
   const info = (obj.info ?? {}) as { name?: string; description?: unknown };
   const name = info.name ?? "Imported collection";
   const collection: Collection = {
     id: uid("col"),
     name,
     description: description(info.description),
-    items: convertPostmanItems(obj.item as PmItem[], obj.auth as PmAuth | undefined),
+    items: convertV2Items(obj.item as PmItem[], obj.auth as PmAuth | undefined),
   };
   const variables = pmKvs(obj.variable as PmKV[] | undefined);
   const environments = variables.length
@@ -263,7 +259,7 @@ function importPostmanCollection(obj: Record<string, unknown>): ImportResult {
   return { collections: [collection], environments, protoSets: [] };
 }
 
-function importPostmanEnvironment(obj: Record<string, unknown>): Environment {
+function importV2Environment(obj: Record<string, unknown>): Environment {
   const values = (obj.values as Array<PmKV & { enabled?: boolean }>) ?? [];
   return {
     id: uid("env"),
@@ -272,8 +268,8 @@ function importPostmanEnvironment(obj: Record<string, unknown>): Environment {
   };
 }
 
-/** Exports a collection in Postman v2.1 format (HTTP requests only). */
-export function exportPostman(collection: Collection): string {
+/** Exports a collection in the v2.1 collection format (HTTP requests only). */
+export function exportCollectionV2(collection: Collection): string {
   const kv = (list: KeyValue[]) =>
     list.map((k) => ({ key: k.key, value: k.value, ...(k.enabled ? {} : { disabled: true }) }));
 
@@ -350,7 +346,6 @@ export function exportPostman(collection: Collection): string {
   return JSON.stringify(
     {
       info: {
-        _postman_id: crypto.randomUUID(),
         name: collection.name,
         description: collection.description,
         schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",

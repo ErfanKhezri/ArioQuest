@@ -1,6 +1,6 @@
 /**
  * A small assertion library for user scripts. Supports the common chai
- * style used by Postman (`expect(x).to.equal(1)`, `pm.response.to.have.status(200)`)
+ * style (`expect(x).to.equal(1)`, `pm.response.to.have.status(200)`)
  * as well as jest style (`expect(x).toBe(1)`).
  */
 

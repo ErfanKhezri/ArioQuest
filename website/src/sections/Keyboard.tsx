@@ -96,7 +96,7 @@ export default function Keyboard() {
     if (key === "n") setTabs((t) => [...t.slice(-3), "Untitled request"]);
     if (key === "w") setTabs((t) => t.slice(0, -1));
     if (key === "e") setEnv((i) => (i + 1) % ENVIRONMENTS.length);
-    if (key === "o") notify("Import: Postman collection, environment, cURL or ArioQuest JSON");
+    if (key === "o") notify("Import: collection, environment, cURL or ArioQuest JSON");
   };
 
   // While the section is on screen, the real shortcuts press these keys.

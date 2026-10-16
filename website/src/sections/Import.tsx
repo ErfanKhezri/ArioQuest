@@ -72,8 +72,8 @@ export default function Import() {
           </m.h2>
           <m.p variants={rise} className="max-w-[52ch] lg:col-span-6 lg:pt-2">
             Paste a cURL command into the URL bar and it becomes a request, headers and body
-            included. Postman collections (v2.0, v2.1) and environments import too, and anything
-            exports back to Postman, cURL or <code>fetch</code>.
+            included. Collection files (v2.0, v2.1) and environments import too, and anything
+            exports as a v2.1 collection, cURL or <code>fetch</code>.
           </m.p>
         </div>
 

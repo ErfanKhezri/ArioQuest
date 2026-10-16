@@ -77,8 +77,8 @@ function responseApi(view: ResponseView) {
 }
 
 /**
- * Runs a user script with the `aq` API (also exposed as `pm` so most
- * Postman scripts work unchanged). Scripts may use `await`.
+ * Runs a user script with the `aq` API (also exposed as `pm`, so most
+ * existing `pm` scripts work unchanged). Scripts may use `await`.
  */
 export async function runScript(code: string, ctx: ScriptContext): Promise<ScriptOutput> {
   const tests: TestResult[] = [];
