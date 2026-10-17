@@ -1,0 +1,13 @@
+# Runs update.sh once. ario-api-update.timer starts it every minute.
+# Install: copy to /etc/systemd/system/ together with ario-api-update.timer.
+
+[Unit]
+Description=Install the latest ArioQuest API build
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# erfan owns /opt/ario-api and may run "systemctl restart ario-api" with sudo.
+User=erfan
+ExecStart=/opt/ario-api/update.sh

@@ -36,6 +36,37 @@ go test ./...
 $env:GOOS="linux"; $env:GOARCH="amd64"; go build -o bin/ario-api ./cmd/server
 ```
 
+## Deploy
+
+Merging to `master` deploys automatically:
+
+1. The `Backend` workflow tests and builds, then uploads the binary to the `backend-latest`
+   pre-release on GitHub.
+2. On the server, `ario-api-update.timer` runs `update.sh` every minute. When `version.txt` in
+   that release changes, it downloads the binary, checks its SHA-256, swaps it in and restarts
+   `ario-api`. If the new version does not answer on `/health`, it goes back to the previous one.
+
+The server pulls instead of GitHub pushing because the server's data center blocks SSH from
+outside Iran.
+
+The files in [`deploy/`](deploy/) are the server setup:
+
+| File                      | On the server                                  |
+| ------------------------- | ---------------------------------------------- |
+| `ario-api.service`        | `/etc/systemd/system/` (runs the API)          |
+| `ario-api-update.service` | `/etc/systemd/system/` (runs `update.sh` once) |
+| `ario-api-update.timer`   | `/etc/systemd/system/` (every minute)          |
+| `update.sh`               | `/opt/ario-api/update.sh`                      |
+
+Useful commands on the server:
+
+```sh
+systemctl status ario-api                 # is the API running?
+journalctl -u ario-api -f                 # API logs
+journalctl -u ario-api-update -n 20       # what the updater did
+cat /opt/ario-api/version.txt             # installed commit
+```
+
 ## Endpoints
 
 Request and response bodies are JSON. Errors look like

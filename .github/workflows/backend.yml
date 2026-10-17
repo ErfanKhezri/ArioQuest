@@ -1,13 +1,11 @@
-# Tests the backend, builds the Linux binary, and deploys it to the server.
+# Tests the backend, builds the Linux binary, and publishes it for the server.
 # Runs when anything under backend/ changes. The binary is attached to the run
 # as the "ario-api" artifact (Actions tab -> the run -> Artifacts).
-# Only pushes to master are deployed; other branches and PRs just test and build.
 #
-# Deploy needs these repository secrets (Settings -> Secrets and variables -> Actions):
-#   DEPLOY_HOST         server IP
-#   DEPLOY_USER         SSH user that owns /opt/ario-api and may restart the service
-#   DEPLOY_SSH_KEY      private key whose public key is in that user's authorized_keys
-#   DEPLOY_KNOWN_HOSTS  output of `ssh-keyscan <server IP>`, so we only talk to our server
+# Pushes to master also publish the build to the "backend-latest" pre-release.
+# The server cannot be reached from outside Iran, so GitHub cannot push to it;
+# instead the server checks that release every minute and installs new builds
+# (see backend/deploy/update.sh).
 name: Backend
 
 on:
@@ -55,42 +53,41 @@ jobs:
           path: backend/bin/ario-api
           retention-days: 14
 
-  deploy:
+  publish:
     needs: test-and-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    # Never run two deploys at the same time; a newer push waits for the older one.
+    permissions:
+      contents: write # create and update the release
+    # Never publish two builds at the same time; a newer push waits for the older one.
     concurrency:
-      group: backend-deploy
+      group: backend-publish
       cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: ario-api
 
-      - name: Set up SSH
+      # The server checks version.txt to see whether there is a new build, and
+      # ario-api.sha256 to make sure the download is complete.
+      - name: Prepare files
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
-          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519
+          sha256sum ario-api > ario-api.sha256
+          echo "$GITHUB_SHA" > version.txt
 
-      # Upload under a temporary name, then swap it in with mv. mv replaces the
-      # file in one step, so the running service never sees a half-copied file.
-      - name: Upload
-        run: scp ario-api "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/ario-api/ario-api.new"
-
-      - name: Restart service
+      # A pre-release, so the "latest release" link still points to the Windows app.
+      - name: Create the release if it does not exist
         run: |
-          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" '
-            set -e
-            chmod +x /opt/ario-api/ario-api.new
-            mv -f /opt/ario-api/ario-api.new /opt/ario-api/ario-api
-            sudo systemctl restart ario-api
-          '
+          gh release view backend-latest > /dev/null 2>&1 ||
+            gh release create backend-latest --prerelease --target "$GITHUB_SHA" \
+              --title "Backend (latest build)" \
+              --notes "Latest build of the backend from master. The server installs it automatically."
 
-      # Fail the run if the new version does not answer, so a broken deploy shows up red.
-      - name: Health check
+      # version.txt goes last: the server only sees a new version once its files are there.
+      - name: Upload the build
         run: |
-          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            'curl --fail --silent --show-error --retry 5 --retry-connrefused --retry-delay 1 http://127.0.0.1:8080/health'
+          gh release upload backend-latest ario-api ario-api.sha256 --clobber
+          gh release upload backend-latest version.txt --clobber
