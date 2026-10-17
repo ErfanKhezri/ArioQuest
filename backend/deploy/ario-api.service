@@ -1,0 +1,34 @@
+# systemd service for the ArioQuest API.
+# Install: copy to /etc/systemd/system/ario-api.service, then
+#   sudo systemctl daemon-reload && sudo systemctl enable --now ario-api
+
+[Unit]
+Description=ArioQuest API
+After=network.target
+
+[Service]
+# Runs as its own user with no login and no access to anything else.
+User=ario-api
+Group=ario-api
+ExecStart=/opt/ario-api/ario-api
+
+# Only reachable from the server itself; Caddy forwards outside traffic to it.
+Environment=ARIO_ADDR=127.0.0.1:8080
+Environment=ARIO_DB=/var/lib/ario-api/ario.db
+
+# systemd creates /var/lib/ario-api, owned by the user above, for the database.
+StateDirectory=ario-api
+
+# Start again if it crashes.
+Restart=on-failure
+RestartSec=3
+
+# The service can only write to its StateDirectory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+# Start at boot.
+WantedBy=multi-user.target
