@@ -1,0 +1,6 @@
+# Local database and build output
+*.db
+*.db-shm
+*.db-wal
+/bin/
+*.exe
