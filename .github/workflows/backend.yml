@@ -1,6 +1,13 @@
-# Tests the backend and builds the Linux binary the server runs.
+# Tests the backend, builds the Linux binary, and deploys it to the server.
 # Runs when anything under backend/ changes. The binary is attached to the run
 # as the "ario-api" artifact (Actions tab -> the run -> Artifacts).
+# Only pushes to master are deployed; other branches and PRs just test and build.
+#
+# Deploy needs these repository secrets (Settings -> Secrets and variables -> Actions):
+#   DEPLOY_HOST         server IP
+#   DEPLOY_USER         SSH user that owns /opt/ario-api and may restart the service
+#   DEPLOY_SSH_KEY      private key whose public key is in that user's authorized_keys
+#   DEPLOY_KNOWN_HOSTS  output of `ssh-keyscan <server IP>`, so we only talk to our server
 name: Backend
 
 on:
@@ -47,3 +54,43 @@ jobs:
           name: ario-api
           path: backend/bin/ario-api
           retention-days: 14
+
+  deploy:
+    needs: test-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    # Never run two deploys at the same time; a newer push waits for the older one.
+    concurrency:
+      group: backend-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ario-api
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
+      # Upload under a temporary name, then swap it in with mv. mv replaces the
+      # file in one step, so the running service never sees a half-copied file.
+      - name: Upload
+        run: scp ario-api "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/ario-api/ario-api.new"
+
+      - name: Restart service
+        run: |
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" '
+            set -e
+            chmod +x /opt/ario-api/ario-api.new
+            mv -f /opt/ario-api/ario-api.new /opt/ario-api/ario-api
+            sudo systemctl restart ario-api
+          '
+
+      # Fail the run if the new version does not answer, so a broken deploy shows up red.
+      - name: Health check
+        run: |
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'curl --fail --silent --show-error --retry 5 --retry-connrefused --retry-delay 1 http://127.0.0.1:8080/health'
