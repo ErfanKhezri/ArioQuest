@@ -1,0 +1,13 @@
+# Checks for a new ArioQuest API build every minute.
+# Install: copy to /etc/systemd/system/, then
+#   sudo systemctl daemon-reload && sudo systemctl enable --now ario-api-update.timer
+
+[Unit]
+Description=Check for a new ArioQuest API build every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
