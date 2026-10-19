@@ -126,14 +126,17 @@ func (response testResponse) expectStatus(want int) {
 	}
 }
 
-// expectError checks the status, and which form field the error belongs to
-// ("" for an error that belongs to no field).
-func (response testResponse) expectError(wantStatus int, wantField string) {
+// expectError checks the status, the error code, and which form field the
+// error belongs to ("" for an error that belongs to no field).
+func (response testResponse) expectError(wantStatus int, wantCode string, wantField string) {
 	response.t.Helper()
 	response.expectStatus(wantStatus)
 
 	var errorBody httpx.ErrorBody
 	response.decodeInto(&errorBody)
+	if errorBody.Code != wantCode {
+		response.t.Fatalf("error code = %q, want %q (error: %q)", errorBody.Code, wantCode, errorBody.Error)
+	}
 	if errorBody.Field != wantField {
 		response.t.Fatalf("error field = %q, want %q (error: %q)", errorBody.Field, wantField, errorBody.Error)
 	}

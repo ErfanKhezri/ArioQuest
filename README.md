@@ -29,7 +29,9 @@ whole collections, and let Ario, the app's mascot, tell you how each response we
 Download `ArioQuest_<version>_x64-setup.exe` (or the `.msi`) from the
 [latest release](https://github.com/ErfanKhezri/ArioQuest/releases/latest) and run it.
 
-Sign in with **admin / admin**. Sign-in is a local mock until the real backend exists.
+Create an account on the sign-in screen. Accounts live on the backend at
+[api.arioquest.ir](https://api.arioquest.ir/health) (see [backend/](backend/)). To use a backend
+running on your machine, put `VITE_API_URL=http://localhost:8080` in `.env.local`.
 
 ## Development
 

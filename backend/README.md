@@ -70,8 +70,21 @@ cat /opt/ario-api/version.txt             # installed commit
 ## Endpoints
 
 Request and response bodies are JSON. Errors look like
-`{"error": "Wrong email or password.", "field": "password"}`; `field` is present when the error
-belongs to one form field (`name`, `email` or `password`).
+`{"code": "invalid_credentials", "error": "Wrong email or password.", "field": "password"}`.
+`code` is a fixed name the app translates into the user's language; `error` is the English
+message; `field` is present when the error belongs to one form field (`name`, `email` or
+`password`).
+
+| Code                                      | Status   | When                              |
+| ----------------------------------------- | -------- | --------------------------------- |
+| `name_required`, `name_too_long`          | 400      | sign-up                           |
+| `email_invalid`                           | 400      | sign-up                           |
+| `password_too_short`, `password_too_long` | 400      | sign-up                           |
+| `email_taken`                             | 409      | sign-up                           |
+| `invalid_credentials`                     | 401      | sign-in                           |
+| `unauthenticated`                         | 401      | missing, unknown or expired token |
+| `invalid_json`, `body_too_large`          | 400, 413 | any request                       |
+| `internal`                                | 500      | anything unexpected (logged)      |
 
 | Method | Path             | Body                      | Success                    |
 | ------ | ---------------- | ------------------------- | -------------------------- |

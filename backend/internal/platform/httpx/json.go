@@ -8,9 +8,14 @@ import (
 	"net/http"
 )
 
-// ErrorBody is the body of every error response. Field names the form field
-// the app shows the message under ("name", "email" or "password").
+// ErrorBody is the body of every error response.
+//
+// Code is a fixed name for the error (like "email_taken") that the app uses to
+// show the message in the user's language; Error is the same message in English.
+// Field names the form field the app shows the message under ("name", "email"
+// or "password").
 type ErrorBody struct {
+	Code  string `json:"code"`
 	Error string `json:"error"`
 	Field string `json:"field,omitempty"`
 }
@@ -26,14 +31,14 @@ func WriteJSON(w http.ResponseWriter, status int, body any) {
 	}
 }
 
-func WriteError(w http.ResponseWriter, status int, message string, field string) {
-	WriteJSON(w, status, ErrorBody{Error: message, Field: field})
+func WriteError(w http.ResponseWriter, status int, code string, message string, field string) {
+	WriteJSON(w, status, ErrorBody{Code: code, Error: message, Field: field})
 }
 
 // WriteInternalError logs err and sends a generic 500, so internals never reach the client.
 func WriteInternalError(w http.ResponseWriter, err error) {
 	slog.Error("internal error", "err", err)
-	WriteError(w, http.StatusInternalServerError, "Something went wrong. Try again.", "")
+	WriteError(w, http.StatusInternalServerError, "internal", "Something went wrong. Try again.", "")
 }
 
 const maxBodySize = 1 << 20 // 1 MB
@@ -50,9 +55,9 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, destination any) bool {
 
 	var tooLargeError *http.MaxBytesError
 	if errors.As(err, &tooLargeError) {
-		WriteError(w, http.StatusRequestEntityTooLarge, "Request body is too large.", "")
+		WriteError(w, http.StatusRequestEntityTooLarge, "body_too_large", "Request body is too large.", "")
 	} else {
-		WriteError(w, http.StatusBadRequest, "Request body must be valid JSON.", "")
+		WriteError(w, http.StatusBadRequest, "invalid_json", "Request body must be valid JSON.", "")
 	}
 	return false
 }

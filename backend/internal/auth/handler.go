@@ -118,22 +118,25 @@ func newSessionResponse(session Session) sessionResponse {
 func writeError(w http.ResponseWriter, err error) {
 	var fieldError *FieldError
 	if errors.As(err, &fieldError) {
-		httpx.WriteError(w, http.StatusBadRequest, fieldError.Message, fieldError.Field)
+		httpx.WriteError(w, http.StatusBadRequest, fieldError.Code, fieldError.Message, fieldError.Field)
 		return
 	}
 
 	if errors.Is(err, ErrEmailTaken) {
-		httpx.WriteError(w, http.StatusConflict, "An account with this email already exists.", "email")
+		httpx.WriteError(w, http.StatusConflict, "email_taken",
+			"An account with this email already exists.", "email")
 		return
 	}
 
 	if errors.Is(err, ErrInvalidCredentials) {
-		httpx.WriteError(w, http.StatusUnauthorized, "Wrong email or password.", "password")
+		httpx.WriteError(w, http.StatusUnauthorized, "invalid_credentials",
+			"Wrong email or password.", "password")
 		return
 	}
 
 	if errors.Is(err, ErrUnauthenticated) {
-		httpx.WriteError(w, http.StatusUnauthorized, "Sign in to continue.", "")
+		httpx.WriteError(w, http.StatusUnauthorized, "unauthenticated",
+			"Sign in to continue.", "")
 		return
 	}
 

@@ -30,7 +30,7 @@ func TestSignUpDuplicateEmail(t *testing.T) {
 
 	response := client.signUp("A", "A@B.CO", "secret123")
 
-	response.expectError(http.StatusConflict, "email")
+	response.expectError(http.StatusConflict, "email_taken", "email")
 }
 
 func TestSignUpInvalidInput(t *testing.T) {
@@ -38,7 +38,7 @@ func TestSignUpInvalidInput(t *testing.T) {
 
 	response := client.signUp("A", "a@b.co", "short")
 
-	response.expectError(http.StatusBadRequest, "password")
+	response.expectError(http.StatusBadRequest, "password_too_short", "password")
 }
 
 func TestSignUpInvalidJSON(t *testing.T) {
@@ -47,7 +47,7 @@ func TestSignUpInvalidJSON(t *testing.T) {
 	// A JSON string where a JSON object is expected.
 	response := client.send(http.MethodPost, "/auth/sign-up", "", "not an object")
 
-	response.expectError(http.StatusBadRequest, "")
+	response.expectError(http.StatusBadRequest, "invalid_json", "")
 }
 
 func TestSignInWithCorrectPassword(t *testing.T) {
@@ -65,7 +65,7 @@ func TestSignInWithWrongPasswordReturns401(t *testing.T) {
 
 	response := client.signIn("a@b.co", "wrong-password")
 
-	response.expectError(http.StatusUnauthorized, "password")
+	response.expectError(http.StatusUnauthorized, "invalid_credentials", "password")
 }
 
 func TestMeReturnsSignedInUser(t *testing.T) {
@@ -87,7 +87,7 @@ func TestMeWithoutTokenReturns401(t *testing.T) {
 
 	response := client.me("")
 
-	response.expectError(http.StatusUnauthorized, "")
+	response.expectError(http.StatusUnauthorized, "unauthenticated", "")
 }
 
 func TestMeWithUnknownTokenReturns401(t *testing.T) {
@@ -95,7 +95,7 @@ func TestMeWithUnknownTokenReturns401(t *testing.T) {
 
 	response := client.me("made-up-token")
 
-	response.expectError(http.StatusUnauthorized, "")
+	response.expectError(http.StatusUnauthorized, "unauthenticated", "")
 }
 
 func TestSignOutEndsSessionOverHTTP(t *testing.T) {
@@ -104,5 +104,5 @@ func TestSignOutEndsSessionOverHTTP(t *testing.T) {
 
 	client.signOut(session.Token).expectStatus(http.StatusNoContent)
 
-	client.me(session.Token).expectError(http.StatusUnauthorized, "")
+	client.me(session.Token).expectError(http.StatusUnauthorized, "unauthenticated", "")
 }
