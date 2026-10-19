@@ -3,9 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-// GitHub Pages serves the site under /<repo>/; the workflow sets SITE_BASE for that.
 export default defineConfig({
-  base: process.env.SITE_BASE ?? "/",
   plugins: [react(), tailwindcss()],
   // `pnpm dev` runs this next to the demo's dev server; separate dependency
   // caches stop one server from overwriting the other's pre-bundled modules.

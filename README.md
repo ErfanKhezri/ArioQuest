@@ -3,8 +3,8 @@
 An API client for Windows. Send HTTP and gRPC requests, test them with scripts, run
 whole collections, and let Ario, the app's mascot, tell you how each response went.
 
-**[Website](https://erfankhezri.github.io/ArioQuest/)** ·
-**[Try it in your browser](https://erfankhezri.github.io/ArioQuest/app/)** ·
+**[Website](https://arioquest.ir)** ·
+**[Try it in your browser](https://arioquest.ir/app/)** ·
 **[Download for Windows](https://github.com/ErfanKhezri/ArioQuest/releases/latest)**
 
 ## Features
@@ -83,5 +83,8 @@ A new Rust command is registered by its module path in `src-tauri/src/lib.rs`
 
 - **Release**: Actions → **Release** → Run workflow with a version like `0.2.0`, or push a tag
   (`git tag v0.2.0 && git push origin v0.2.0`). The installers are attached to the release.
-- **Website**: every push to `master` deploys it to GitHub Pages. One-time setup: Settings →
-  Pages → Source: **GitHub Actions**.
+- **Website**: every push to `master` builds it and publishes it to the `website-latest`
+  pre-release; the server installs new builds within a minute and serves them at
+  [arioquest.ir](https://arioquest.ir). See `website/deploy/` and `deploy/Caddyfile`.
+- **Backend**: merging changes under `backend/` deploys the same way to
+  [api.arioquest.ir](https://api.arioquest.ir/health). See [backend/README.md](backend/README.md).

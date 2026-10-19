@@ -1,9 +1,6 @@
-# Builds the website (landing page + the web demo at /app) and publishes it to GitHub Pages.
-# One-time setup: Settings → Pages → Source: "GitHub Actions".
-#
-# It also publishes a build for https://arioquest.ir to the "website-latest" pre-release;
-# the server checks that release every minute and installs new builds
-# (see website/deploy/update.sh).
+# Builds the website (landing page + the web demo at /app) for https://arioquest.ir and
+# publishes it to the "website-latest" pre-release. The server checks that release every
+# minute and installs new builds (see website/deploy/update.sh).
 name: Website
 
 on:
@@ -12,55 +9,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write # create and update the release
 
+# Never publish two builds at the same time; a newer push replaces the older one.
 concurrency:
-  group: pages
+  group: website-publish
   cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      # Pages serves the site under /<repo>/, so both builds need that base path.
-      - run: pnpm site:build
-        env:
-          SITE_BASE: /${{ github.event.repository.name }}/
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: website/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-  # A second build for our own server, which serves the site at the domain root ("/").
-  publish-for-server:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # create and update the release
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
