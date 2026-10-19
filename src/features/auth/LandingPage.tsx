@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
-import { moodLabel, moodTextClass } from "@/components/ui/arioMood";
+import { moodTextClass } from "@/components/ui/arioMood";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { LanguageSwitch } from "@/components/ui/LanguageSwitch";
+import { t } from "@/i18n";
 import type { Session } from "@/lib/auth";
 import { LiveDemo } from "./LiveDemo";
 import { LoginCard, type FieldName } from "./LoginCard";
 
-const features: Array<{ icon: IconName; text: string }> = [
-  { icon: "layers", text: "HTTP & gRPC" },
-  { icon: "beaker", text: "No-code tests & JavaScript test scripts" },
-  { icon: "folder", text: "Collections & environments" },
+const features: Array<{ icon: IconName; id: "protocols" | "tests" | "collections" }> = [
+  { icon: "layers", id: "protocols" },
+  { icon: "beaker", id: "tests" },
+  { icon: "folder", id: "collections" },
 ];
 
 type Phase = "idle" | "submitting" | "error" | "success";
@@ -21,19 +24,20 @@ function reaction(
   passwordVisible: boolean,
   name: string,
 ): { mood: ArioMood; line: string } {
-  if (phase === "success") return { mood: "happy", line: `Let's go${name ? `, ${name}` : ""}!` };
-  if (phase === "submitting") return { mood: "thinking", line: "Checking…" };
-  if (phase === "error")
-    return { mood: "sad", line: "Hmm, that didn't work. Mind checking the form?" };
+  if (phase === "success") {
+    const line = name ? t("landing.ario.successNamed", { name }) : t("landing.ario.success");
+    return { mood: "happy", line };
+  }
+  if (phase === "submitting") return { mood: "thinking", line: t("landing.ario.submitting") };
+  if (phase === "error") return { mood: "sad", line: t("landing.ario.error") };
   if (field === "password") {
     return passwordVisible
-      ? { mood: "curious", line: "Oops, I can see it now…" }
-      : { mood: "shy", line: "Don't worry, I'm not looking!" };
+      ? { mood: "curious", line: t("landing.ario.peeking") }
+      : { mood: "shy", line: t("landing.ario.notLooking") };
   }
-  if (field === "name")
-    return { mood: "curious", line: "Nice to meet you! What should I call you?" };
-  if (field === "email") return { mood: "curious", line: "Which email should we use?" };
-  return { mood: "idle", line: "Hi, I'm Ario — your API sidekick." };
+  if (field === "name") return { mood: "curious", line: t("landing.ario.name") };
+  if (field === "email") return { mood: "curious", line: t("landing.ario.email") };
+  return { mood: "idle", line: t("landing.ario.idle") };
 }
 
 function SpeechBubble({ children }: { children: string }) {
@@ -43,7 +47,7 @@ function SpeechBubble({ children }: { children: string }) {
       className="relative max-w-56 rounded-md border border-line bg-panel px-3 py-2 text-sm text-muted"
     >
       {/* tail pointing at Ario */}
-      <span className="absolute top-1/2 -left-1.5 size-3 -translate-y-1/2 rotate-45 border-b border-l border-line bg-panel" />
+      <span className="absolute -start-1.5 top-1/2 size-3 -translate-y-1/2 rotate-45 border-b border-l border-line bg-panel rtl:-scale-x-100" />
       <span className="relative">{children}</span>
     </p>
   );
@@ -51,6 +55,7 @@ function SpeechBubble({ children }: { children: string }) {
 
 /** Pre-login screen: Ario and a live demo on the left, the sign-in card on the right. */
 export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => void }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("idle");
   // The email field is autofocused, so Ario starts out looking at it.
   const [field, setField] = useState<FieldName | null>("email");
@@ -67,7 +72,7 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
       mood={mood}
       size={size}
       animate={animate}
-      label={`Ario is ${moodLabel[mood]}`}
+      label={t("ario.is", { mood: t(`ario.moods.${mood}`) })}
       className={phase === "error" ? moodTextClass.error : "text-accent"}
     />
   );
@@ -111,9 +116,7 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
             <Ario size={48} className="text-accent" />
             ArioQuest
           </h1>
-          <p className="mt-2 text-md text-muted">
-            Send, test and chain HTTP &amp; gRPC requests — fast.
-          </p>
+          <p className="mt-2 text-md text-muted">{t("landing.tagline")}</p>
         </div>
         <div className="flex items-center gap-4">
           {ario(128)}
@@ -122,15 +125,16 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
         <LiveDemo />
         <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted">
           {features.map((f) => (
-            <li key={f.text} className="flex items-center gap-2">
+            <li key={f.id} className="flex items-center gap-2">
               <Icon name={f.icon} size={14} className="text-subtle" />
-              {f.text}
+              {t(`landing.features.${f.id}`)}
             </li>
           ))}
         </ul>
       </section>
 
       <section className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
+        <LanguageSwitch className="absolute end-4 top-4" />
         {/* Narrow windows: Ario and the name stand in for the hero. */}
         <div className="flex flex-col items-center gap-2 text-center min-[900px]:hidden">
           {ario(64)}
@@ -142,9 +146,7 @@ export function LandingPage({ onSignedIn }: { onSignedIn: (session: Session) => 
           style={{ animationDelay: "120ms" }}
         >
           <LoginCard {...cardEvents} />
-          <p className="mt-4 text-center text-xs text-subtle">
-            Your requests and collections stay on this device.
-          </p>
+          <p className="mt-4 text-center text-xs text-subtle">{t("landing.localOnly")}</p>
         </div>
       </section>
     </div>

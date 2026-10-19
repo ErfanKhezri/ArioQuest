@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { EmptyState, IconButton } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Menu, type MenuItem } from "@/components/ui/Menu";
@@ -15,7 +16,7 @@ import { useWorkspace } from "@/store/workspace";
 import { RenameInput, SidebarShell } from "./SidebarShell";
 
 const rowClass =
-  "group flex h-8 w-full cursor-pointer items-center gap-2 rounded-md pr-1 text-left text-sm hover:bg-panel-2";
+  "group flex h-8 w-full cursor-pointer items-center gap-2 rounded-md pe-1 text-start text-sm hover:bg-panel-2";
 
 /** Returns items matching the filter, keeping folders that contain matches. */
 function filterItems(items: CollectionItem[], needle: string): CollectionItem[] {
@@ -33,6 +34,7 @@ function filterItems(items: CollectionItem[], needle: string): CollectionItem[] 
 }
 
 export function CollectionsPanel() {
+  const { t } = useTranslation();
   const collections = useWorkspace((s) => s.collections);
   const createCollection = useWorkspace((s) => s.createCollection);
   const openDialog = useWorkspace((s) => s.openDialog);
@@ -50,42 +52,46 @@ export function CollectionsPanel() {
     });
 
   const newCollection = () => {
-    const id = createCollection("New collection");
+    const id = createCollection(t("defaults.newCollection"));
     setRenaming(id);
   };
 
   return (
     <SidebarShell
-      title="Collections"
+      title={t("collections.title")}
       actions={
         <>
-          <IconButton icon="import" label="Import" onClick={() => openDialog({ type: "import" })} />
-          <IconButton icon="plus" label="New collection" onClick={newCollection} />
+          <IconButton
+            icon="import"
+            label={t("actions.import")}
+            onClick={() => openDialog({ type: "import" })}
+          />
+          <IconButton icon="plus" label={t("collections.newCollection")} onClick={newCollection} />
         </>
       }
       search={
         collections.length
-          ? { value: query, onChange: setQuery, placeholder: "Filter requests" }
+          ? { value: query, onChange: setQuery, placeholder: t("collections.filter") }
           : undefined
       }
     >
       {collections.length === 0 ? (
-        <EmptyState title="No collections yet">
-          Group requests into collections to save them, run them together and export them.
+        <EmptyState title={t("collections.emptyTitle")}>
+          {t("collections.emptyBody")}
           <div className="mt-3 flex justify-center gap-3">
             <button
               type="button"
               onClick={newCollection}
               className="font-medium text-accent hover:underline"
             >
-              Create collection
+              {t("collections.create")}
             </button>
             <button
               type="button"
               onClick={() => openDialog({ type: "import" })}
               className="font-medium text-accent hover:underline"
             >
-              Import
+              {t("actions.import")}
             </button>
           </div>
         </EmptyState>
@@ -126,6 +132,7 @@ function CollectionNode({
   open,
   ...shared
 }: NodeProps & { collection: Collection; items: CollectionItem[]; open: boolean }) {
+  const { t } = useTranslation();
   const store = useWorkspace.getState;
   const { toggle, renaming, setRenaming } = shared;
 
@@ -137,56 +144,60 @@ function CollectionNode({
     const suffix = format === "native" ? "arioquest" : "collection_v2.1";
     try {
       if (await saveTextFile(`${safeFileName(collection.name)}.${suffix}.json`, contents))
-        notify.success("Collection exported.");
+        notify.success(t("collections.exported"));
     } catch (err) {
-      notify.error(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
+      notify.error(
+        t("collections.exportFailed", { error: err instanceof Error ? err.message : String(err) }),
+      );
     }
   };
 
   const menu: MenuItem[] = [
     {
-      label: "Add HTTP request",
+      label: t("collections.addHttp"),
       icon: "globe",
       onSelect: () => store().addRequestTo(collection.id, null, newHttpRequest()),
     },
     {
-      label: "Add gRPC request",
+      label: t("collections.addGrpc"),
       icon: "server",
       onSelect: () => store().addRequestTo(collection.id, null, newGrpcRequest()),
     },
     {
-      label: "Add folder",
+      label: t("collections.addFolder"),
       icon: "folderPlus",
-      onSelect: () => setRenaming(store().addFolder(collection.id, null, "New folder")),
+      onSelect: () => setRenaming(store().addFolder(collection.id, null, t("defaults.newFolder"))),
     },
     {
-      label: "Run collection",
+      label: t("collections.run"),
       icon: "play",
       separatorBefore: true,
       onSelect: () => store().openDialog({ type: "runner", collectionId: collection.id }),
     },
     {
-      label: "Rename",
+      label: t("actions.rename"),
       icon: "edit",
       separatorBefore: true,
       onSelect: () => setRenaming(collection.id),
     },
     {
-      label: "Duplicate",
+      label: t("actions.duplicate"),
       icon: "copy",
       onSelect: () => store().duplicateCollection(collection.id),
     },
-    { label: "Export (ArioQuest)", icon: "download", onSelect: () => void exportAs("native") },
-    { label: "Export (Collection v2.1)", icon: "download", onSelect: () => void exportAs("v2") },
     {
-      label: "Delete",
+      label: t("collections.exportNative"),
+      icon: "download",
+      onSelect: () => void exportAs("native"),
+    },
+    { label: t("collections.exportV2"), icon: "download", onSelect: () => void exportAs("v2") },
+    {
+      label: t("actions.delete"),
       icon: "trash",
       danger: true,
       separatorBefore: true,
       onSelect: async () => {
-        if (
-          await confirmAction(`Delete the collection "${collection.name}" and all its requests?`)
-        ) {
+        if (await confirmAction(t("collections.deleteConfirm", { name: collection.name }))) {
           store().deleteCollection(collection.id);
         }
       },
@@ -195,7 +206,7 @@ function CollectionNode({
 
   return (
     <li>
-      <div className={cn(rowClass, "pl-1 font-medium")} onClick={() => toggle(collection.id)}>
+      <div className={cn(rowClass, "ps-1 font-medium")} onClick={() => toggle(collection.id)}>
         <Icon
           name={open ? "chevronDown" : "chevronRight"}
           size={13}
@@ -218,7 +229,7 @@ function CollectionNode({
         </span>
         <IconButton
           icon="play"
-          label="Run collection"
+          label={t("collections.run")}
           size={12}
           className="hidden size-6 group-hover:inline-flex"
           onClick={(e) => {
@@ -228,28 +239,32 @@ function CollectionNode({
         />
         <Menu
           items={menu}
-          trigger={({ toggle: t }) => (
+          trigger={({ toggle: toggleMenu }) => (
             <IconButton
               icon="dots"
-              label="Collection actions"
+              label={t("collections.actions")}
               size={14}
               className="hidden size-6 group-hover:inline-flex"
-              onClick={t}
+              onClick={toggleMenu}
             />
           )}
         />
       </div>
       {open && <ItemList collectionId={collection.id} items={items} depth={1} {...shared} />}
       {open && items.length === 0 && (
-        <p className="py-2 pl-9 text-xs text-subtle">
-          Empty —{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={() => store().addRequestTo(collection.id, null, newHttpRequest())}
-          >
-            add a request
-          </button>
+        <p className="py-2 ps-9 text-xs text-subtle">
+          <Trans
+            i18nKey="collections.empty"
+            components={{
+              add: (
+                <button
+                  type="button"
+                  className="text-accent hover:underline"
+                  onClick={() => store().addRequestTo(collection.id, null, newHttpRequest())}
+                />
+              ),
+            }}
+          />
         </p>
       )}
     </li>
@@ -277,58 +292,60 @@ function ItemNode({
   depth,
   ...shared
 }: NodeProps & { collectionId: string; item: CollectionItem; depth: number }) {
+  const { t } = useTranslation();
   const store = useWorkspace.getState;
   const activeItemId = useWorkspace(
     (s) => s.tabs.find((t) => t.id === s.activeTabId)?.origin?.itemId,
   );
   const { collapsed, toggle, renaming, setRenaming } = shared;
-  const indent = { paddingLeft: `${depth * 14 + 4}px` };
+  const indent = { paddingInlineStart: `${depth * 14 + 4}px` };
 
   const remove = async () => {
-    const what =
+    const question =
       item.type === "folder"
-        ? `the folder "${item.name}" and its contents`
-        : `"${item.request.name}"`;
-    if (await confirmAction(`Delete ${what}?`)) store().deleteItem(collectionId, item.id);
+        ? t("collections.deleteFolderConfirm", { name: item.name })
+        : t("collections.deleteRequestConfirm", { name: item.request.name });
+    if (await confirmAction(question)) store().deleteItem(collectionId, item.id);
   };
 
   if (item.type === "folder") {
     const open = !collapsed.has(item.id);
     const menu: MenuItem[] = [
       {
-        label: "Add HTTP request",
+        label: t("collections.addHttp"),
         icon: "globe",
         onSelect: () => store().addRequestTo(collectionId, item.id, newHttpRequest()),
       },
       {
-        label: "Add gRPC request",
+        label: t("collections.addGrpc"),
         icon: "server",
         onSelect: () => store().addRequestTo(collectionId, item.id, newGrpcRequest()),
       },
       {
-        label: "Add folder",
+        label: t("collections.addFolder"),
         icon: "folderPlus",
-        onSelect: () => setRenaming(store().addFolder(collectionId, item.id, "New folder")),
+        onSelect: () =>
+          setRenaming(store().addFolder(collectionId, item.id, t("defaults.newFolder"))),
       },
       {
-        label: "Run folder",
+        label: t("collections.runFolder"),
         icon: "play",
         separatorBefore: true,
         onSelect: () => store().openDialog({ type: "runner", collectionId, folderId: item.id }),
       },
       {
-        label: "Rename",
+        label: t("actions.rename"),
         icon: "edit",
         separatorBefore: true,
         onSelect: () => setRenaming(item.id),
       },
       {
-        label: "Duplicate",
+        label: t("actions.duplicate"),
         icon: "copy",
         onSelect: () => store().duplicateItem(collectionId, item.id),
       },
       {
-        label: "Delete",
+        label: t("actions.delete"),
         icon: "trash",
         danger: true,
         separatorBefore: true,
@@ -357,13 +374,13 @@ function ItemNode({
           )}
           <Menu
             items={menu}
-            trigger={({ toggle: t }) => (
+            trigger={({ toggle: toggleMenu }) => (
               <IconButton
                 icon="dots"
-                label="Folder actions"
+                label={t("collections.folderActions")}
                 size={14}
                 className="hidden size-6 group-hover:inline-flex"
-                onClick={t}
+                onClick={toggleMenu}
               />
             )}
           />
@@ -378,18 +395,18 @@ function ItemNode({
   const r = item.request;
   const menu: MenuItem[] = [
     {
-      label: "Open",
+      label: t("actions.open"),
       icon: "arrowRight",
       onSelect: () => store().openCollectionRequest(collectionId, item.id),
     },
-    { label: "Rename", icon: "edit", onSelect: () => setRenaming(item.id) },
+    { label: t("actions.rename"), icon: "edit", onSelect: () => setRenaming(item.id) },
     {
-      label: "Duplicate",
+      label: t("actions.duplicate"),
       icon: "copy",
       onSelect: () => store().duplicateItem(collectionId, item.id),
     },
     {
-      label: "Delete",
+      label: t("actions.delete"),
       icon: "trash",
       danger: true,
       separatorBefore: true,
@@ -419,13 +436,13 @@ function ItemNode({
         )}
         <Menu
           items={menu}
-          trigger={({ toggle: t }) => (
+          trigger={({ toggle: toggleMenu }) => (
             <IconButton
               icon="dots"
-              label="Request actions"
+              label={t("collections.requestActions")}
               size={14}
               className="hidden size-6 group-hover:inline-flex"
-              onClick={t}
+              onClick={toggleMenu}
             />
           )}
         />

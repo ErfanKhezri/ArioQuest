@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { getPath, stringifyValue } from "./jsonPath";
 import type { ResponseView } from "./response";
 import type {
@@ -8,53 +9,41 @@ import type {
   TestResult,
 } from "./types";
 
-export const assertionSources: Array<{ value: AssertionSource; label: string }> = [
-  { value: "status", label: "Status code" },
-  { value: "grpcStatus", label: "gRPC status" },
-  { value: "header", label: "Header" },
-  { value: "jsonPath", label: "JSON body path" },
-  { value: "body", label: "Body text" },
-  { value: "responseTime", label: "Response time (ms)" },
+export const assertionSources: AssertionSource[] = [
+  "status",
+  "grpcStatus",
+  "header",
+  "jsonPath",
+  "body",
+  "responseTime",
 ];
 
-export const assertionOperators: Array<{ value: AssertionOperator; label: string }> = [
-  { value: "equals", label: "equals" },
-  { value: "notEquals", label: "does not equal" },
-  { value: "contains", label: "contains" },
-  { value: "notContains", label: "does not contain" },
-  { value: "exists", label: "exists" },
-  { value: "notExists", label: "does not exist" },
-  { value: "lessThan", label: "is less than" },
-  { value: "greaterThan", label: "is greater than" },
-  { value: "matches", label: "matches regex" },
+export const assertionOperators: AssertionOperator[] = [
+  "equals",
+  "notEquals",
+  "contains",
+  "notContains",
+  "exists",
+  "notExists",
+  "lessThan",
+  "greaterThan",
+  "matches",
 ];
+
+export const sourceLabel = (source: AssertionSource) => t(`assertions.sources.${source}`);
+export const operatorLabel = (op: AssertionOperator) => t(`assertions.operators.${op}`);
 
 export const operatorNeedsValue = (op: AssertionOperator) => op !== "exists" && op !== "notExists";
 export const sourceNeedsProperty = (source: AssertionSource) =>
   source === "header" || source === "jsonPath";
 
-const sourceLabel = (a: Assertion) => {
-  switch (a.source) {
-    case "status":
-      return "Status code";
-    case "grpcStatus":
-      return "gRPC status";
-    case "header":
-      return `Header "${a.property}"`;
-    case "jsonPath":
-      return `Body ${a.property || "$"}`;
-    case "body":
-      return "Body";
-    case "responseTime":
-      return "Response time";
-  }
-};
+/** What an assertion checks, e.g. `Header "content-type"`. */
+const subject = (a: Assertion) =>
+  t(`assertions.subject.${a.source}`, { name: a.property, path: a.property || "$" });
 
 export function describeAssertion(a: Assertion, expected = a.expected): string {
-  const op = assertionOperators.find((o) => o.value === a.operator)?.label ?? a.operator;
-  return operatorNeedsValue(a.operator)
-    ? `${sourceLabel(a)} ${op} ${expected}`
-    : `${sourceLabel(a)} ${op}`;
+  const op = operatorLabel(a.operator);
+  return operatorNeedsValue(a.operator) ? `${subject(a)} ${op} ${expected}` : `${subject(a)} ${op}`;
 }
 
 function actualValue(a: Assertion, response: ResponseView): unknown {
@@ -74,7 +63,7 @@ function actualValue(a: Assertion, response: ResponseView): unknown {
       try {
         json = response.json();
       } catch {
-        throw new Error("Response body is not valid JSON");
+        throw new Error(t("assertions.notJson"));
       }
       return getPath(json, a.property || "$");
     }
@@ -108,7 +97,11 @@ export function evaluateAssertion(
     const passed = compare(a.operator, actual, expected);
     return passed
       ? { name, passed }
-      : { name, passed, message: `Actual value: ${truncate(stringifyValue(actual))}` };
+      : {
+          name,
+          passed,
+          message: t("assertions.actualValue", { value: truncate(stringifyValue(actual)) }),
+        };
   } catch (err) {
     return { name, passed: false, message: err instanceof Error ? err.message : String(err) };
   }
@@ -156,10 +149,12 @@ export function runExtractions(list: Extraction[], response: ResponseView): Extr
         else if (e.source === "header") value = response.headers[e.path.trim().toLowerCase()];
         else value = getPath(response.json(), e.path || "$");
 
-        if (value === undefined) return { variable, error: `Nothing found at "${e.path}"` };
+        if (value === undefined) {
+          return { variable, error: t("assertions.nothingFound", { path: e.path }) };
+        }
         return { variable, value: stringifyValue(value) };
       } catch {
-        return { variable, error: "Response body is not valid JSON" };
+        return { variable, error: t("assertions.notJson") };
       }
     });
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { VariableInput } from "@/components/editor/VariableInput";
 import { Ario } from "@/components/ui/Ario";
@@ -10,6 +11,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { schemaKey, schemaSourceFor, streamingLabel } from "@/core/grpc";
 import type { GrpcMethodInfo, GrpcRequest } from "@/core/types";
 import { interpolate } from "@/core/variables";
+import { inEveryLanguage } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { isTauri } from "@/lib/tauri";
 import { isWebDemo, RELEASES_URL } from "@/lib/demo";
@@ -32,15 +34,13 @@ function exampleMessage(method: GrpcMethodInfo) {
 
 /** Shown in the web demo: browsers can't open the HTTP/2 connections gRPC needs. */
 function GrpcInDesktopApp() {
+  const { t } = useTranslation();
   return (
     <div className="mx-2 mb-2 flex items-center gap-3 rounded-md bg-panel-2 px-3 py-3 text-sm">
       <Ario mood="shy" size={36} className="text-info" />
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-fg">gRPC lives in the desktop app</p>
-        <p className="text-muted">
-          Browsers can&apos;t open raw HTTP/2 connections, so I can&apos;t call gRPC services from
-          here. Grab the Windows app and this request will work as is.
-        </p>
+        <p className="font-medium text-fg">{t("grpc.desktopTitle")}</p>
+        <p className="text-muted">{t("grpc.desktopBody")}</p>
       </div>
       <a
         href={RELEASES_URL}
@@ -49,13 +49,14 @@ function GrpcInDesktopApp() {
         className="inline-flex h-7 shrink-0 items-center gap-2 rounded-md bg-accent px-3 font-medium text-accent-fg hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
       >
         <Icon name="download" size={13} />
-        Download for Windows
+        {t("grpc.downloadWindows")}
       </a>
     </div>
   );
 }
 
 export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcRequest }) {
+  const { t } = useTranslation();
   const update = useRequestUpdater(tab.id, "grpc");
   const protoSets = useWorkspace((s) => s.protoSets);
   const schemas = useWorkspace((s) => s.schemas);
@@ -100,7 +101,8 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
     update((r) => ({
       ...r,
       method: value,
-      name: r.name === "Untitled gRPC call" && found ? found.name : r.name,
+      name:
+        inEveryLanguage("defaults.untitledGrpc").includes(r.name) && found ? found.name : r.name,
       message: found && EMPTY_MESSAGES.has(r.message.trim()) ? exampleMessage(found) : r.message,
     }));
   };
@@ -112,7 +114,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-2 p-2">
         <div className="flex h-7 min-w-0 flex-1 items-center rounded-md border border-line bg-panel focus-within:border-accent">
-          <span className="flex h-full items-center border-r border-line px-2 font-mono text-xs font-medium">
+          <span className="flex h-full items-center border-e border-line px-2 font-mono text-xs font-medium">
             gRPC
           </span>
           <VariableInput
@@ -120,20 +122,20 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
             onChange={(target) => update((r) => ({ ...r, target }))}
             onEnter={() => void sendTab(tab.id)}
             placeholder="localhost:50051"
-            ariaLabel="Server address"
+            ariaLabel={t("grpc.serverAddress")}
             className="px-2"
           />
           <button
             type="button"
             onClick={() => update((r) => ({ ...r, tls: !r.tls }))}
-            title={request.tls ? "TLS enabled (grpcs)" : "Plaintext (no TLS)"}
+            title={request.tls ? t("grpc.tlsOn") : t("grpc.tlsOff")}
             className={cn(
-              "mr-1 flex h-5 items-center gap-1 rounded-sm px-1 text-xs",
+              "me-1 flex h-5 items-center gap-1 rounded-sm px-1 text-xs",
               request.tls ? "text-fg" : "text-subtle hover:text-fg",
             )}
           >
             <Icon name="shield" size={12} />
-            {request.tls ? "TLS" : "No TLS"}
+            {request.tls ? "TLS" : t("grpc.noTls")}
           </button>
         </div>
         <SendControls tab={tab} />
@@ -141,9 +143,9 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
 
       <div className="flex flex-wrap items-center gap-2 px-2 pb-2">
         <label className="flex h-7 items-center gap-2 rounded-md border border-line bg-panel px-2 text-sm">
-          <span className="text-subtle">Schema</span>
+          <span className="text-subtle">{t("grpc.schema")}</span>
           <select
-            aria-label="Schema source"
+            aria-label={t("grpc.schemaSource")}
             value={sourceValue}
             onChange={(e) => {
               const value = e.target.value;
@@ -159,9 +161,9 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
             }}
             className="max-w-48 cursor-pointer bg-transparent outline-none"
           >
-            <option value="reflection">Server reflection</option>
+            <option value="reflection">{t("grpc.reflection")}</option>
             {protoSets.length > 0 && (
-              <optgroup label="Proto files">
+              <optgroup label={t("grpc.protoFiles")}>
                 {protoSets.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -170,22 +172,22 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
               </optgroup>
             )}
             {request.source.type === "protoSet" && !protoSets.some((p) => p.id === sourceValue) && (
-              <option value={sourceValue}>(deleted proto set)</option>
+              <option value={sourceValue}>{t("grpc.deletedSet")}</option>
             )}
-            <option value={IMPORT_OPTION}>Import .proto files…</option>
+            <option value={IMPORT_OPTION}>{t("grpc.importProtos")}</option>
           </select>
         </label>
 
         <label className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-line bg-panel px-2 text-sm">
-          <span className="text-subtle">Method</span>
+          <span className="text-subtle">{t("grpc.method")}</span>
           <select
-            aria-label="Method"
+            aria-label={t("grpc.method")}
             value={request.method}
             onChange={(e) => selectMethod(e.target.value)}
             className="min-w-0 flex-1 cursor-pointer bg-transparent font-mono text-xs outline-none"
           >
             <option value="" disabled>
-              {methods.length ? "Select a method…" : "Load the schema to list methods"}
+              {methods.length ? t("grpc.selectMethod") : t("grpc.loadSchemaFirst")}
             </option>
             {schemaState?.schema?.services.map((s) => (
               <optgroup key={s.name} label={s.name}>
@@ -210,14 +212,10 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
             variant="secondary"
             disabled={schemaState?.status === "loading"}
             onClick={() => source && void loadSchema(source)}
-            title={
-              source.kind === "reflection"
-                ? "Ask the server for its services"
-                : "Recompile the proto files"
-            }
+            title={source.kind === "reflection" ? t("grpc.askServer") : t("grpc.recompile")}
           >
             {schemaState?.status === "loading" ? <Spinner /> : <Icon name="refresh" size={13} />}
-            {source.kind === "reflection" ? "Load via reflection" : "Reload"}
+            {source.kind === "reflection" ? t("grpc.loadReflection") : t("grpc.reload")}
           </Button>
         )}
       </div>
@@ -227,9 +225,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
       ) : (
         (sourceError || schemaState?.status === "error" || !isTauri()) && (
           <ErrorNote className="mx-2 mb-2">
-            {!isTauri()
-              ? "gRPC requires the desktop app. Run `pnpm app:dev` to call gRPC services."
-              : (sourceError ?? schemaState?.error)}
+            {!isTauri() ? t("grpc.needsDesktop") : (sourceError ?? schemaState?.error)}
           </ErrorNote>
         )
       )}
@@ -238,29 +234,29 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         value={section}
         onChange={setSection}
         tabs={[
-          { id: "message", label: "Message" },
+          { id: "message", label: t("request.message") },
           {
             id: "metadata",
-            label: "Metadata",
+            label: t("request.metadata"),
             badge: request.metadata.filter((m) => m.enabled && m.key).length,
           },
           {
             id: "scripts",
-            label: "Scripts",
+            label: t("request.scripts"),
             badge: [request.preScript, request.testScript].filter((s) => s.trim()).length,
           },
           {
             id: "tests",
-            label: "Tests",
+            label: t("request.tests"),
             badge: request.assertions.filter((a) => a.enabled).length,
           },
-          { id: "settings", label: "Settings" },
+          { id: "settings", label: t("request.settings") },
         ]}
         trailing={
           section === "message" &&
           selected && (
             <span className="flex items-center gap-2 text-xs text-subtle">
-              <span className="hidden font-mono xl:inline">
+              <span dir="ltr" className="hidden font-mono xl:inline">
                 {selected.inputType} → {selected.outputType}
               </span>
               <span>{streamingLabel(selected)}</span>
@@ -273,16 +269,14 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         {section === "message" && (
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex h-8 items-center gap-2 px-3 text-xs text-subtle">
-              {selected?.clientStreaming
-                ? "Client streaming: send a JSON array to stream several messages."
-                : "Request message as JSON (proto field names or lowerCamelCase)."}
+              {selected?.clientStreaming ? t("grpc.clientStreamingHint") : t("grpc.messageHint")}
               {selected && (
                 <button
                   type="button"
-                  className="ml-auto text-accent hover:underline"
+                  className="ms-auto text-accent hover:underline"
                   onClick={() => update((r) => ({ ...r, message: exampleMessage(selected) }))}
                 >
-                  Generate example
+                  {t("grpc.generateExample")}
                 </button>
               )}
             </div>
@@ -305,8 +299,10 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
               valuePlaceholder="Bearer {{token}}"
             />
             <p className="px-3 pb-3 text-xs text-subtle">
-              Keys are lowercased. Keys ending in <code className="font-mono">-bin</code> take
-              base64 values. Metadata is also sent with reflection requests.
+              <Trans
+                i18nKey="grpc.metadataHint"
+                components={{ code: <code className="font-mono" /> }}
+              />
             </p>
           </div>
         )}
@@ -324,7 +320,7 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
         )}
         {section === "settings" && (
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
-            <Field label="Deadline (ms)" hint="Sent as grpc-timeout. 0 disables the deadline.">
+            <Field label={t("grpc.deadline")} hint={t("grpc.deadlineHint")}>
               <Input
                 type="number"
                 min={0}
@@ -336,11 +332,12 @@ export function GrpcRequestEditor({ tab, request }: { tab: Tab; request: GrpcReq
                 className="w-40"
               />
             </Field>
-            <Field label="Description">
+            <Field label={t("request.description")}>
               <textarea
                 value={request.description ?? ""}
                 onChange={(e) => update((r) => ({ ...r, description: e.target.value }))}
                 rows={4}
+                dir="auto"
                 className="w-full max-w-lg resize-y rounded-md border border-line bg-panel p-2 text-xs outline-none focus:border-accent"
               />
             </Field>

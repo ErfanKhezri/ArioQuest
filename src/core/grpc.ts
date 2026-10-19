@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { type GrpcSchemaSource, type WireKeyValue, invokeCommand, isTauri } from "@/lib/tauri";
 import { type VariableResolver, interpolate } from "./variables";
 import type {
@@ -11,7 +12,7 @@ import type {
 
 const requireDesktop = () => {
   if (!isTauri()) {
-    throw new Error("gRPC calls need the desktop app (browsers cannot speak HTTP/2 gRPC).");
+    throw new Error(t("errors.grpcNeedsDesktop"));
   }
 };
 
@@ -24,7 +25,7 @@ export function schemaSourceFor(
   if (request.source.type === "protoSet") {
     const { protoSetId } = request.source;
     const set = protoSets.find((p) => p.id === protoSetId);
-    if (!set) throw new Error("The proto file set for this request was deleted. Pick another one.");
+    if (!set) throw new Error(t("errors.protoSetDeleted"));
     return { kind: "protos", files: set.files };
   }
   return {
@@ -60,7 +61,7 @@ export function prepareGrpcCall(
   resolve: VariableResolver,
   requestId: string,
 ): PreparedGrpcCall {
-  if (!request.method) throw new Error("Select a method to call.");
+  if (!request.method) throw new Error(t("errors.selectMethod"));
   const v = (s: string) => interpolate(s, resolve);
   const metadata = request.metadata
     .filter((m) => m.enabled && m.key.trim())

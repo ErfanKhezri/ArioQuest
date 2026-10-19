@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Spinner } from "@/components/ui/controls";
@@ -28,6 +29,7 @@ export function LoginCard({
   onFocusField,
   onPasswordVisibleChange,
 }: LoginCardProps) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +51,7 @@ export function LoginCard({
       setError(
         err instanceof AuthError
           ? { field: err.field, message: err.message }
-          : { message: "Something went wrong. Please try again." },
+          : { message: t("login.errors.generic") },
       );
       setSubmitting(false);
       onError();
@@ -68,8 +70,8 @@ export function LoginCard({
           setError(null);
         }}
         tabs={[
-          { id: "signin", label: "Sign in" },
-          { id: "signup", label: "Create account" },
+          { id: "signin", label: t("login.signIn") },
+          { id: "signup", label: t("login.createAccount") },
         ]}
         className="h-10 px-4"
       />
@@ -90,7 +92,7 @@ export function LoginCard({
       >
         {mode === "signup" && (
           <label className="block">
-            <span className="mb-1 block text-xs text-muted">Name</span>
+            <span className="mb-1 block text-xs text-muted">{t("login.name")}</span>
             <Input
               autoFocus
               value={name}
@@ -104,7 +106,7 @@ export function LoginCard({
         )}
         <label className="block">
           <span className="mb-1 block text-xs text-muted">
-            {mode === "signin" ? "Email or username" : "Email"}
+            {mode === "signin" ? t("login.emailOrUsername") : t("login.email")}
           </span>
           <Input
             autoFocus={mode === "signin"}
@@ -114,21 +116,22 @@ export function LoginCard({
             name="email"
             autoComplete="email"
             placeholder="you@company.com"
+            dir="ltr"
             className={`h-8 ${invalid("email")}`}
           />
           <FieldError message={errorFor("email")} />
         </label>
         <div>
           <span className="mb-1 flex items-center justify-between text-xs text-muted">
-            <label htmlFor="auth-password">Password</label>
+            <label htmlFor="auth-password">{t("login.password")}</label>
             {mode === "signin" && (
               <button
                 type="button"
                 disabled
-                title="Coming soon"
+                title={t("login.comingSoon")}
                 className="text-subtle disabled:cursor-not-allowed"
               >
-                Forgot password?
+                {t("login.forgotPassword")}
               </button>
             )}
           </span>
@@ -140,17 +143,17 @@ export function LoginCard({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              placeholder={mode === "signup" ? "At least 8 characters" : undefined}
-              className={`h-8 pr-8 ${invalid("password")}`}
+              placeholder={mode === "signup" ? t("login.passwordPlaceholder") : undefined}
+              className={`h-8 pe-8 ${invalid("password")}`}
             />
             <button
               type="button"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t("login.hidePassword") : t("login.showPassword")}
               onClick={() => {
                 setShowPassword(!showPassword);
                 onPasswordVisibleChange(!showPassword);
               }}
-              className="absolute top-1/2 right-2 -translate-y-1/2 text-subtle hover:text-fg"
+              className="absolute end-2 top-1/2 -translate-y-1/2 text-subtle hover:text-fg"
             >
               <Icon name={showPassword ? "eyeOff" : "eye"} size={14} />
             </button>
@@ -159,12 +162,12 @@ export function LoginCard({
         </div>
         <Button type="submit" disabled={submitting} className="h-8 w-full">
           {submitting && <Spinner />}
-          {mode === "signin" ? "Sign in" : "Create account"}
+          {mode === "signin" ? t("login.signIn") : t("login.createAccount")}
         </Button>
         {error && !error.field && <FieldError message={error.message} />}
         {mode === "signin" && (
           <p className="text-center text-xs text-subtle">
-            First time here?{" "}
+            {t("login.firstTime")}{" "}
             <button
               type="button"
               onClick={() => {
@@ -174,7 +177,7 @@ export function LoginCard({
               }}
               className="text-accent hover:underline"
             >
-              Use the default account
+              {t("login.useDefaultAccount")}
             </button>{" "}
             ({DEFAULT_ACCOUNT.username} / {DEFAULT_ACCOUNT.password})
           </p>

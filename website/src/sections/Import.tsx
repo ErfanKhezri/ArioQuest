@@ -1,5 +1,6 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { looksLikeCurl, parseCurl } from "@/core/curl";
 import type { HttpRequest } from "@/core/types";
@@ -17,6 +18,7 @@ function prettyBody(raw: string) {
 }
 
 export default function Import() {
+  const { t } = useTranslation("site");
   const reduced = useReducedMotion();
   const [input, setInput] = useState("");
   const [request, setRequest] = useState<HttpRequest | null>(null);
@@ -62,18 +64,16 @@ export default function Import() {
       aria-labelledby="import-title"
     >
       <div className="page flex flex-col py-24 lg:py-36">
-        <div className="grid gap-4 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <m.h2
             variants={rise}
             id="import-title"
             className="text-title font-semibold lg:col-span-6"
           >
-            Paste cURL, get a request
+            {t("import.title")}
           </m.h2>
           <m.p variants={rise} className="max-w-[52ch] lg:col-span-6 lg:pt-2">
-            Paste a cURL command into the URL bar and it becomes a request, headers and body
-            included. Collection files (v2.0, v2.1) and environments import too, and anything
-            exports as a v2.1 collection, cURL or <code>fetch</code>.
+            <Trans t={t} i18nKey="import.body" components={{ code: <code /> }} />
           </m.p>
         </div>
 
@@ -82,7 +82,7 @@ export default function Import() {
           variants={rise}
           viewport={{ once: true, amount: 0.6 }}
           onViewportEnter={() => paste(EXAMPLE, reduced ? 0 : 1400)}
-          className="mt-16 min-h-[clamp(300px,24vw,420px)] lg:mt-24 lg:-mr-[5vw] lg:ml-[16%]"
+          className="mt-16 min-h-[clamp(300px,24vw,420px)] lg:ms-[16%] lg:-me-[5vw] lg:mt-24"
         >
           <div data-ui className="rounded-md bg-panel text-[clamp(15px,1.7vw,24px)] text-fg">
             <div className="flex items-stretch gap-[0.5em] p-[0.5em]">
@@ -98,17 +98,18 @@ export default function Import() {
                 </m.span>
               </AnimatePresence>
               <label className="min-w-0 flex-1">
-                <span className="sr-only">URL, or paste a cURL command</span>
+                <span className="sr-only">{t("import.urlLabel")}</span>
                 <input
                   value={input}
                   onChange={(e) => onChange(e.target.value)}
-                  placeholder="Paste a cURL command"
+                  placeholder={t("import.placeholder")}
+                  dir={input ? "ltr" : undefined}
                   spellCheck={false}
                   className={`h-[2.4em] w-full rounded-[0.25em] bg-canvas px-[0.6em] font-mono text-[0.8em] outline-none placeholder:text-muted focus-visible:outline-2 focus-visible:outline-accent ${pasted ? "bg-accent/25" : ""}`}
                 />
               </label>
               <span className="hidden items-center rounded-[0.25em] bg-accent px-[1em] font-medium text-accent-fg sm:flex">
-                Send
+                {t("ui.send")}
               </span>
             </div>
 
@@ -123,8 +124,10 @@ export default function Import() {
                 >
                   <div className="grid gap-[1em] px-[0.75em] pt-[0.25em] pb-[0.9em] text-[0.62em] md:grid-cols-2">
                     <div>
-                      <p className="mb-[0.5em] text-muted">Headers {headers.length}</p>
-                      <ul className="flex flex-col gap-[0.3em] font-mono">
+                      <p className="mb-[0.5em] text-muted">
+                        {t("import.headers", { count: headers.length })}
+                      </p>
+                      <ul dir="ltr" className="flex flex-col gap-[0.3em] text-left font-mono">
                         {headers.map((h, i) => (
                           <m.li
                             key={h.id}
@@ -137,12 +140,12 @@ export default function Import() {
                             <span className="truncate text-muted">{h.value}</span>
                           </m.li>
                         ))}
-                        {headers.length === 0 && <li className="text-muted">None</li>}
+                        {headers.length === 0 && <li className="text-muted">{t("import.none")}</li>}
                       </ul>
                     </div>
                     <div>
                       <p className="mb-[0.5em] text-muted">
-                        Body {body.length > 0 && `· ${request.body.mode.toUpperCase()}`}
+                        {t("ui.body")} {body.length > 0 && `· ${request.body.mode.toUpperCase()}`}
                       </p>
                       <m.div
                         initial={{ opacity: 0 }}
@@ -153,7 +156,7 @@ export default function Import() {
                         {body.length ? (
                           body.map((l, i) => <JsonLine key={i} text={l} />)
                         ) : (
-                          <span className="text-muted">Empty</span>
+                          <span className="text-muted">{t("import.empty")}</span>
                         )}
                       </m.div>
                     </div>
@@ -164,16 +167,16 @@ export default function Import() {
           </div>
         </m.div>
 
-        <m.div variants={rise} className="mt-8 flex flex-wrap items-center gap-3 lg:ml-[16%]">
+        <m.div variants={rise} className="mt-8 flex flex-wrap items-center gap-3 lg:ms-[16%]">
           <m.button
             {...press}
             type="button"
             onClick={() => paste(EXAMPLE, reduced ? 0 : 900)}
             className="text-small inline-flex h-11 items-center rounded-md bg-accent-fg px-4 font-medium text-[oklch(0.3_0.1_255)] transition-colors hover:bg-white"
           >
-            Paste the example again
+            {t("import.again")}
           </m.button>
-          <span className="text-small">Or paste your own. It never leaves this page.</span>
+          <span className="text-small">{t("import.private")}</span>
         </m.div>
       </div>
     </m.section>

@@ -21,6 +21,8 @@ whole collections, and let Ario, the app's mascot, tell you how each response we
 - **Import / export**: v2.0 / v2.1 collection files and environments, cURL (paste it into the URL bar),
   `fetch`.
 - **Keyboard first**: `Ctrl+K` command palette, `Ctrl+Enter` send, `Ctrl+S` save.
+- **English and Persian**: switch in Settings or on the sign-in screen; Persian lays the app out
+  right to left.
 
 ## Install
 
@@ -66,6 +68,12 @@ src/          React frontend (the app)
 src-tauri/    Rust backend: HTTP, gRPC and storage commands
 website/      Marketing site; reuses the app's theme, mascot and cURL parser
 ```
+
+Interface text lives in `src/i18n/locales/` (app) and `website/src/i18n/` (site), one file per
+language, using [i18next](https://www.i18next.com/). English is the source: TypeScript checks every
+`t("…")` key against it and makes the Persian file keep the same keys. Use logical Tailwind classes
+(`ms-`, `pe-`, `start-`, `text-start`, …) instead of `ml-`, `pr-`, `left-`, so layouts flip for
+right-to-left languages.
 
 A new Rust command is registered by its module path in `src-tauri/src/lib.rs`
 (`pub use` re-exports don't work with `generate_handler!`), and its types are added to

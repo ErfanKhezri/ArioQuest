@@ -4,6 +4,7 @@ import { Compartment, EditorState, Prec } from "@codemirror/state";
 import { EditorView, keymap, placeholder as placeholderExt } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useEffect, useMemo, useState } from "react";
+import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { editorTheme } from "./theme";
 import { useVariableExtensions } from "./variables";
@@ -95,7 +96,9 @@ export function VariableInput({
       ),
       handlerSlot.of([]),
       keymap.of([...completionKeymap, ...defaultKeymap, ...historyKeymap]),
-      EditorView.contentAttributes.of({ "aria-label": ariaLabel ?? placeholder ?? "Input" }),
+      EditorView.contentAttributes.of({
+        "aria-label": ariaLabel ?? placeholder ?? t("editor.input"),
+      }),
       ...variableExtensions,
     ],
     [placeholder, ariaLabel, variableExtensions, handlerSlot],
@@ -108,6 +111,7 @@ export function VariableInput({
 
   return (
     <CodeMirror
+      dir="ltr"
       value={value}
       onChange={onChange}
       theme="none"

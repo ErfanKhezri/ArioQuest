@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { newHttpRequest, newKeyValue } from "./factory";
 import { buildHttpPayload } from "./http";
 import { splitUrl, syncParamsFromUrl } from "./url";
@@ -98,9 +99,9 @@ const FLAG_WITH_VALUE = new Set([
 /** Converts a cURL command into a request. Throws if it is not a cURL command. */
 export function parseCurl(command: string): HttpRequest {
   const words = shellSplit(command.trim());
-  if (!words[0] || !/^curl(\.exe)?$/i.test(words[0])) throw new Error("Not a cURL command");
+  if (!words[0] || !/^curl(\.exe)?$/i.test(words[0])) throw new Error(t("errors.notCurl"));
 
-  const request = newHttpRequest({ name: "Imported from cURL" });
+  const request = newHttpRequest({ name: t("importers.fromCurl") });
   let method: string | undefined;
   let url = "";
   const data: string[] = [];
@@ -170,7 +171,7 @@ export function parseCurl(command: string): HttpRequest {
           enabled: true,
           type: isFile ? "file" : "text",
           // Files referenced by path must be re-attached by the user.
-          description: isFile ? `Attach ${val.slice(1)}` : undefined,
+          description: isFile ? t("importers.attach", { file: val.slice(1) }) : undefined,
         });
         break;
       }

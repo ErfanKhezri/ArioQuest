@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Kbd } from "@/components/ui/Kbd";
 import { MethodBadge, type HttpMethod } from "@/components/ui/MethodBadge";
 import { Modal } from "@/components/ui/Modal";
 import { flattenRequests, requestLabel, requestTarget } from "@/core/tree";
+import { i18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { invokeCommand } from "@/lib/tauri";
 import { notify } from "@/store/toasts";
@@ -13,13 +15,14 @@ interface Command {
   id: string;
   title: string;
   subtitle?: string;
-  group: string;
+  group: "actions" | "environments" | "requests" | "history";
   icon?: IconName;
   method?: HttpMethod;
   run: () => void;
 }
 
 export function CommandPalette() {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const collections = useWorkspace((s) => s.collections);
   const history = useWorkspace((s) => s.history);
@@ -32,74 +35,76 @@ export function CommandPalette() {
     const actions: Command[] = [
       {
         id: "new-http",
-        title: "New HTTP request",
-        group: "Actions",
+        title: t("workspace.quick.newHttp"),
+        group: "actions",
         icon: "globe",
         run: () => s.newTab("http"),
       },
       {
         id: "new-grpc",
-        title: "New gRPC request",
-        group: "Actions",
+        title: t("workspace.quick.newGrpc"),
+        group: "actions",
         icon: "server",
         run: () => s.newTab("grpc"),
       },
       {
         id: "import",
-        title: "Import collection, environment or cURL",
-        group: "Actions",
+        title: t("palette.importAll"),
+        group: "actions",
         icon: "import",
         run: () => s.openDialog({ type: "import" }),
       },
       {
         id: "protos",
-        title: "Import .proto files",
-        group: "Actions",
+        title: t("palette.importProtos"),
+        group: "actions",
         icon: "file",
         run: () => s.openDialog({ type: "protoSet" }),
       },
       {
         id: "globals",
-        title: "Edit global variables",
-        group: "Actions",
+        title: t("palette.editGlobals"),
+        group: "actions",
         icon: "globe",
         run: () => s.openDialog({ type: "environment", environmentId: "globals" }),
       },
       {
         id: "settings",
-        title: "Editor theme and settings",
-        group: "Actions",
+        title: t("palette.settings"),
+        group: "actions",
         icon: "palette",
         run: () => s.openDialog({ type: "settings" }),
       },
       {
         id: "cookies",
-        title: "Clear cookies",
-        group: "Actions",
+        title: t("palette.clearCookies"),
+        group: "actions",
         icon: "trash",
         run: () =>
-          void invokeCommand("clear_cookies").then(() => notify.success("Cookie jar cleared.")),
+          void invokeCommand("clear_cookies").then(() =>
+            notify.success(t("palette.cookiesCleared")),
+          ),
       },
     ];
     const runs: Command[] = collections.map((c) => ({
       id: `run-${c.id}`,
-      title: `Run collection: ${c.name}`,
-      group: "Actions",
+      title: t("palette.runCollection", { name: c.name }),
+      group: "actions",
       icon: "play",
       run: () => s.openDialog({ type: "runner", collectionId: c.id }),
     }));
     const envs: Command[] = [
       {
         id: "env-none",
-        title: "Use no environment",
-        group: "Environments",
+        title: t("palette.noEnvironment"),
+        group: "environments",
         icon: "globe",
         run: () => s.setActiveEnvironment(null),
       },
       ...environments.map((e) => ({
         id: `env-${e.id}`,
-        title: `Use environment: ${e.name}`,
-        group: "Environments",
+        title: t("palette.useEnvironment", { name: e.name }),
+        group: "environments" as const,
         icon: "globe" as const,
         run: () => s.setActiveEnvironment(e.id),
       })),
@@ -109,7 +114,7 @@ export function CommandPalette() {
         id: `req-${item.id}`,
         title: item.request.name,
         subtitle: [c.name, ...path].join(" / "),
-        group: "Requests",
+        group: "requests",
         method: requestLabel(item.request),
         run: () => s.openCollectionRequest(c.id, item.id),
       })),
@@ -117,17 +122,17 @@ export function CommandPalette() {
     const recent: Command[] = history.slice(0, 30).map((h) => ({
       id: `hist-${h.id}`,
       title: requestTarget(h.request) || h.request.name,
-      subtitle: `${h.summary.status} · ${new Date(h.timestamp).toLocaleString()}`,
-      group: "History",
+      subtitle: `${h.summary.status} · ${new Date(h.timestamp).toLocaleString(i18n.language)}`,
+      group: "history",
       method: requestLabel(h.request),
       run: () => s.openHistoryEntry(h.id),
     }));
     return [...requests, ...actions, ...runs, ...envs, ...recent];
-  }, [collections, history, environments]);
+  }, [collections, history, environments, t]);
 
   const results = useMemo(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    if (terms.length === 0) return commands.filter((c) => c.group !== "History").slice(0, 50);
+    if (terms.length === 0) return commands.filter((c) => c.group !== "history").slice(0, 50);
     return commands
       .filter((c) => {
         const text = `${c.title} ${c.subtitle ?? ""} ${c.method ?? ""}`.toLowerCase();
@@ -144,7 +149,7 @@ export function CommandPalette() {
 
   let lastGroup = "";
   return (
-    <Modal title="Command palette" bare onClose={closeDialog} className="max-w-xl">
+    <Modal title={t("palette.title")} bare onClose={closeDialog} className="max-w-xl">
       <div className="flex items-center gap-3 border-b border-line px-4">
         <Icon name="search" size={16} className="text-subtle" />
         <input
@@ -166,27 +171,33 @@ export function CommandPalette() {
               choose(results[index]);
             }
           }}
-          placeholder="Search requests, history and actions…"
+          placeholder={t("palette.placeholder")}
           className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle"
         />
         <Kbd>Esc</Kbd>
       </div>
       <ul className="max-h-[50vh] overflow-y-auto p-2">
         {results.length === 0 && (
-          <li className="px-3 py-6 text-center text-xs text-subtle">Nothing matches “{query}”.</li>
+          <li className="px-3 py-6 text-center text-xs text-subtle">
+            {t("palette.noMatch", { query })}
+          </li>
         )}
         {results.map((c, i) => {
           const header = c.group !== lastGroup ? c.group : null;
           lastGroup = c.group;
           return (
             <li key={c.id}>
-              {header && <p className="px-3 pt-2 pb-1 text-xs font-medium text-subtle">{header}</p>}
+              {header && (
+                <p className="px-3 pt-2 pb-1 text-xs font-medium text-subtle">
+                  {t(`palette.groups.${header}`)}
+                </p>
+              )}
               <button
                 type="button"
                 onMouseEnter={() => setIndex(i)}
                 onClick={() => choose(c)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-xs",
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-start text-xs",
                   i === index ? "bg-panel-2 text-fg" : "text-muted",
                 )}
               >

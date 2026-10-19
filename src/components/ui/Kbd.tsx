@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 interface KbdProps {
-  children: ReactNode;
+  /** Optional so translations can fill it in: `<kbd>Ctrl</kbd>` in a `Trans` string. */
+  children?: ReactNode;
   className?: string;
 }
 

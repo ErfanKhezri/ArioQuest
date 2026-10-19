@@ -1,45 +1,49 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { Segmented } from "@/components/ui/Tabs";
 import type { ApiRequest } from "@/core/types";
+import type { app } from "@/i18n/locales/en";
+
+type SnippetId = keyof typeof app.scripts.snippet;
 
 interface Snippet {
-  label: string;
+  label: SnippetId;
   code: string;
 }
 
 const testSnippets: Snippet[] = [
   {
-    label: "Status code is 200",
+    label: "status200",
     code: 'aq.test("Status code is 200", () => {\n  aq.expect(aq.response.code).to.equal(200);\n});',
   },
   {
-    label: "Response time below 500 ms",
+    label: "responseTime",
     code: 'aq.test("Response time is below 500 ms", () => {\n  aq.expect(aq.response.responseTime).to.be.below(500);\n});',
   },
   {
-    label: "Check a JSON value",
+    label: "jsonValue",
     code: 'aq.test("Body has the expected value", () => {\n  const json = aq.response.json();\n  aq.expect(json.id).to.exist;\n});',
   },
   {
-    label: "Header is present",
+    label: "header",
     code: 'aq.test("Content-Type is JSON", () => {\n  aq.expect(aq.response.headers.get("content-type")).to.include("json");\n});',
   },
   {
-    label: "Save value to environment",
+    label: "saveToEnvironment",
     code: 'aq.environment.set("token", aq.response.json().token);',
   },
-  { label: "Log the response", code: "console.log(aq.response.json());" },
+  { label: "logResponse", code: "console.log(aq.response.json());" },
 ];
 
 const preSnippets: Snippet[] = [
   {
-    label: "Set a variable",
+    label: "setVariable",
     code: 'aq.variables.set("requestTime", new Date().toISOString());',
   },
-  { label: "Add a header", code: 'aq.request.headers["X-Request-Id"] = crypto.randomUUID();' },
+  { label: "addHeader", code: 'aq.request.headers["X-Request-Id"] = crypto.randomUUID();' },
   {
-    label: "Read environment variable",
+    label: "readEnvironment",
     code: 'const baseUrl = aq.environment.get("baseUrl");\nconsole.log("Calling", baseUrl);',
   },
 ];
@@ -50,6 +54,7 @@ interface ScriptsEditorProps {
 }
 
 export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<"pre" | "test">(
     request.preScript && !request.testScript ? "pre" : "test",
   );
@@ -65,14 +70,18 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
           value={phase}
           onChange={setPhase}
           options={[
-            { value: "pre", label: `Pre-request${request.preScript.trim() ? " •" : ""}` },
-            { value: "test", label: `Post-response${request.testScript.trim() ? " •" : ""}` },
+            {
+              value: "pre",
+              label: `${t("scripts.preRequest")}${request.preScript.trim() ? " •" : ""}`,
+            },
+            {
+              value: "test",
+              label: `${t("scripts.postResponse")}${request.testScript.trim() ? " •" : ""}`,
+            },
           ]}
         />
         <span className="text-xs text-subtle">
-          {phase === "pre"
-            ? "Runs before the request is sent. Edit aq.request or set variables."
-            : "Runs after the response arrives. Use aq.test() and aq.expect(); pm.* also works."}
+          {phase === "pre" ? t("scripts.preHint") : t("scripts.postHint")}
         </span>
       </div>
       <div className="flex min-h-0 flex-1 border-t border-line">
@@ -88,8 +97,8 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
             }
           />
         </div>
-        <aside className="hidden w-52 shrink-0 overflow-y-auto border-l border-line p-3 lg:block">
-          <p className="mb-2 text-xs font-medium text-subtle">Snippets</p>
+        <aside className="hidden w-52 shrink-0 overflow-y-auto border-s border-line p-3 lg:block">
+          <p className="mb-2 text-xs font-medium text-subtle">{t("scripts.snippets")}</p>
           <ul className="space-y-0.5">
             {snippets.map((s) => (
               <li key={s.label}>
@@ -98,9 +107,9 @@ export function ScriptsEditor({ request, onChange }: ScriptsEditorProps) {
                   onClick={() =>
                     set(value.trim() ? `${value.trimEnd()}\n\n${s.code}\n` : `${s.code}\n`)
                   }
-                  className="w-full rounded-md px-2 py-2 text-left text-xs text-accent hover:bg-panel-2"
+                  className="w-full rounded-md px-2 py-2 text-start text-xs text-accent hover:bg-panel-2"
                 >
-                  {s.label}
+                  {t(`scripts.snippet.${s.label}`)}
                 </button>
               </li>
             ))}

@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { IconButton, Checkbox, Select } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import {
   assertionOperators,
   assertionSources,
+  operatorLabel,
   operatorNeedsValue,
+  sourceLabel,
   sourceNeedsProperty,
 } from "@/core/assertions";
 import { newAssertion, newExtraction } from "@/core/factory";
@@ -20,11 +23,13 @@ interface TestsEditorProps {
 
 /** No-code checks and variable extraction that run after every response. */
 export function TestsEditor({ request, onChange }: TestsEditorProps) {
+  const { t } = useTranslation();
   const isGrpc = request.kind === "grpc";
   // Header assertions also match gRPC metadata; gRPC status only makes sense for gRPC.
-  const sources = isGrpc
-    ? assertionSources
-    : assertionSources.filter((s) => s.value !== "grpcStatus");
+  const sources = (
+    isGrpc ? assertionSources : assertionSources.filter((s) => s !== "grpcStatus")
+  ).map((source) => ({ value: source, label: sourceLabel(source) }));
+  const operators = assertionOperators.map((op) => ({ value: op, label: operatorLabel(op) }));
 
   const setAssertion = (id: string, patch: Partial<Assertion>) =>
     onChange({ assertions: request.assertions.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
@@ -38,9 +43,9 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
       <section>
         <header className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-medium">Assertions</h3>
+            <h3 className="text-xs font-medium">{t("tests.assertions")}</h3>
             <p className="mt-0.5 text-xs text-subtle">
-              Checked after each response. Expected values may use {"{{variables}}"}.
+              {t("tests.assertionsHint", { example: "{{variables}}" })}
             </p>
           </div>
           <button
@@ -55,7 +60,7 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
             }
             className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
-            <Icon name="plus" size={13} /> Add assertion
+            <Icon name="plus" size={13} /> {t("tests.addAssertion")}
           </button>
         </header>
 
@@ -73,7 +78,7 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                   <Checkbox
                     checked={a.enabled}
                     onChange={(enabled) => setAssertion(a.id, { enabled })}
-                    label="Enabled"
+                    label={t("keyValue.enabled")}
                   />
                 </span>
                 <Select
@@ -88,23 +93,25 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                   <input
                     value={a.property}
                     onChange={(e) => setAssertion(a.id, { property: e.target.value })}
-                    placeholder={a.source === "header" ? "Header name" : "data.items[0].id"}
-                    className={cn(cell, "flex-1 border-r border-line")}
+                    placeholder={a.source === "header" ? t("tests.headerName") : "data.items[0].id"}
+                    dir="ltr"
+                    className={cn(cell, "flex-1 border-e border-line")}
                   />
                 )}
                 <Select
-                  className="w-36 shrink-0 [&_select]:rounded-none [&_select]:border-0 [&_select]:border-r [&_select]:bg-transparent"
+                  className="w-36 shrink-0 [&_select]:rounded-none [&_select]:border-0 [&_select]:border-e [&_select]:bg-transparent"
                   value={a.operator}
                   onChange={(e) =>
                     setAssertion(a.id, { operator: e.target.value as Assertion["operator"] })
                   }
-                  options={assertionOperators}
+                  options={operators}
                 />
                 {operatorNeedsValue(a.operator) ? (
                   <input
                     value={a.expected}
                     onChange={(e) => setAssertion(a.id, { expected: e.target.value })}
-                    placeholder="Expected value"
+                    placeholder={t("tests.expectedValue")}
+                    dir="auto"
                     className={cn(cell, "flex-1")}
                   />
                 ) : (
@@ -113,7 +120,7 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                 <span className="flex w-8 shrink-0 justify-center">
                   <IconButton
                     icon="trash"
-                    label="Remove assertion"
+                    label={t("tests.removeAssertion")}
                     size={13}
                     tone="danger"
                     className="size-6 opacity-0 group-hover:opacity-100"
@@ -131,17 +138,15 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
       <section className="mt-6">
         <header className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-medium">Extract variables</h3>
-            <p className="mt-0.5 text-xs text-subtle">
-              Save response values into the active environment (or globals) to chain requests.
-            </p>
+            <h3 className="text-xs font-medium">{t("tests.extract")}</h3>
+            <p className="mt-0.5 text-xs text-subtle">{t("tests.extractHint")}</p>
           </div>
           <button
             type="button"
             onClick={() => onChange({ extractions: [...request.extractions, newExtraction()] })}
             className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
-            <Icon name="plus" size={13} /> Add variable
+            <Icon name="plus" size={13} /> {t("tests.addVariable")}
           </button>
         </header>
 
@@ -159,32 +164,34 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                   <Checkbox
                     checked={e.enabled}
                     onChange={(enabled) => setExtraction(e.id, { enabled })}
-                    label="Enabled"
+                    label={t("keyValue.enabled")}
                   />
                 </span>
                 <input
                   value={e.variable}
                   onChange={(ev) => setExtraction(e.id, { variable: ev.target.value })}
-                  placeholder="Variable name"
+                  placeholder={t("tests.variableName")}
+                  dir="ltr"
                   className={cn(cell, "flex-1 border-x border-line")}
                 />
                 <Select
-                  className="w-36 shrink-0 [&_select]:rounded-none [&_select]:border-0 [&_select]:border-r [&_select]:bg-transparent"
+                  className="w-36 shrink-0 [&_select]:rounded-none [&_select]:border-0 [&_select]:border-e [&_select]:bg-transparent"
                   value={e.source}
                   onChange={(ev) =>
                     setExtraction(e.id, { source: ev.target.value as Extraction["source"] })
                   }
                   options={[
-                    { value: "jsonPath", label: "JSON body path" },
-                    { value: "header", label: "Header" },
-                    { value: "status", label: "Status code" },
+                    { value: "jsonPath", label: sourceLabel("jsonPath") },
+                    { value: "header", label: sourceLabel("header") },
+                    { value: "status", label: sourceLabel("status") },
                   ]}
                 />
                 {e.source !== "status" ? (
                   <input
                     value={e.path}
                     onChange={(ev) => setExtraction(e.id, { path: ev.target.value })}
-                    placeholder={e.source === "header" ? "Header name" : "data.token"}
+                    placeholder={e.source === "header" ? t("tests.headerName") : "data.token"}
+                    dir="ltr"
                     className={cn(cell, "flex-[1.4]")}
                   />
                 ) : (
@@ -193,7 +200,7 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
                 <span className="flex w-8 shrink-0 justify-center">
                   <IconButton
                     icon="trash"
-                    label="Remove variable"
+                    label={t("tests.removeVariable")}
                     size={13}
                     tone="danger"
                     className="size-6 opacity-0 group-hover:opacity-100"
@@ -210,8 +217,7 @@ export function TestsEditor({ request, onChange }: TestsEditorProps) {
 
       <p className="mt-6 flex items-start gap-2 rounded-md bg-panel-2/60 px-3 py-2 text-xs text-muted">
         <Icon name="info" size={14} className="mt-px shrink-0 text-subtle" />
-        Need more control? Write JavaScript tests in the Scripts tab — they run alongside these
-        assertions, and the collection runner reports both.
+        {t("tests.moreControl")}
       </p>
     </div>
   );

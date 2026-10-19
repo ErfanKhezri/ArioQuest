@@ -33,15 +33,3 @@ export const moodTextClass: Record<ArioMood, string> = {
   error: "text-danger",
   sleepy: "text-subtle",
 };
-
-/** Words for screen readers: "Ario is upset". */
-export const moodLabel: Record<ArioMood, string> = {
-  idle: "calm",
-  happy: "happy",
-  curious: "curious",
-  thinking: "thinking",
-  shy: "looking away",
-  sad: "upset",
-  error: "alarmed",
-  sleepy: "sleepy",
-};

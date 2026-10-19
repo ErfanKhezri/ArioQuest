@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { Button } from "@/components/ui/Button";
 import { ErrorNote, IconButton, Input, Spinner } from "@/components/ui/controls";
@@ -7,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { newGrpcRequest } from "@/core/factory";
 import { schemaKey, streamingLabel } from "@/core/grpc";
 import type { GrpcMethodInfo, ProtoFile } from "@/core/types";
+import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { confirmAction } from "@/lib/confirm";
 import { formatBytes, pickFiles } from "@/lib/files";
@@ -25,7 +27,7 @@ async function chooseProtos(directory: boolean): Promise<ProtoFile[]> {
     directory,
   });
   const protos = files.filter((f) => f.name.endsWith(".proto"));
-  if (files.length > 0 && protos.length === 0) notify.error("No .proto files were selected.");
+  if (files.length > 0 && protos.length === 0) notify.error(t("protos.noneSelected"));
   return Promise.all(protos.map(async (f) => ({ path: pathOf(f), content: await f.text() })));
 }
 
@@ -48,6 +50,7 @@ export function ProtoSetDialog({
   protoSetId?: string;
   assignToTabId?: string;
 }) {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const protoSet = useWorkspace((s) => s.protoSets.find((p) => p.id === protoSetId));
   const addProtoSet = useWorkspace((s) => s.addProtoSet);
@@ -105,18 +108,14 @@ export function ProtoSetDialog({
 
   return (
     <Modal
-      title={protoSet ? "Proto files" : "Import .proto files"}
+      title={protoSet ? t("protos.title") : t("protos.importTitle")}
       onClose={closeDialog}
       className="max-w-4xl"
     >
       {!protoSet ? (
         <div className="space-y-4 p-6">
           <p className="text-xs text-muted">
-            Choose the <code className="font-mono">.proto</code> files that define your services.
-            Pick a folder to keep import paths like{" "}
-            <code className="font-mono">import "common/v1/types.proto"</code> working. Well-known
-            types (<code className="font-mono">google/protobuf/*</code>) are built in — no protoc
-            needed.
+            <Trans i18nKey="protos.intro" components={{ code: <code className="font-mono" /> }} />
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <button
@@ -125,8 +124,8 @@ export function ProtoSetDialog({
               className="flex flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-8 text-center hover:border-accent/50 hover:bg-panel-2"
             >
               <Icon name="filePlus" size={20} className="text-subtle" />
-              <span className="text-sm font-medium">Choose files</span>
-              <span className="text-xs text-subtle">One or more .proto files</span>
+              <span className="text-sm font-medium">{t("protos.chooseFiles")}</span>
+              <span className="text-xs text-subtle">{t("protos.chooseFilesHint")}</span>
             </button>
             <button
               type="button"
@@ -134,27 +133,27 @@ export function ProtoSetDialog({
               className="flex flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-8 text-center hover:border-accent/50 hover:bg-panel-2"
             >
               <Icon name="folderPlus" size={20} className="text-subtle" />
-              <span className="text-sm font-medium">Choose a folder</span>
-              <span className="text-xs text-subtle">Every .proto file inside it</span>
+              <span className="text-sm font-medium">{t("protos.chooseFolder")}</span>
+              <span className="text-xs text-subtle">{t("protos.chooseFolderHint")}</span>
             </button>
           </div>
         </div>
       ) : (
         <div className="grid min-h-[440px] md:grid-cols-[280px_1fr]">
-          <div className="flex flex-col border-b border-line md:border-r md:border-b-0">
+          <div className="flex flex-col border-b border-line md:border-e md:border-b-0">
             <div className="space-y-2 p-4">
               <Input
                 value={protoSet.name}
                 onChange={(e) => updateProtoSet(protoSet.id, { name: e.target.value })}
-                aria-label="Proto set name"
+                aria-label={t("protos.setName")}
                 className="h-9 text-sm font-medium"
               />
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" onClick={() => void addFiles(false)}>
-                  <Icon name="filePlus" size={13} /> Files
+                  <Icon name="filePlus" size={13} /> {t("protos.files")}
                 </Button>
                 <Button variant="secondary" size="sm" onClick={() => void addFiles(true)}>
-                  <Icon name="folderPlus" size={13} /> Folder
+                  <Icon name="folderPlus" size={13} /> {t("protos.folder")}
                 </Button>
               </div>
             </div>
@@ -172,7 +171,11 @@ export function ProtoSetDialog({
                     )}
                   >
                     <Icon name="file" size={13} className="shrink-0 text-subtle" />
-                    <span className="min-w-0 flex-1 truncate font-mono text-xs" title={f.path}>
+                    <span
+                      dir="ltr"
+                      className="min-w-0 flex-1 truncate text-start font-mono text-xs"
+                      title={f.path}
+                    >
                       {f.path}
                     </span>
                     <span className="text-xs text-subtle group-hover:hidden">
@@ -180,7 +183,7 @@ export function ProtoSetDialog({
                     </span>
                     <IconButton
                       icon="x"
-                      label="Remove file"
+                      label={t("protos.removeFile")}
                       size={12}
                       className="hidden size-5 group-hover:inline-flex"
                       onClick={(e) => {
@@ -200,13 +203,13 @@ export function ProtoSetDialog({
                 size="sm"
                 className="text-danger hover:text-danger"
                 onClick={async () => {
-                  if (await confirmAction(`Delete the proto set "${protoSet.name}"?`)) {
+                  if (await confirmAction(t("protos.deleteConfirm", { name: protoSet.name }))) {
                     deleteProtoSet(protoSet.id);
                     closeDialog();
                   }
                 }}
               >
-                <Icon name="trash" size={13} /> Delete proto set
+                <Icon name="trash" size={13} /> {t("protos.deleteSet")}
               </Button>
             </div>
           </div>
@@ -217,7 +220,7 @@ export function ProtoSetDialog({
                 <div className="flex items-center justify-between border-b border-line px-4 py-2 text-xs">
                   <span className="truncate font-mono">{viewed.path}</span>
                   <Button variant="ghost" size="sm" onClick={() => setViewing(null)}>
-                    Back to services
+                    {t("protos.backToServices")}
                   </Button>
                 </div>
                 <div className="min-h-0 flex-1">
@@ -227,7 +230,7 @@ export function ProtoSetDialog({
             ) : (
               <div className="min-h-0 flex-1 overflow-y-auto p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-xs font-medium">Services</h3>
+                  <h3 className="text-xs font-medium">{t("protos.services")}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -239,23 +242,17 @@ export function ProtoSetDialog({
                     ) : (
                       <Icon name="refresh" size={13} />
                     )}{" "}
-                    Recompile
+                    {t("protos.recompile")}
                   </Button>
                 </div>
-                {!isTauri() && (
-                  <p className="text-xs text-subtle">
-                    Compiling proto files requires the desktop app.
-                  </p>
-                )}
+                {!isTauri() && <p className="text-xs text-subtle">{t("protos.needsDesktop")}</p>}
                 {schemaState?.status === "error" && (
                   <ErrorNote>
                     <span className="font-mono">{schemaState.error}</span>
                   </ErrorNote>
                 )}
                 {schemaState?.schema?.services.length === 0 && (
-                  <p className="text-xs text-subtle">
-                    These files compile but do not define any services.
-                  </p>
+                  <p className="text-xs text-subtle">{t("protos.noServices")}</p>
                 )}
                 <div className="space-y-4">
                   {schemaState?.schema?.services.map((s) => (
@@ -267,17 +264,17 @@ export function ProtoSetDialog({
                             <button
                               type="button"
                               onClick={() => openMethod(s.name, m)}
-                              className="group flex w-full items-center gap-3 px-3 py-2 text-left text-xs hover:bg-panel-2"
+                              className="group flex w-full items-center gap-3 px-3 py-2 text-start text-xs hover:bg-panel-2"
                             >
                               <span className="font-mono font-medium">{m.name}</span>
                               <span className="hidden min-w-0 truncate font-mono text-xs text-subtle lg:inline">
                                 {m.inputType.split(".").pop()} → {m.outputType.split(".").pop()}
                               </span>
-                              <span className="ml-auto shrink-0 rounded-sm bg-panel-2 px-2 py-0.5 text-xs text-muted">
+                              <span className="ms-auto shrink-0 rounded-sm bg-panel-2 px-2 py-0.5 text-xs text-muted">
                                 {streamingLabel(m)}
                               </span>
                               <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-accent opacity-0 group-hover:opacity-100">
-                                New request <Icon name="arrowRight" size={12} />
+                                {t("protos.newRequest")} <Icon name="arrowRight" size={12} />
                               </span>
                             </button>
                           </li>

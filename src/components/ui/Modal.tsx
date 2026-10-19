@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
 import { IconButton } from "./controls";
 
@@ -14,6 +15,7 @@ interface ModalProps {
 }
 
 export function Modal({ title, onClose, children, footer, className, bare = false }: ModalProps) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -53,14 +55,14 @@ export function Modal({ title, onClose, children, footer, className, bare = fals
         aria-modal="true"
         aria-label={typeof title === "string" ? title : undefined}
         className={cn(
-          "flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden glass rounded-md border border-line",
+          "glass flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-md border border-line",
           className,
         )}
       >
         {!bare && (
-          <header className="flex h-10 items-center justify-between border-b border-line pr-2 pl-4">
+          <header className="flex h-10 items-center justify-between border-b border-line ps-4 pe-2">
             <h2 className="text-sm font-medium">{title}</h2>
-            <IconButton icon="x" label="Close" onClick={onClose} />
+            <IconButton icon="x" label={t("actions.close")} onClick={onClose} />
           </header>
         )}
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>

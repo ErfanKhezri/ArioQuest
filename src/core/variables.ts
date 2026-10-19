@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+import type { app } from "@/i18n/locales/en";
 import { uuid } from "@/lib/id";
 
 /** Resolves a variable name to its value, or undefined when unknown. */
@@ -11,24 +13,31 @@ const FIRST_NAMES = ["Ava", "Liam", "Noah", "Emma", "Sara", "Arian", "Mina", "Le
 const LAST_NAMES = ["Smith", "Rahimi", "Garcia", "Chen", "Novak", "Karimi", "Silva", "Berg"];
 const pick = <T>(items: readonly T[]): T => items[randomInt(0, items.length - 1)] as T;
 
+type DynamicKey = keyof typeof app.dynamicVariables;
+
+/** The description is a getter so it follows the current language. */
+const dynamic = (key: DynamicKey, value: () => string) => ({
+  get description() {
+    return t(`dynamicVariables.${key}`);
+  },
+  value,
+});
+
 /** Built-in `{{$name}}` variables, evaluated fresh on every use. */
 export const dynamicVariables: Record<string, { description: string; value: () => string }> = {
-  $guid: { description: "Random UUID v4", value: () => uuid() },
-  $uuid: { description: "Random UUID v4", value: () => uuid() },
-  $timestamp: {
-    description: "Unix timestamp in seconds",
-    value: () => String(Math.floor(Date.now() / 1000)),
-  },
-  $timestampMs: { description: "Unix timestamp in milliseconds", value: () => String(Date.now()) },
-  $isoTimestamp: { description: "Current time, ISO 8601", value: () => new Date().toISOString() },
-  $randomInt: { description: "Random integer 0–1000", value: () => String(randomInt(0, 1000)) },
-  $randomBoolean: { description: "true or false", value: () => String(Math.random() < 0.5) },
-  $randomFirstName: { description: "Random first name", value: () => pick(FIRST_NAMES) },
-  $randomLastName: { description: "Random last name", value: () => pick(LAST_NAMES) },
-  $randomEmail: {
-    description: "Random email address",
-    value: () => `${pick(FIRST_NAMES).toLowerCase()}.${randomInt(100, 9999)}@example.com`,
-  },
+  $guid: dynamic("uuid", () => uuid()),
+  $uuid: dynamic("uuid", () => uuid()),
+  $timestamp: dynamic("timestamp", () => String(Math.floor(Date.now() / 1000))),
+  $timestampMs: dynamic("timestampMs", () => String(Date.now())),
+  $isoTimestamp: dynamic("isoTimestamp", () => new Date().toISOString()),
+  $randomInt: dynamic("randomInt", () => String(randomInt(0, 1000))),
+  $randomBoolean: dynamic("randomBoolean", () => String(Math.random() < 0.5)),
+  $randomFirstName: dynamic("randomFirstName", () => pick(FIRST_NAMES)),
+  $randomLastName: dynamic("randomLastName", () => pick(LAST_NAMES)),
+  $randomEmail: dynamic(
+    "randomEmail",
+    () => `${pick(FIRST_NAMES).toLowerCase()}.${randomInt(100, 9999)}@example.com`,
+  ),
 };
 
 const resolveOne = (name: string, resolve: VariableResolver): string | undefined =>

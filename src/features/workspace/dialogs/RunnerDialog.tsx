@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, Field, Input, Spinner, Toggle } from "@/components/ui/controls";
@@ -9,6 +10,7 @@ import { cancelRequest } from "@/core/http";
 import { executeRequest } from "@/core/runner";
 import { findItem, flattenRequests, requestLabel } from "@/core/tree";
 import type { RunResult } from "@/core/types";
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 import { cn } from "@/lib/cn";
 import { formatDuration } from "@/lib/files";
@@ -38,7 +40,7 @@ function outcomeStatus(result: RunResult): { text: string; ok: boolean; timeMs?:
       ok: outcome.response.ok,
       timeMs: outcome.response.timeMs,
     };
-  return { text: "Error", ok: false };
+  return { text: t("defaults.error"), ok: false };
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -50,6 +52,7 @@ export function RunnerDialog({
   collectionId: string;
   folderId?: string;
 }) {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const collection = useWorkspace((s) => s.collections.find((c) => c.id === collectionId));
 
@@ -71,7 +74,10 @@ export function RunnerDialog({
 
   if (!collection) return null;
   const folderName = folderId ? findItem(collection.items, folderId) : undefined;
-  const title = `Run ${folderName?.type === "folder" ? `${collection.name} / ${folderName.name}` : collection.name}`;
+  const title = t("runner.title", {
+    name:
+      folderName?.type === "folder" ? `${collection.name} / ${folderName.name}` : collection.name,
+  });
 
   const run = async () => {
     const queue = scope.filter((s) => selected.has(s.item.id));
@@ -138,7 +144,7 @@ export function RunnerDialog({
       footer={
         <>
           {rows.length > 0 && (
-            <span className="mr-auto flex items-center gap-4 text-xs">
+            <span className="me-auto flex items-center gap-4 text-xs">
               <Ario
                 mood={
                   running
@@ -156,33 +162,33 @@ export function RunnerDialog({
                       : "text-success"
                 }
               />
-              <span className="text-success">{passed} passed</span>
+              <span className="text-success">{t("runner.passed", { count: passed })}</span>
               <span className={allTests.length - passed ? "text-danger" : "text-subtle"}>
-                {allTests.length - passed} failed
+                {t("runner.failed", { count: allTests.length - passed })}
               </span>
               <span className="text-subtle">
-                {rows.length} requests{failedRequests ? ` (${failedRequests} with errors)` : ""} ·{" "}
+                {t("runner.requestCount", { count: rows.length })}
+                {failedRequests ? t("runner.withErrors", { count: failedRequests }) : ""} ·{" "}
                 {formatDuration(totalTime)}
               </span>
             </span>
           )}
           {running ? (
             <Button variant="secondary" onClick={stop}>
-              <Icon name="stop" size={13} /> Stop
+              <Icon name="stop" size={13} /> {t("actions.stop")}
             </Button>
           ) : (
             <Button onClick={() => void run()} disabled={selected.size === 0}>
-              <Icon name="play" size={13} /> Run {selected.size} request
-              {selected.size === 1 ? "" : "s"}
+              <Icon name="play" size={13} /> {t("runner.run", { count: selected.size })}
             </Button>
           )}
         </>
       }
     >
       <div className="grid min-h-[420px] md:grid-cols-[260px_1fr]">
-        <div className="border-b border-line p-4 md:border-r md:border-b-0">
+        <div className="border-b border-line p-4 md:border-e md:border-b-0">
           <div className="mb-2 flex items-center justify-between text-xs text-subtle">
-            <span className="font-medium">Requests</span>
+            <span className="font-medium">{t("runner.requests")}</span>
             <button
               type="button"
               className="hover:text-fg"
@@ -192,7 +198,7 @@ export function RunnerDialog({
                 )
               }
             >
-              {selected.size === scope.length ? "Select none" : "Select all"}
+              {selected.size === scope.length ? t("runner.selectNone") : t("runner.selectAll")}
             </button>
           </div>
           <ul className="max-h-56 space-y-0.5 overflow-y-auto">
@@ -213,11 +219,13 @@ export function RunnerDialog({
                 </label>
               </li>
             ))}
-            {scope.length === 0 && <li className="text-xs text-subtle">No requests to run.</li>}
+            {scope.length === 0 && (
+              <li className="text-xs text-subtle">{t("runner.noRequests")}</li>
+            )}
           </ul>
           <div className="mt-4 space-y-3 border-t border-line pt-4">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Iterations">
+              <Field label={t("runner.iterations")}>
                 <Input
                   type="number"
                   min={1}
@@ -228,7 +236,7 @@ export function RunnerDialog({
                   }
                 />
               </Field>
-              <Field label="Delay (ms)">
+              <Field label={t("runner.delay")}>
                 <Input
                   type="number"
                   min={0}
@@ -239,14 +247,11 @@ export function RunnerDialog({
               </Field>
             </div>
             <Toggle
-              label="Stop on first failure"
+              label={t("runner.stopOnFailure")}
               checked={stopOnFailure}
               onChange={setStopOnFailure}
             />
-            <p className="text-xs text-subtle">
-              Requests run in order with the active environment. Extracted variables carry over to
-              the following requests.
-            </p>
+            <p className="text-xs text-subtle">{t("runner.hint")}</p>
           </div>
         </div>
 
@@ -254,7 +259,7 @@ export function RunnerDialog({
           {rows.length === 0 && !running ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-xs text-subtle">
               <Icon name="play" size={20} className="text-subtle" />
-              Results appear here as each request finishes.
+              {t("runner.resultsHint")}
             </div>
           ) : (
             <ul className="divide-y divide-line">
@@ -267,7 +272,7 @@ export function RunnerDialog({
                     <button
                       type="button"
                       onClick={() => setExpanded(open ? null : row.key)}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-xs hover:bg-panel-2/60"
+                      className="flex w-full items-center gap-3 px-4 py-2 text-start text-xs hover:bg-panel-2/60"
                     >
                       <Icon
                         name={status.ok && failedTests === 0 ? "checkCircle" : "alert"}
@@ -281,16 +286,16 @@ export function RunnerDialog({
                         )}
                         <span className="font-medium">{row.name}</span>
                         {iterations > 1 && (
-                          <span className="ml-2 text-xs text-subtle">#{row.iteration}</span>
+                          <span className="ms-2 text-xs text-subtle">#{row.iteration}</span>
                         )}
                       </span>
                       <span className={cn("font-mono", status.ok ? "text-success" : "text-danger")}>
                         {status.text}
                       </span>
-                      <span className="w-16 text-right text-subtle">
+                      <span className="w-16 text-end text-subtle">
                         {status.timeMs !== undefined ? formatDuration(status.timeMs) : "—"}
                       </span>
-                      <span className="w-14 text-right text-subtle">
+                      <span dir="ltr" className="w-14 text-end text-subtle">
                         {row.result.tests.length
                           ? `${row.result.tests.length - failedTests}/${row.result.tests.length}`
                           : "—"}
@@ -304,7 +309,7 @@ export function RunnerDialog({
                     {open && (
                       <div className="space-y-1 bg-panel-2/40 px-12 py-2 text-xs">
                         {row.result.outcome.kind === "error" && (
-                          <p className="selectable font-mono break-words text-danger">
+                          <p dir="auto" className="selectable font-mono break-words text-danger">
                             {row.result.outcome.message}
                           </p>
                         )}
@@ -321,7 +326,10 @@ export function RunnerDialog({
                             <span>
                               {t.name}
                               {t.message && (
-                                <span className="selectable block font-mono text-xs text-muted">
+                                <span
+                                  dir="auto"
+                                  className="selectable block font-mono text-xs text-muted"
+                                >
                                   {t.message}
                                 </span>
                               )}
@@ -329,14 +337,18 @@ export function RunnerDialog({
                           </p>
                         ))}
                         {row.result.logs.map((l, i) => (
-                          <p key={`log-${i}`} className="selectable font-mono text-xs text-subtle">
+                          <p
+                            key={`log-${i}`}
+                            dir="ltr"
+                            className="selectable text-left font-mono text-xs text-subtle"
+                          >
                             {l}
                           </p>
                         ))}
                         {row.result.tests.length === 0 &&
                           row.result.outcome.kind !== "error" &&
                           row.result.logs.length === 0 && (
-                            <p className="text-subtle">No tests defined for this request.</p>
+                            <p className="text-subtle">{t("runner.noTests")}</p>
                           )}
                       </div>
                     )}
@@ -346,7 +358,9 @@ export function RunnerDialog({
               {running && current && (
                 <li className="flex items-center gap-3 px-4 py-2 text-xs text-subtle">
                   <Spinner className="text-accent" />
-                  Running {scope.find((s) => s.item.id === current)?.item.request.name}…
+                  {t("runner.running", {
+                    name: scope.find((s) => s.item.id === current)?.item.request.name,
+                  })}
                 </li>
               )}
             </ul>

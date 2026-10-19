@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { KeyValueEditor } from "@/components/ui/KeyValueEditor";
 import { Modal } from "@/components/ui/Modal";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/controls";
 import { useWorkspace } from "@/store/workspace";
 
 export function EnvironmentDialog({ environmentId }: { environmentId: string | "globals" }) {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const environment = useWorkspace((s) => s.environments.find((e) => e.id === environmentId));
   const globals = useWorkspace((s) => s.globals);
@@ -18,7 +20,7 @@ export function EnvironmentDialog({ environmentId }: { environmentId: string | "
 
   return (
     <Modal
-      title={isGlobals ? "Global variables" : "Edit environment"}
+      title={isGlobals ? t("environment.globalsTitle") : t("environment.editTitle")}
       onClose={closeDialog}
       className="max-w-3xl"
       footer={
@@ -26,13 +28,13 @@ export function EnvironmentDialog({ environmentId }: { environmentId: string | "
           {environment && environment.id !== activeId && (
             <Button
               variant="secondary"
-              className="mr-auto"
+              className="me-auto"
               onClick={() => setActive(environment.id)}
             >
-              Set as active
+              {t("environment.setActive")}
             </Button>
           )}
-          <Button onClick={closeDialog}>Done</Button>
+          <Button onClick={closeDialog}>{t("actions.done")}</Button>
         </>
       }
     >
@@ -42,15 +44,13 @@ export function EnvironmentDialog({ environmentId }: { environmentId: string | "
             <Input
               value={environment.name}
               onChange={(e) => updateEnvironment(environment.id, { name: e.target.value })}
-              aria-label="Environment name"
+              aria-label={t("environment.name")}
               className="h-9 text-sm font-medium"
             />
           </div>
         )}
         <p className="px-4 text-xs text-subtle">
-          {isGlobals
-            ? "Globals are available in every request. Variables in the active environment override them."
-            : "Changes are saved automatically. Scripts can update these with aq.environment.set()."}
+          {isGlobals ? t("environment.globalsHint") : t("environment.hint")}
         </p>
         <KeyValueEditor
           rows={isGlobals ? globals : (environment?.variables ?? [])}
@@ -59,8 +59,7 @@ export function EnvironmentDialog({ environmentId }: { environmentId: string | "
               ? setGlobals(variables)
               : environment && updateEnvironment(environment.id, { variables })
           }
-          keyPlaceholder="Variable"
-          valuePlaceholder="Value"
+          keyPlaceholder={t("environment.variable")}
           secret
           showDescription
         />
