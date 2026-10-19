@@ -5,5 +5,5 @@
       "@/*": ["../src/*"]
     }
   },
-  "include": ["src", "../src/vite-env.d.ts"]
+  "include": ["src", "../src/vite-env.d.ts", "../src/i18n/i18next.d.ts"]
 }

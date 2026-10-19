@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { EnvironmentPicker } from "@/features/workspace/EnvironmentPicker";
 import { cn } from "@/lib/cn";
 import { isWebDemo } from "@/lib/demo";
@@ -6,6 +7,7 @@ import { useWorkspace } from "@/store/workspace";
 
 /** Active environment on the left, connection state on the right. Nothing else. */
 export function StatusBar() {
+  const { t } = useTranslation();
   const running = useWorkspace((s) => Object.keys(s.running).length);
   const desktop = isTauri();
 
@@ -14,20 +16,16 @@ export function StatusBar() {
       <EnvironmentPicker />
       <span
         className="flex items-center gap-2"
-        title={
-          desktop
-            ? undefined
-            : "Browser preview: HTTP uses fetch (CORS applies), gRPC is unavailable"
-        }
+        title={desktop ? undefined : t("status.browserPreviewHint")}
       >
         <span className={cn("size-1.5 rounded-full", desktop ? "bg-success" : "bg-warning")} />
         {running > 0
-          ? `Sending ${running}…`
+          ? t("status.sending", { count: running })
           : desktop
-            ? "Ready"
+            ? t("status.ready")
             : isWebDemo
-              ? "Web demo"
-              : "Browser preview"}
+              ? t("status.webDemo")
+              : t("status.browserPreview")}
       </span>
     </footer>
   );

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 import { newHttpRequest, newKeyValue, normalizeRequest } from "./factory";
 import { syncParamsFromUrl } from "./url";
@@ -39,9 +40,9 @@ export function importJson(text: string): ImportResult {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("The file is not valid JSON.");
+    throw new Error(t("errors.invalidJsonFile"));
   }
-  if (!data || typeof data !== "object") throw new Error("Unsupported file.");
+  if (!data || typeof data !== "object") throw new Error(t("errors.unsupportedFile"));
   const obj = data as Record<string, unknown>;
 
   if (obj.format === NATIVE_FORMAT) return importNative(obj as unknown as NativeExport);
@@ -49,9 +50,7 @@ export function importJson(text: string): ImportResult {
   if (Array.isArray(obj.values) && typeof obj.name === "string") {
     return { collections: [], environments: [importV2Environment(obj)], protoSets: [] };
   }
-  throw new Error(
-    "Unrecognized format. Supported: ArioQuest exports, v2.0/v2.1 collection files and environment files.",
-  );
+  throw new Error(t("errors.unknownFormat"));
 }
 
 function importNative(data: NativeExport): ImportResult {
@@ -178,7 +177,7 @@ function convertV2Request(item: PmItem, inheritedAuth?: PmAuth): ApiRequest {
   const url = typeof pm.url === "string" ? pm.url : (pm.url?.raw ?? "");
 
   const request = newHttpRequest({
-    name: item.name ?? "Request",
+    name: item.name ?? t("importers.request"),
     method: HTTP_METHODS.includes(method) ? method : "GET",
     url,
     headers: pmKvs(pm.header),
@@ -209,7 +208,10 @@ function convertV2Request(item: PmItem, inheritedAuth?: PmAuth): ApiRequest {
     request.body.formdata = (body.formdata ?? []).map((f) => ({
       ...newKeyValue(text(f.key), f.type === "file" ? "" : text(f.value), !f.disabled),
       type: f.type === "file" ? "file" : "text",
-      description: f.type === "file" ? `Attach ${text(f.src)}` : description(f.description),
+      description:
+        f.type === "file"
+          ? t("importers.attach", { file: text(f.src) })
+          : description(f.description),
     }));
   } else if (body?.mode === "graphql") {
     request.body.mode = "graphql";
@@ -236,7 +238,7 @@ function convertV2Items(items: PmItem[], auth?: PmAuth): CollectionItem[] {
       ? {
           type: "folder",
           id: uid("fld"),
-          name: item.name ?? "Folder",
+          name: item.name ?? t("importers.folder"),
           items: convertV2Items(item.item, item.auth ?? auth),
         }
       : { type: "request", id: uid("item"), request: convertV2Request(item, auth) },
@@ -245,7 +247,7 @@ function convertV2Items(items: PmItem[], auth?: PmAuth): CollectionItem[] {
 
 function importV2Collection(obj: Record<string, unknown>): ImportResult {
   const info = (obj.info ?? {}) as { name?: string; description?: unknown };
-  const name = info.name ?? "Imported collection";
+  const name = info.name ?? t("importers.collection");
   const collection: Collection = {
     id: uid("col"),
     name,
@@ -254,7 +256,7 @@ function importV2Collection(obj: Record<string, unknown>): ImportResult {
   };
   const variables = pmKvs(obj.variable as PmKV[] | undefined);
   const environments = variables.length
-    ? [{ id: uid("env"), name: `${name} variables`, variables }]
+    ? [{ id: uid("env"), name: t("importers.variables", { name }), variables }]
     : [];
   return { collections: [collection], environments, protoSets: [] };
 }
@@ -263,7 +265,7 @@ function importV2Environment(obj: Record<string, unknown>): Environment {
   const values = (obj.values as Array<PmKV & { enabled?: boolean }>) ?? [];
   return {
     id: uid("env"),
-    name: text(obj.name) || "Imported environment",
+    name: text(obj.name) || t("importers.environment"),
     variables: values.map((v) => newKeyValue(text(v.key), text(v.value), v.enabled !== false)),
   };
 }

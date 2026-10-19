@@ -27,6 +27,7 @@ import type {
   RunResult,
 } from "@/core/types";
 import type { GrpcSchemaSource } from "@/lib/tauri";
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 import { workspaceStorage } from "@/lib/storage";
 import { newKeyValue } from "@/core/factory";
@@ -159,7 +160,7 @@ function historySummary(result: RunResult): HistoryEntry["summary"] {
     const { statusName, ok, timeMs } = outcome.response;
     return { status: statusName, ok, timeMs };
   }
-  return { status: "Error", ok: false };
+  return { status: t("defaults.error"), ok: false };
 }
 
 const tabFor = (request: ApiRequest, origin?: Tab["origin"]): Tab => ({
@@ -384,7 +385,7 @@ export const useWorkspace = create<WorkspaceState>()(
           const copy: Collection = {
             ...source,
             id: uid("col"),
-            name: `${source.name} copy`,
+            name: t("defaults.copyOf", { name: source.name }),
             items: source.items.map(cloneItem),
           };
           set({ collections: [...get().collections, copy] });
@@ -476,7 +477,7 @@ export const useWorkspace = create<WorkspaceState>()(
           if (!env) return;
           const copy: Environment = {
             id: uid("env"),
-            name: `${env.name} copy`,
+            name: t("defaults.copyOf", { name: env.name }),
             variables: env.variables.map((v) => ({ ...v, id: uid("kv") })),
           };
           set({ environments: [...get().environments, copy] });
@@ -562,7 +563,9 @@ export const useWorkspace = create<WorkspaceState>()(
           const fromEnv = env?.variables.find((v) => v.enabled && v.key === name);
           if (fromEnv && env) return { value: fromEnv.value, scope: env.name };
           const fromGlobals = get().globals.find((v) => v.enabled && v.key === name);
-          return fromGlobals ? { value: fromGlobals.value, scope: "Globals" } : undefined;
+          return fromGlobals
+            ? { value: fromGlobals.value, scope: t("defaults.globals") }
+            : undefined;
         },
       };
     },

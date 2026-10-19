@@ -47,6 +47,18 @@
   }
 }
 
+/*
+ * Persian: Vazirmatn, whose Latin letters are drawn to sit next to the Persian
+ * ones, and no letter-spacing, which pulls joined Persian letters apart.
+ */
+:root[dir="rtl"] {
+  --font-sans: "Vazirmatn Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+:root[dir="rtl"] body * {
+  letter-spacing: normal;
+}
+
 /* Frosted surface for things that float over content: dialogs, menus, toasts. */
 .glass {
   background-color: var(--glass);

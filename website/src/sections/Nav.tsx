@@ -1,13 +1,16 @@
 import { m } from "motion/react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
 import { DownloadButton, GitHubMark, StarIcon } from "../components/Actions";
+import { LanguageMenu } from "../components/LanguageMenu";
 import { DEMO_URL, REPO_URL, useStars } from "../lib/github";
 import { press } from "../lib/motion";
 
 function ThemeToggle() {
+  const { t } = useTranslation("site");
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme ?? "dark");
   const next = theme === "dark" ? "light" : "dark";
 
@@ -26,7 +29,7 @@ function ThemeToggle() {
       {...press}
       type="button"
       onClick={toggle}
-      aria-label={`Switch to ${next} mode`}
+      aria-label={next === "light" ? t("nav.toLight") : t("nav.toDark")}
       className="inline-flex size-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-panel-2 hover:text-fg"
     >
       <Icon name={theme === "dark" ? "sun" : "moon"} size={17} />
@@ -38,6 +41,7 @@ const link =
   "rounded-md px-3 py-2 text-small text-muted transition-colors hover:bg-panel-2 hover:text-fg";
 
 export function Nav() {
+  const { t } = useTranslation("site");
   const [scrolled, setScrolled] = useState(false);
   const stars = useStars();
 
@@ -58,16 +62,16 @@ export function Nav() {
       <nav className="page flex h-16 items-center gap-1">
         <a
           href="#top"
-          className="mr-auto flex items-center gap-2 rounded-md py-1 pr-2 font-semibold"
+          className="me-auto flex items-center gap-2 rounded-md py-1 pe-2 font-semibold"
         >
           <Ario size={28} className="text-accent" />
           <span className="text-[17px] tracking-tight">ArioQuest</span>
         </a>
         <a href="#features" className={cn(link, "hidden md:inline-flex")}>
-          Features
+          {t("nav.features")}
         </a>
         <a href={DEMO_URL} className={cn(link, "hidden md:inline-flex")}>
-          Try online
+          {t("nav.tryOnline")}
         </a>
         <a
           href={REPO_URL}
@@ -82,8 +86,9 @@ export function Nav() {
             </span>
           )}
         </a>
+        <LanguageMenu />
         <ThemeToggle />
-        <span className="ml-1">
+        <span className="ms-1">
           <DownloadButton compact />
         </span>
       </nav>

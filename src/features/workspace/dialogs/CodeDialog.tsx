@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -9,6 +10,7 @@ import { notify } from "@/store/toasts";
 import { useWorkspace } from "@/store/workspace";
 
 export function CodeDialog({ tabId }: { tabId: string }) {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const request = useWorkspace((s) => s.tabs.find((t) => t.id === tabId)?.request);
   const resolveVariable = useWorkspace((s) => s.resolveVariable);
@@ -27,29 +29,29 @@ export function CodeDialog({ tabId }: { tabId: string }) {
 
   return (
     <Modal
-      title="Generate code"
+      title={t("code.title")}
       onClose={closeDialog}
       className="max-w-2xl"
       footer={
         <>
-          <label className="mr-auto flex items-center gap-2 text-xs text-muted">
+          <label className="me-auto flex items-center gap-2 text-xs text-muted">
             <input
               type="checkbox"
               checked={resolve}
               onChange={(e) => setResolve(e.target.checked)}
               className="accent-accent"
             />
-            Resolve variables
+            {t("code.resolveVariables")}
           </label>
           <Button
             onClick={() =>
               navigator.clipboard.writeText(code).then(
-                () => notify.success("Copied to clipboard."),
-                () => notify.error("Could not access the clipboard."),
+                () => notify.success(t("notices.copied")),
+                () => notify.error(t("notices.clipboardFailed")),
               )
             }
           >
-            <Icon name="copy" size={14} /> Copy
+            <Icon name="copy" size={14} /> {t("actions.copy")}
           </Button>
         </>
       }

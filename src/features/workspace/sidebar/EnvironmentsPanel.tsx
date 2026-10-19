@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
@@ -10,6 +11,7 @@ import { useWorkspace } from "@/store/workspace";
 import { SidebarShell } from "./SidebarShell";
 
 export function EnvironmentsPanel() {
+  const { t } = useTranslation();
   const environments = useWorkspace((s) => s.environments);
   const globals = useWorkspace((s) => s.globals);
   const activeId = useWorkspace((s) => s.activeEnvironmentId);
@@ -20,23 +22,30 @@ export function EnvironmentsPanel() {
   const deleteEnvironment = useWorkspace((s) => s.deleteEnvironment);
 
   const create = () => {
-    const id = createEnvironment(`Environment ${environments.length + 1}`);
+    const id = createEnvironment(t("defaults.environment", { number: environments.length + 1 }));
     openDialog({ type: "environment", environmentId: id });
   };
 
   return (
     <SidebarShell
-      title="Environments"
+      title={t("environments.title")}
       actions={
         <>
-          <IconButton icon="import" label="Import" onClick={() => openDialog({ type: "import" })} />
-          <IconButton icon="plus" label="New environment" onClick={create} />
+          <IconButton
+            icon="import"
+            label={t("actions.import")}
+            onClick={() => openDialog({ type: "import" })}
+          />
+          <IconButton icon="plus" label={t("environments.new")} onClick={create} />
         </>
       }
       footer={
         <p className="text-xs text-subtle">
-          Reference variables as <code className="font-mono text-fg">{"{{name}}"}</code> in URLs,
-          headers, bodies and metadata. The active environment wins over globals.
+          <Trans
+            i18nKey="environments.footer"
+            values={{ example: "{{name}}" }}
+            components={{ code: <code className="font-mono text-fg" /> }}
+          />
         </p>
       }
     >
@@ -44,21 +53,28 @@ export function EnvironmentsPanel() {
         <button
           type="button"
           onClick={() => openDialog({ type: "environment", environmentId: "globals" })}
-          className="flex min-h-8 w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm hover:bg-panel-2"
+          className="flex min-h-8 w-full items-center gap-2 rounded-md px-2 py-1 text-start text-sm hover:bg-panel-2"
         >
           <Icon name="globe" size={14} className="text-subtle" />
-          <span className="flex-1 font-medium">Globals</span>
-          <span className="text-xs text-subtle">{globals.length} vars</span>
+          <span className="flex-1 font-medium">{t("defaults.globals")}</span>
+          <span className="text-xs text-subtle">
+            {t("environments.variableCount", { count: globals.length })}
+          </span>
         </button>
 
-        <h3 className="px-2 pt-3 pb-1 text-xs font-medium text-subtle">Environments</h3>
+        <h3 className="px-2 pt-3 pb-1 text-xs font-medium text-subtle">
+          {t("environments.title")}
+        </h3>
         {environments.length === 0 && (
           <p className="px-2 py-2 text-xs text-subtle">
-            None yet.{" "}
-            <button type="button" onClick={create} className="text-accent hover:underline">
-              Create one
-            </button>{" "}
-            for each stage (local, staging, production…).
+            <Trans
+              i18nKey="environments.noneYet"
+              components={{
+                create: (
+                  <button type="button" onClick={create} className="text-accent hover:underline" />
+                ),
+              }}
+            />
           </p>
         )}
         <ul>
@@ -80,7 +96,7 @@ export function EnvironmentsPanel() {
                 >
                   <button
                     type="button"
-                    title={active ? "Active — click to deactivate" : "Set as active"}
+                    title={active ? t("environments.activeTitle") : t("environments.setAsActive")}
                     onClick={(e) => {
                       e.stopPropagation();
                       setActive(active ? null : env.id);
@@ -96,27 +112,27 @@ export function EnvironmentsPanel() {
                   </button>
                   <span className="min-w-0 flex-1 truncate font-medium">{env.name}</span>
                   <span className="text-xs text-subtle group-hover:hidden">
-                    {env.variables.length} vars
+                    {t("environments.variableCount", { count: env.variables.length })}
                   </span>
                   <Menu
                     items={[
                       {
-                        label: active ? "Deactivate" : "Set active",
+                        label: active ? t("environments.deactivate") : t("environments.setActive"),
                         icon: "check",
                         onSelect: () => setActive(active ? null : env.id),
                       },
                       {
-                        label: "Edit",
+                        label: t("actions.edit"),
                         icon: "edit",
                         onSelect: () => openDialog({ type: "environment", environmentId: env.id }),
                       },
                       {
-                        label: "Duplicate",
+                        label: t("actions.duplicate"),
                         icon: "copy",
                         onSelect: () => duplicateEnvironment(env.id),
                       },
                       {
-                        label: "Export",
+                        label: t("actions.export"),
                         icon: "download",
                         onSelect: async () => {
                           if (
@@ -125,17 +141,19 @@ export function EnvironmentsPanel() {
                               exportNative({ environments: [env] }),
                             )
                           ) {
-                            notify.success("Environment exported.");
+                            notify.success(t("environments.exported"));
                           }
                         },
                       },
                       {
-                        label: "Delete",
+                        label: t("actions.delete"),
                         icon: "trash",
                         danger: true,
                         separatorBefore: true,
                         onSelect: async () => {
-                          if (await confirmAction(`Delete the environment "${env.name}"?`))
+                          if (
+                            await confirmAction(t("environments.deleteConfirm", { name: env.name }))
+                          )
                             deleteEnvironment(env.id);
                         },
                       },
@@ -143,7 +161,7 @@ export function EnvironmentsPanel() {
                     trigger={({ toggle }) => (
                       <IconButton
                         icon="dots"
-                        label="Environment actions"
+                        label={t("environments.actions")}
                         size={14}
                         className="hidden size-6 group-hover:inline-flex"
                         onClick={toggle}

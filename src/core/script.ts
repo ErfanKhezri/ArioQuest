@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { AssertionError, expect, show, type ResponseLike } from "./expect";
 import type { ResponseView } from "./response";
 import type { TestResult } from "./types";
@@ -149,8 +150,8 @@ export async function runScript(code: string, ctx: ScriptContext): Promise<Scrip
     await fn(api, api, consoleShim, expect);
     await Promise.all(pending);
   } catch (err) {
-    const label = ctx.phase === "pre" ? "Pre-request script" : "Test script";
-    tests.push({ name: `${label} error`, passed: false, message: errorMessage(err) });
+    const name = ctx.phase === "pre" ? t("errors.preScript") : t("errors.testScript");
+    tests.push({ name, passed: false, message: errorMessage(err) });
   }
   return { tests, logs };
 }

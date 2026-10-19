@@ -24,7 +24,7 @@ const JSON_COLORS = [
 export function JsonLine({ text }: { text: string }) {
   const parts = text.split(/("[^"]*"\s*:|"[^"]*"|-?\d+(?:\.\d+)?|true|false|null)/g);
   return (
-    <div className="truncate whitespace-pre">
+    <div dir="ltr" className="truncate text-left whitespace-pre">
       {parts.map((p, i) => (
         <span key={i} className={JSON_COLORS.find((c) => c.test(p))?.className ?? "text-muted"}>
           {p}
@@ -37,7 +37,7 @@ export function JsonLine({ text }: { text: string }) {
 /** Text with `{{variables}}` highlighted the way the URL bar shows them. */
 export function VarText({ text }: { text: string }) {
   return (
-    <>
+    <bdi dir="ltr">
       {text.split(/(\{\{[^}]*\}\}?)/g).map((p, i) =>
         p.startsWith("{{") ? (
           <span key={i} className="rounded-sm bg-accent/15 text-[var(--syn-key)]">
@@ -47,6 +47,6 @@ export function VarText({ text }: { text: string }) {
           p
         ),
       )}
-    </>
+    </bdi>
   );
 }

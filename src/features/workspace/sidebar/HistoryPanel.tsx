@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { EmptyState, IconButton } from "@/components/ui/controls";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { requestLabel, requestTarget } from "@/core/tree";
 import type { HistoryEntry } from "@/core/types";
+import { i18n, t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { confirmAction } from "@/lib/confirm";
 import { formatDuration } from "@/lib/files";
@@ -16,12 +18,13 @@ function dayLabel(ts: number): string {
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return "Today";
-  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  if (d.toDateString() === today.toDateString()) return t("history.today");
+  if (d.toDateString() === yesterday.toDateString()) return t("history.yesterday");
+  return d.toLocaleDateString(i18n.language, { weekday: "short", month: "short", day: "numeric" });
 }
 
 export function HistoryPanel() {
+  const { t } = useTranslation();
   const history = useWorkspace((s) => s.history);
   const openHistoryEntry = useWorkspace((s) => s.openHistoryEntry);
   const deleteHistoryEntry = useWorkspace((s) => s.deleteHistoryEntry);
@@ -49,28 +52,28 @@ export function HistoryPanel() {
 
   return (
     <SidebarShell
-      title="History"
+      title={t("history.title")}
       actions={
         history.length > 0 && (
           <IconButton
             icon="trash"
-            label="Clear history"
+            label={t("history.clear")}
             tone="danger"
             onClick={async () => {
-              if (await confirmAction("Clear all request history?")) clearHistory();
+              if (await confirmAction(t("history.clearConfirm"))) clearHistory();
             }}
           />
         )
       }
       search={
         history.length
-          ? { value: query, onChange: setQuery, placeholder: "Search history" }
+          ? { value: query, onChange: setQuery, placeholder: t("history.search") }
           : undefined
       }
     >
       {history.length === 0 ? (
-        <EmptyState title="No history yet" mood="sleepy">
-          Every request you send is recorded here so you can reopen it later.
+        <EmptyState title={t("history.emptyTitle")} mood="sleepy">
+          {t("history.emptyBody")}
         </EmptyState>
       ) : (
         groups.map((group) => (
@@ -84,12 +87,12 @@ export function HistoryPanel() {
                     tabIndex={0}
                     onClick={() => openHistoryEntry(h.id)}
                     onKeyDown={(e) => e.key === "Enter" && openHistoryEntry(h.id)}
-                    className="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-panel-2"
+                    className="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-start hover:bg-panel-2"
                     title={historyTarget(h)}
                   >
                     <MethodBadge method={requestLabel(h.request)} className="w-10 text-xs" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-mono text-xs">
+                      <span dir="auto" className="block truncate text-start font-mono text-xs">
                         {historyTarget(h) || h.request.name}
                       </span>
                       <span className="flex gap-2 text-xs text-subtle">
@@ -100,7 +103,7 @@ export function HistoryPanel() {
                           <span>{formatDuration(h.summary.timeMs)}</span>
                         )}
                         <span>
-                          {new Date(h.timestamp).toLocaleTimeString(undefined, {
+                          {new Date(h.timestamp).toLocaleTimeString(i18n.language, {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
@@ -109,7 +112,7 @@ export function HistoryPanel() {
                     </span>
                     <IconButton
                       icon="x"
-                      label="Remove from history"
+                      label={t("history.remove")}
                       size={12}
                       className="hidden size-6 group-hover:inline-flex"
                       onClick={(e) => {

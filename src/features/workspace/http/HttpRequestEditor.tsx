@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { VariableInput } from "@/components/editor/VariableInput";
 import { Field, Input, Toggle } from "@/components/ui/controls";
 import { KeyValueEditor } from "@/components/ui/KeyValueEditor";
@@ -7,6 +8,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { looksLikeCurl, parseCurl } from "@/core/curl";
 import { applyParamsToUrl, syncParamsFromUrl } from "@/core/url";
 import { HTTP_METHODS, type HttpMethodName, type HttpRequest } from "@/core/types";
+import { inEveryLanguage, t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { notify } from "@/store/toasts";
 import { type Tab, useWorkspace } from "@/store/workspace";
@@ -17,15 +19,21 @@ import { SendControls } from "../SendControls";
 import { AuthEditor } from "./AuthEditor";
 import { BodyEditor } from "./BodyEditor";
 
-const bodyLabel: Partial<Record<HttpRequest["body"]["mode"], string>> = {
-  json: "JSON",
-  text: "Text",
-  xml: "XML",
-  html: "HTML",
-  urlencoded: "Form",
-  formdata: "Multipart",
-  graphql: "GraphQL",
-  binary: "File",
+const bodyLabel = (mode: HttpRequest["body"]["mode"]): string | undefined => {
+  switch (mode) {
+    case "none":
+      return undefined;
+    case "json":
+      return "JSON";
+    case "xml":
+      return "XML";
+    case "html":
+      return "HTML";
+    case "graphql":
+      return "GraphQL";
+    default:
+      return t(`http.bodyBadge.${mode}`);
+  }
 };
 
 const authLabel: Partial<Record<HttpRequest["auth"]["type"], string>> = {
@@ -37,6 +45,7 @@ const authLabel: Partial<Record<HttpRequest["auth"]["type"], string>> = {
 type Section = "params" | "headers" | "body" | "auth" | "scripts" | "tests" | "settings";
 
 export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpRequest }) {
+  const { t } = useTranslation();
   const update = useRequestUpdater(tab.id, "http");
   const sendTab = useWorkspace((s) => s.sendTab);
   const [section, setSection] = useState<Section>(request.body.mode !== "none" ? "body" : "params");
@@ -51,9 +60,9 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
       update((r) => ({
         ...parsed,
         id: r.id,
-        name: r.name === "Untitled request" ? parsed.name : r.name,
+        name: inEveryLanguage("defaults.untitledRequest").includes(r.name) ? parsed.name : r.name,
       }));
-      notify.success("Imported cURL command.");
+      notify.success(t("http.curlImported"));
       return true;
     } catch {
       return false;
@@ -69,11 +78,11 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
       <div className="flex items-center gap-2 p-2">
         <div className="flex h-7 min-w-0 flex-1 items-center rounded-md border border-line bg-panel focus-within:border-accent">
           <select
-            aria-label="HTTP method"
+            aria-label={t("http.method")}
             value={request.method}
             onChange={(e) => update((r) => ({ ...r, method: e.target.value as HttpMethodName }))}
             className={cn(
-              "h-full cursor-pointer rounded-l-md border-r border-line bg-transparent pr-1 pl-2 font-mono text-xs font-medium outline-none",
+              "h-full cursor-pointer rounded-s-md border-e border-line bg-transparent ps-2 pe-1 font-mono text-xs font-medium outline-none",
               methodTextClasses[request.method],
             )}
           >
@@ -88,8 +97,8 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
             onChange={setUrl}
             onPasteText={pasteCurl}
             onEnter={() => void sendTab(tab.id)}
-            placeholder="Enter a URL or paste a cURL command"
-            ariaLabel="Request URL"
+            placeholder={t("http.urlPlaceholder")}
+            ariaLabel={t("http.url")}
             className="px-2"
           />
         </div>
@@ -100,17 +109,17 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
         value={section}
         onChange={setSection}
         tabs={[
-          { id: "params", label: "Params", badge: count(request.params) },
-          { id: "headers", label: "Headers", badge: count(request.headers) },
-          { id: "body", label: "Body", badge: bodyLabel[request.body.mode] },
-          { id: "auth", label: "Auth", badge: authLabel[request.auth.type] },
-          { id: "scripts", label: "Scripts", badge: scripts },
+          { id: "params", label: t("request.params"), badge: count(request.params) },
+          { id: "headers", label: t("request.headers"), badge: count(request.headers) },
+          { id: "body", label: t("request.body"), badge: bodyLabel(request.body.mode) },
+          { id: "auth", label: t("request.auth"), badge: authLabel[request.auth.type] },
+          { id: "scripts", label: t("request.scripts"), badge: scripts },
           {
             id: "tests",
-            label: "Tests",
+            label: t("request.tests"),
             badge: request.assertions.filter((a) => a.enabled).length,
           },
-          { id: "settings", label: "Settings" },
+          { id: "settings", label: t("request.settings") },
         ]}
       />
 
@@ -122,7 +131,7 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
               onChange={(params) =>
                 update((r) => ({ ...r, params, url: applyParamsToUrl(r.url, params) }))
               }
-              keyPlaceholder="Parameter"
+              keyPlaceholder={t("http.parameter")}
               showDescription
             />
           </div>
@@ -132,13 +141,10 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
             <KeyValueEditor
               rows={request.headers}
               onChange={(headers) => update((r) => ({ ...r, headers }))}
-              keyPlaceholder="Header"
+              keyPlaceholder={t("http.header")}
               showDescription
             />
-            <p className="px-3 pb-3 text-xs text-subtle">
-              Content-Type, Authorization and User-Agent are added automatically from the body and
-              auth settings unless you set them here.
-            </p>
+            <p className="px-3 pb-3 text-xs text-subtle">{t("http.headersHint")}</p>
           </div>
         )}
         {section === "body" && (
@@ -163,23 +169,23 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
           <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
             <div className="max-w-lg divide-y divide-line">
               <Toggle
-                label="Follow redirects"
-                description="Automatically follow 3xx responses (up to 10)."
+                label={t("http.followRedirects")}
+                description={t("http.followRedirectsHint")}
                 checked={request.settings.followRedirects}
                 onChange={(followRedirects) =>
                   update((r) => ({ ...r, settings: { ...r.settings, followRedirects } }))
                 }
               />
               <Toggle
-                label="Verify TLS certificates"
-                description="Turn off for local servers with self-signed certificates."
+                label={t("http.verifyTls")}
+                description={t("http.verifyTlsHint")}
                 checked={request.settings.verifyTls}
                 onChange={(verifyTls) =>
                   update((r) => ({ ...r, settings: { ...r.settings, verifyTls } }))
                 }
               />
               <div className="py-3">
-                <Field label="Timeout (ms)" hint="0 disables the timeout.">
+                <Field label={t("http.timeout")} hint={t("http.timeoutHint")}>
                   <Input
                     type="number"
                     min={0}
@@ -199,12 +205,13 @@ export function HttpRequestEditor({ tab, request }: { tab: Tab; request: HttpReq
                 </Field>
               </div>
               <div className="py-3">
-                <Field label="Description">
+                <Field label={t("request.description")}>
                   <textarea
                     value={request.description ?? ""}
                     onChange={(e) => update((r) => ({ ...r, description: e.target.value }))}
                     rows={4}
-                    placeholder="What does this request do?"
+                    dir="auto"
+                    placeholder={t("http.descriptionPlaceholder")}
                     className="w-full resize-y rounded-md border border-line bg-panel p-2 text-sm outline-none focus:border-accent"
                   />
                 </Field>

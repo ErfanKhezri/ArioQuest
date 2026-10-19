@@ -10,6 +10,7 @@ import {
 } from "@codemirror/view";
 import { useMemo } from "react";
 import { dynamicVariables } from "@/core/variables";
+import { t } from "@/i18n";
 import { useWorkspace } from "@/store/workspace";
 
 type Lookup = (name: string) => { value: string; scope: string } | undefined;
@@ -20,13 +21,15 @@ function highlighter(lookup: Lookup): Extension {
     decoration: (match) => {
       const name = match[1] ?? "";
       const dynamic = dynamicVariables[name];
-      const found = dynamic ? { value: dynamic.description, scope: "dynamic" } : lookup(name);
+      const found = dynamic
+        ? { value: dynamic.description, scope: t("editor.dynamicScope") }
+        : lookup(name);
       return Decoration.mark({
         class: found ? "cm-var" : "cm-var cm-var-missing",
         attributes: {
           title: found
             ? `${name} = ${found.value}  (${found.scope})`
-            : `${name} is not defined in the active environment or globals`,
+            : t("editor.variableUndefined", { name }),
         },
       });
     },
@@ -81,7 +84,7 @@ export function useVariableExtensions(): Extension[] {
       }
     };
     env?.variables.filter((v) => v.enabled).forEach((v) => add(v.key, env.name));
-    globals.filter((v) => v.enabled).forEach((v) => add(v.key, "Globals"));
+    globals.filter((v) => v.enabled).forEach((v) => add(v.key, t("defaults.globals")));
     Object.entries(dynamicVariables).forEach(([k, d]) => add(k, d.description));
 
     return [

@@ -12,7 +12,7 @@ interface SidebarShellProps {
 export function SidebarShell({ title, actions, search, children, footer }: SidebarShellProps) {
   return (
     <aside className="glass-panel flex w-64 shrink-0 flex-col overflow-hidden bg-panel">
-      <header className="flex h-9 shrink-0 items-center justify-between border-b border-line pr-1 pl-3">
+      <header className="flex h-9 shrink-0 items-center justify-between border-b border-line ps-3 pe-1">
         <h2 className="text-xs text-muted">{title}</h2>
         <div className="flex items-center">{actions}</div>
       </header>
@@ -23,6 +23,7 @@ export function SidebarShell({ title, actions, search, children, footer }: Sideb
             value={search.value}
             onChange={(e) => search.onChange(e.target.value)}
             placeholder={search.placeholder}
+            dir="auto"
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-subtle"
           />
         </label>
@@ -46,6 +47,7 @@ export function RenameInput({
     <input
       autoFocus
       defaultValue={initial}
+      dir="auto"
       onFocus={(e) => e.target.select()}
       onClick={(e) => e.stopPropagation()}
       onBlur={(e) => onDone(cancelled.current ? null : e.target.value.trim() || null)}

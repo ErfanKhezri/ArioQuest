@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 import { evaluateAssertion, runExtractions } from "./assertions";
 import { invokeGrpc, prepareGrpcCall } from "./grpc";
@@ -131,7 +132,7 @@ export async function executeRequest(original: ApiRequest, ctx: RunContext): Pro
     }
   } else if (request.assertions.some((a) => a.enabled) || request.testScript.trim()) {
     tests.push({
-      name: "Request completed",
+      name: t("errors.requestCompleted"),
       passed: false,
       message: (outcome as { message: string }).message,
     });
