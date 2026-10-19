@@ -1,0 +1,13 @@
+# Runs update.sh once. ario-website-update.timer starts it every minute.
+# Install: copy to /etc/systemd/system/ together with ario-website-update.timer.
+
+[Unit]
+Description=Install the latest ArioQuest website build
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# erfan owns /var/www/arioquest.
+User=erfan
+ExecStart=/var/www/arioquest/update.sh

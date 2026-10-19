@@ -1,3 +1,4 @@
 # Files copied to the Linux server must keep Linux line endings (LF), even when
 # checked out on Windows; systemd misreads a unit file with CRLF line endings.
-deploy/* text eol=lf
+deploy/** text eol=lf
+**/deploy/** text eol=lf
