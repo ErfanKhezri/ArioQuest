@@ -1,0 +1,22 @@
+# Caddy config for the whole server, one block per site. Caddy gets and renews
+# the HTTPS certificate for every domain below by itself.
+#
+# Install: copy to /etc/caddy/Caddyfile, then
+#   sudo systemctl reload caddy
+
+# The website (landing page + the browser demo at /app).
+# website/deploy/update.sh installs new builds into /var/www/arioquest/current.
+arioquest.ir {
+	root * /var/www/arioquest/current
+	encode gzip
+	file_server
+}
+
+www.arioquest.ir {
+	redir https://arioquest.ir{uri} permanent
+}
+
+# The backend API (backend/deploy/ario-api.service).
+api.arioquest.ir {
+	reverse_proxy 127.0.0.1:8080
+}

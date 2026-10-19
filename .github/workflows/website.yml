@@ -1,5 +1,9 @@
 # Builds the website (landing page + the web demo at /app) and publishes it to GitHub Pages.
 # One-time setup: Settings → Pages → Source: "GitHub Actions".
+#
+# It also publishes a build for https://arioquest.ir to the "website-latest" pre-release;
+# the server checks that release every minute and installs new builds
+# (see website/deploy/update.sh).
 name: Website
 
 on:
@@ -51,3 +55,49 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # A second build for our own server, which serves the site at the domain root ("/").
+  publish-for-server:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create and update the release
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm site:build
+
+      # The server checks version.txt to see whether there is a new build, and
+      # website.tar.gz.sha256 to make sure the download is complete.
+      - name: Pack the site
+        run: |
+          tar --create --gzip --file website.tar.gz --directory website/dist .
+          sha256sum website.tar.gz > website.tar.gz.sha256
+          echo "$GITHUB_SHA" > version.txt
+
+      # A pre-release, so the "latest release" link still points to the Windows app.
+      - name: Create the release if it does not exist
+        run: |
+          gh release view website-latest > /dev/null 2>&1 ||
+            gh release create website-latest --prerelease --target "$GITHUB_SHA" \
+              --title "Website (latest build)" \
+              --notes "Latest build of arioquest.ir from master. The server installs it automatically."
+
+      # version.txt goes last: the server only sees a new version once its files are there.
+      - name: Upload the build
+        run: |
+          gh release upload website-latest website.tar.gz website.tar.gz.sha256 --clobber
+          gh release upload website-latest version.txt --clobber
