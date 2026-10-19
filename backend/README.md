@@ -100,6 +100,31 @@ Sign-up errors: `400` for invalid input, `409` when the email already has an acc
 Sign-in returns `401` for a wrong email or password. A token is valid for 30 days or until
 sign-out.
 
+## Database
+
+SQLite, in one file (`/var/lib/ario-api/ario.db` on the server, `ario.db` locally). The tables
+are created by [`migrations.go`](internal/platform/database/migrations.go); keep this diagram
+in sync when you add a migration.
+
+```mermaid
+erDiagram
+    users ||--o{ sessions : "signs in with"
+
+    users {
+        INTEGER id PK
+        TEXT name
+        TEXT email UK "lowercase"
+        TEXT password_hash "bcrypt, never the password"
+        INTEGER created_at "Unix seconds"
+    }
+
+    sessions {
+        TEXT token_hash PK "SHA-256 of the token, never the token"
+        INTEGER user_id FK "deleted with the user"
+        INTEGER expires_at "Unix seconds, 30 days after sign-in"
+    }
+```
+
 ## Layout
 
 Code is grouped by feature. Each feature has three layers, and each layer only calls the one
