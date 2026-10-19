@@ -52,7 +52,7 @@ export function Tabs<T extends string>({
           </button>
         );
       })}
-      {trailing && <div className="ml-auto flex items-center gap-1">{trailing}</div>}
+      {trailing && <div className="ms-auto flex items-center gap-1">{trailing}</div>}
     </div>
   );
 }
@@ -77,7 +77,7 @@ export function Segmented<T extends string>({
           type="button"
           onClick={() => onChange(o.value)}
           className={cn(
-            "h-6 px-2 text-xs first:rounded-l-md last:rounded-r-md",
+            "h-6 px-2 text-xs first:rounded-s-md last:rounded-e-md",
             o.value === value ? "bg-panel-2 text-fg" : "text-subtle hover:text-fg",
           )}
         >

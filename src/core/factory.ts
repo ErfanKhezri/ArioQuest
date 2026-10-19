@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 import type {
   ApiRequest,
@@ -39,7 +40,7 @@ export function newHttpRequest(partial: Partial<HttpRequest> = {}): HttpRequest 
   return {
     kind: "http",
     id: uid("req"),
-    name: "Untitled request",
+    name: t("defaults.untitledRequest"),
     method: "GET",
     url: "",
     params: [],
@@ -70,7 +71,7 @@ export function newGrpcRequest(partial: Partial<GrpcRequest> = {}): GrpcRequest 
   return {
     kind: "grpc",
     id: uid("req"),
-    name: "Untitled gRPC call",
+    name: t("defaults.untitledGrpc"),
     target: "localhost:50051",
     tls: false,
     source: { type: "reflection" },

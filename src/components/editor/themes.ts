@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 /**
  * Editor color themes as plain data. `themeExtension.ts` turns one of these into
  * a CodeMirror extension; the settings UI edits them.
@@ -18,18 +19,6 @@ export const tokenKeys = [
 ] as const;
 
 export type TokenKey = (typeof tokenKeys)[number];
-
-export const tokenLabels: Record<TokenKey, string> = {
-  text: "Plain text",
-  key: "Keys",
-  string: "Strings",
-  number: "Numbers",
-  boolean: "Booleans",
-  null: "Null",
-  punctuation: "Brackets & punctuation",
-  comment: "Comments",
-  keyword: "Keywords",
-};
 
 export interface EditorTheme {
   id: string;
@@ -221,20 +210,20 @@ export function parseTheme(json: string, id: string): EditorTheme {
   try {
     data = JSON.parse(json);
   } catch {
-    throw new Error("The file is not valid JSON.");
+    throw new Error(t("errors.invalidJsonFile"));
   }
-  if (!data || typeof data !== "object") throw new Error("The file is not a theme.");
+  if (!data || typeof data !== "object") throw new Error(t("themeErrors.notTheme"));
   const raw = data as Record<string, unknown>;
 
   const name = typeof raw.name === "string" ? raw.name.trim() : "";
-  if (!name) throw new Error("The theme has no name.");
+  if (!name) throw new Error(t("themeErrors.noName"));
   if (raw.mode !== "dark" && raw.mode !== "light") {
-    throw new Error('The theme mode must be "dark" or "light".');
+    throw new Error(t("themeErrors.badMode"));
   }
-  const base = presetThemes.find((t) => t.mode === raw.mode)!;
+  const base = presetThemes.find((theme) => theme.mode === raw.mode)!;
 
   const background = normalizeHex(String(raw.background ?? base.background));
-  if (!background) throw new Error("The theme background must be a hex color.");
+  if (!background) throw new Error(t("themeErrors.badBackground"));
 
   const rawColors = (raw.colors && typeof raw.colors === "object" ? raw.colors : {}) as Record<
     string,
@@ -244,7 +233,7 @@ export function parseTheme(json: string, id: string): EditorTheme {
   for (const key of tokenKeys) {
     if (rawColors[key] === undefined) continue;
     const hex = normalizeHex(String(rawColors[key]));
-    if (!hex) throw new Error(`The color for "${key}" must be a hex color.`);
+    if (!hex) throw new Error(t("themeErrors.badColor", { key }));
     colors[key] = hex;
   }
 

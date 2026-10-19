@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { t } from "@/i18n";
 import { notify } from "@/store/toasts";
 import { useWorkspace } from "@/store/workspace";
 
@@ -23,11 +24,11 @@ export function useShortcuts() {
         if (s.running[tabId]) s.cancelTab(tabId);
         else void s.sendTab(tabId);
       } else if (key === "s" && tabId && inWorkspace) {
-        if (s.saveTab(tabId)) notify.success("Saved.");
+        if (s.saveTab(tabId)) notify.success(t("notices.saved"));
       } else if (key === "n" && e.shiftKey) {
-        s.createCollection("New collection");
+        s.createCollection(t("defaults.newCollection"));
         s.showSection("collections");
-        notify.success("Created a collection.");
+        notify.success(t("shortcuts.collectionCreated"));
       } else if (key === "n") {
         s.newTab("http");
       } else if (key === "w" && tabId && inWorkspace) {

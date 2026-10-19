@@ -166,13 +166,16 @@ const paths = {
 
 export type IconName = keyof typeof paths;
 
+/** Icons that point forward or back, mirrored in right-to-left layouts. */
+const directional = new Set<IconName>(["arrowRight", "chevronRight", "send"]);
+
 interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;
   size?: number;
 }
 
 /** Inline stroke icon set (no network fetch, CSP friendly). */
-export function Icon({ name, size = 18, ...props }: IconProps) {
+export function Icon({ name, size = 18, className, ...props }: IconProps) {
   return (
     <svg
       width={size}
@@ -184,6 +187,7 @@ export function Icon({ name, size = 18, ...props }: IconProps) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      className={directional.has(name) ? `rtl:-scale-x-100 ${className ?? ""}` : className}
       {...props}
     >
       {paths[name]}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/controls";
 import { Menu } from "@/components/ui/Menu";
 import { useAppMode } from "@/lib/appTheme";
@@ -6,6 +7,7 @@ import { activeTheme, themeByName, themeNames } from "./themes";
 
 /** Palette button that switches the editor theme without opening Settings. */
 export function ThemeMenu() {
+  const { t } = useTranslation();
   const settings = useWorkspace((s) => s.editorSettings);
   const update = useWorkspace((s) => s.updateEditorSettings);
   const openDialog = useWorkspace((s) => s.openDialog);
@@ -22,13 +24,15 @@ export function ThemeMenu() {
           onSelect: () => update({ themeId: themeByName(settings, name, mode).id }),
         })),
         {
-          label: "Customize…",
+          label: t("editor.customize"),
           icon: "sliders",
           separatorBefore: true,
           onSelect: () => openDialog({ type: "settings" }),
         },
       ]}
-      trigger={({ toggle }) => <IconButton icon="palette" label="Editor theme" onClick={toggle} />}
+      trigger={({ toggle }) => (
+        <IconButton icon="palette" label={t("editor.themeMenu")} onClick={toggle} />
+      )}
     />
   );
 }

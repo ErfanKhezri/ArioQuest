@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor";
 import { Button } from "@/components/ui/Button";
 import { KeyValueEditor } from "@/components/ui/KeyValueEditor";
@@ -5,19 +6,20 @@ import { Icon } from "@/components/ui/Icon";
 import { IconButton, Select } from "@/components/ui/controls";
 import { newKeyValue } from "@/core/factory";
 import type { BodyMode, FormField, HttpBodyConfig } from "@/core/types";
+import { t } from "@/i18n";
 import { formatBytes, pickFiles, readFileData } from "@/lib/files";
 import { notify } from "@/store/toasts";
 
-const modes: Array<{ value: BodyMode; label: string }> = [
-  { value: "none", label: "None" },
+const modes = (): Array<{ value: BodyMode; label: string }> => [
+  { value: "none", label: t("body.modes.none") },
   { value: "json", label: "JSON" },
-  { value: "text", label: "Text" },
+  { value: "text", label: t("body.modes.text") },
   { value: "xml", label: "XML" },
   { value: "html", label: "HTML" },
-  { value: "urlencoded", label: "URL-encoded" },
-  { value: "formdata", label: "Form data" },
+  { value: "urlencoded", label: t("body.modes.urlencoded") },
+  { value: "formdata", label: t("body.modes.formdata") },
   { value: "graphql", label: "GraphQL" },
-  { value: "binary", label: "Binary" },
+  { value: "binary", label: t("body.modes.binary") },
 ];
 
 const editorLanguage: Partial<Record<BodyMode, EditorLanguage>> = {
@@ -33,7 +35,7 @@ async function chooseFile() {
   const [file] = await pickFiles();
   if (!file) return undefined;
   if (file.size > MAX_FILE_BYTES) {
-    notify.error(`${file.name} is larger than 50 MB.`);
+    notify.error(t("body.tooLarge", { name: file.name }));
     return undefined;
   }
   return readFileData(file);
@@ -60,6 +62,7 @@ interface BodyEditorProps {
 }
 
 export function BodyEditor({ body, onChange }: BodyEditorProps) {
+  const { t } = useTranslation();
   const set = (patch: Partial<HttpBodyConfig>) => onChange({ ...body, ...patch });
   const language = editorLanguage[body.mode];
 
@@ -67,31 +70,31 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 px-4 py-2">
         <Select
-          aria-label="Body type"
+          aria-label={t("body.type")}
           className="w-36"
           value={body.mode}
           onChange={(e) => set({ mode: e.target.value as BodyMode })}
-          options={modes}
+          options={modes()}
         />
         {body.mode === "json" && (
           <Button
             variant="ghost"
             size="sm"
-            className="ml-auto"
+            className="ms-auto"
             onClick={() => {
               const pretty = beautifyJson(body.raw);
-              if (pretty === null) notify.error("The body is not valid JSON.");
+              if (pretty === null) notify.error(t("body.notJson"));
               else set({ raw: pretty });
             }}
           >
-            <Icon name="braces" size={13} /> Beautify
+            <Icon name="braces" size={13} /> {t("body.beautify")}
           </Button>
         )}
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col border-t border-line">
         {body.mode === "none" && (
-          <p className="px-4 py-6 text-xs text-subtle">This request does not have a body.</p>
+          <p className="px-4 py-6 text-xs text-subtle">{t("body.noBody")}</p>
         )}
 
         {language && (
@@ -125,11 +128,11 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                 <select
                   value={row.type}
                   onChange={(e) => update({ type: e.target.value as FormField["type"] })}
-                  aria-label="Field type"
+                  aria-label={t("body.fieldType")}
                   className="h-8 cursor-pointer bg-transparent px-2 text-xs text-muted outline-none"
                 >
-                  <option value="text">Text</option>
-                  <option value="file">File</option>
+                  <option value="text">{t("body.text")}</option>
+                  <option value="file">{t("body.file")}</option>
                 </select>
               )}
               renderValue={(row, update) =>
@@ -142,9 +145,9 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                         <span className="shrink-0 text-subtle">{formatBytes(row.file.size)}</span>
                         <IconButton
                           icon="x"
-                          label="Remove file"
+                          label={t("body.removeFile")}
                           size={12}
-                          className="ml-auto size-6"
+                          className="ms-auto size-6"
                           onClick={() => update({ file: undefined })}
                         />
                       </>
@@ -158,7 +161,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                             update({ file, key: row.key || file.name.replace(/\.[^.]+$/, "") });
                         }}
                       >
-                        {row.description ?? "Choose file…"}
+                        {row.description ?? t("body.chooseFileLink")}
                       </button>
                     )}
                   </span>
@@ -171,7 +174,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
         {body.mode === "graphql" && (
           <div className="grid min-h-0 flex-1 grid-cols-[1.6fr_1fr]">
             <div className="flex min-h-0 flex-col">
-              <span className="px-4 pt-2 text-xs font-medium text-subtle">Query</span>
+              <span className="px-4 pt-2 text-xs font-medium text-subtle">{t("body.query")}</span>
               <CodeEditor
                 value={body.graphql.query}
                 onChange={(query) => set({ graphql: { ...body.graphql, query } })}
@@ -180,8 +183,10 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                 placeholder={"query GetUser($id: ID!) {\n  user(id: $id) { id name }\n}"}
               />
             </div>
-            <div className="flex min-h-0 flex-col border-l border-line">
-              <span className="px-4 pt-2 text-xs font-medium text-subtle">Variables (JSON)</span>
+            <div className="flex min-h-0 flex-col border-s border-line">
+              <span className="px-4 pt-2 text-xs font-medium text-subtle">
+                {t("body.graphqlVariables")}
+              </span>
               <CodeEditor
                 value={body.graphql.variables}
                 onChange={(variables) => set({ graphql: { ...body.graphql, variables } })}
@@ -205,7 +210,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                   {body.binary.contentType ?? "application/octet-stream"}
                 </span>
                 <Button variant="ghost" size="sm" onClick={() => set({ binary: undefined })}>
-                  Remove
+                  {t("actions.remove")}
                 </Button>
               </>
             ) : (
@@ -217,7 +222,7 @@ export function BodyEditor({ body, onChange }: BodyEditorProps) {
                   if (file) set({ binary: file });
                 }}
               >
-                <Icon name="upload" size={13} /> Choose file
+                <Icon name="upload" size={13} /> {t("body.chooseFile")}
               </Button>
             )}
           </div>

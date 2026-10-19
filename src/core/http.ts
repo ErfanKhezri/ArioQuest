@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import {
   type HttpBodyPayload,
   type HttpRequestPayload,
@@ -97,7 +98,7 @@ function buildBody(request: HttpRequest, v: (s: string) => string): HttpBodyPayl
         try {
           variables = JSON.parse(rawVars);
         } catch {
-          throw new Error("GraphQL variables are not valid JSON");
+          throw new Error(t("errors.graphqlVariables"));
         }
       }
       return { type: "text", content: JSON.stringify({ query: v(body.graphql.query), variables }) };
@@ -223,11 +224,9 @@ async function sendWithFetch(payload: HttpRequestPayload): Promise<HttpResponseD
       timeMs: performance.now() - started,
     };
   } catch (err) {
-    if (controller.signal.aborted)
-      throw new Error("Request cancelled or timed out", { cause: err });
+    if (controller.signal.aborted) throw new Error(t("errors.cancelled"), { cause: err });
     throw new Error(
-      `Request failed — ${err instanceof Error ? err.message : String(err)}. ` +
-        "In the browser preview requests are limited by CORS; run the desktop app for full access.",
+      t("errors.requestFailed", { error: err instanceof Error ? err.message : String(err) }),
       { cause: err },
     );
   } finally {

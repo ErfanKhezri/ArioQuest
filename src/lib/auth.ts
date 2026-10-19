@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { isWebDemo } from "./demo";
 import { invokeCommand, isTauri } from "./tauri";
 
@@ -69,7 +70,7 @@ export async function signIn(email: string, password: string): Promise<Session> 
 }
 
 export async function signUp(name: string, email: string, password: string): Promise<Session> {
-  if (!name.trim()) throw new AuthError("Enter your name.", "name");
+  if (!name.trim()) throw new AuthError(t("login.errors.enterName"), "name");
   // TODO(auth): replace the mock with the real sign-up endpoint.
   const session = await mockAuthenticate(name.trim(), email, password);
   await writeSession(session);
@@ -89,17 +90,17 @@ async function mockDefaultAccount(): Promise<Session> {
 /** The only username (no "@") the mock knows is the default account. */
 async function mockWrongUsername(): Promise<never> {
   await new Promise((resolve) => setTimeout(resolve, 700));
-  throw new AuthError("Wrong username or password.", "password");
+  throw new AuthError(t("login.errors.wrongUsername"), "password");
 }
 
 /** Accepts any valid email with a password of at least 8 characters. */
 async function mockAuthenticate(name: string, email: string, password: string) {
   await new Promise((resolve) => setTimeout(resolve, 700));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-    throw new AuthError("Enter a valid email address.", "email");
+    throw new AuthError(t("login.errors.invalidEmail"), "email");
   }
   if (password.length < 8) {
-    throw new AuthError("Password must be at least 8 characters.", "password");
+    throw new AuthError(t("login.errors.shortPassword"), "password");
   }
   return { name, email: email.trim(), token: `mock-${crypto.randomUUID()}` };
 }

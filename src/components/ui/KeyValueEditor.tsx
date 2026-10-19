@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { newKeyValue } from "@/core/factory";
 import type { KeyValue } from "@/core/types";
 import { uid } from "@/lib/id";
@@ -56,8 +57,8 @@ function fromBulk<T extends KeyValue>(
 export function KeyValueEditor<T extends KeyValue>({
   rows,
   onChange,
-  keyPlaceholder = "Key",
-  valuePlaceholder = "Value",
+  keyPlaceholder,
+  valuePlaceholder,
   createRow = (id) => ({ ...newKeyValue(), id }) as T,
   renderValue,
   renderExtra,
@@ -66,6 +67,7 @@ export function KeyValueEditor<T extends KeyValue>({
   allowBulkEdit = true,
   className,
 }: KeyValueEditorProps<T>) {
+  const { t } = useTranslation();
   // The blank row's id is reserved up front so the focused input survives
   // the moment it turns into a real row.
   const [ghostId, setGhostId] = useState(() => uid("kv"));
@@ -88,11 +90,15 @@ export function KeyValueEditor<T extends KeyValue>({
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
       <div className="flex h-8 items-center justify-between px-3 text-xs text-subtle">
-        <span>{rows.length > 0 ? `${enabledCount} of ${rows.length} enabled` : " "}</span>
+        <span>
+          {rows.length > 0
+            ? t("keyValue.enabledCount", { enabled: enabledCount, total: rows.length })
+            : " "}
+        </span>
         <span className="flex items-center gap-2">
           {secret && (
             <button type="button" className="hover:text-fg" onClick={() => setRevealed(!revealed)}>
-              {revealed ? "Hide values" : "Show values"}
+              {revealed ? t("keyValue.hideValues") : t("keyValue.showValues")}
             </button>
           )}
           {allowBulkEdit && (
@@ -107,7 +113,7 @@ export function KeyValueEditor<T extends KeyValue>({
                 }
               }}
             >
-              {bulk === null ? "Bulk edit" : "Key-value edit"}
+              {bulk === null ? t("keyValue.bulkEdit") : t("keyValue.keyValueEdit")}
             </button>
           )}
         </span>
@@ -119,6 +125,7 @@ export function KeyValueEditor<T extends KeyValue>({
           onChange={(e) => setBulk(e.target.value)}
           onBlur={() => onChange(fromBulk(bulk, rows, createRow))}
           spellCheck={false}
+          dir="ltr"
           placeholder={"key: value\n// disabled-key: value"}
           className="mx-3 mb-3 min-h-40 flex-1 resize-none rounded-md border border-line bg-panel p-2 font-mono text-xs outline-none focus:border-accent"
         />
@@ -141,27 +148,29 @@ export function KeyValueEditor<T extends KeyValue>({
                     <Checkbox
                       checked={row.enabled}
                       onChange={(enabled) => set({ enabled } as Partial<T>)}
-                      label="Enabled"
+                      label={t("keyValue.enabled")}
                     />
                   )}
                 </span>
                 <input
                   value={row.key}
                   onChange={(e) => set({ key: e.target.value } as Partial<T>)}
-                  placeholder={keyPlaceholder}
+                  placeholder={keyPlaceholder ?? t("keyValue.key")}
                   spellCheck={false}
+                  dir="auto"
                   className={cn(cellInput, "flex-1 border-x border-line")}
                 />
                 {renderExtra && (
-                  <span className="shrink-0 border-r border-line">{renderExtra(row, set)}</span>
+                  <span className="shrink-0 border-e border-line">{renderExtra(row, set)}</span>
                 )}
                 <span className="flex min-w-0 flex-[1.4]">
                   {customValue ?? (
                     <input
                       value={row.value}
                       onChange={(e) => set({ value: e.target.value } as Partial<T>)}
-                      placeholder={valuePlaceholder}
+                      placeholder={valuePlaceholder ?? t("keyValue.value")}
                       spellCheck={false}
+                      dir="auto"
                       type={secret && !revealed ? "password" : "text"}
                       className={cellInput}
                     />
@@ -171,10 +180,11 @@ export function KeyValueEditor<T extends KeyValue>({
                   <input
                     value={row.description ?? ""}
                     onChange={(e) => set({ description: e.target.value } as Partial<T>)}
-                    placeholder="Description"
+                    placeholder={t("keyValue.description")}
+                    dir="auto"
                     className={cn(
                       cellInput,
-                      "hidden flex-1 border-l border-line font-sans xl:block",
+                      "hidden flex-1 border-s border-line font-sans xl:block",
                     )}
                   />
                 )}
@@ -182,7 +192,7 @@ export function KeyValueEditor<T extends KeyValue>({
                   {!isGhost && (
                     <IconButton
                       icon="trash"
-                      label="Remove"
+                      label={t("actions.remove")}
                       size={13}
                       tone="danger"
                       className="size-6 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"

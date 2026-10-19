@@ -65,6 +65,7 @@ export function CodeEditor({
 
   return (
     <CodeMirror
+      dir="ltr"
       value={value}
       onChange={onChange}
       readOnly={readOnly}

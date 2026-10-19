@@ -24,7 +24,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 export function Select({ options, className, ...props }: SelectProps) {
   return (
     <span className={cn("relative inline-flex", className)}>
-      <select className={cn(inputClass, "cursor-pointer appearance-none pr-6")} {...props}>
+      <select className={cn(inputClass, "cursor-pointer appearance-none pe-6")} {...props}>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -34,7 +34,7 @@ export function Select({ options, className, ...props }: SelectProps) {
       <Icon
         name="chevronDown"
         size={12}
-        className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-subtle"
+        className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-subtle"
       />
     </span>
   );
@@ -123,7 +123,7 @@ export function Toggle({
         <span
           className={cn(
             "absolute top-0.5 size-3 rounded-full bg-white",
-            checked ? "left-3.5" : "left-0.5",
+            checked ? "start-3.5" : "start-0.5",
           )}
         />
       </button>

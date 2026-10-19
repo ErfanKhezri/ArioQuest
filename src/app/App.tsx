@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { Toaster } from "@/components/ui/Toaster";
 import { LandingPage } from "@/features/auth/LandingPage";
@@ -13,6 +14,7 @@ import { NavRail } from "./NavRail";
 import { StatusBar } from "./StatusBar";
 
 export function App() {
+  const { t, i18n } = useTranslation();
   const hydrated = useWorkspace((s) => s.hydrated);
   // undefined while the saved session is being read.
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -26,15 +28,16 @@ export function App() {
   if (!hydrated || session === undefined) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Ario mood="thinking" size={48} label="Loading ArioQuest" className="text-accent" />
+        <Ario mood="thinking" size={48} label={t("loading")} className="text-accent" />
       </div>
     );
   }
 
-  if (!session) return <LandingPage onSignedIn={setSession} />;
+  // Keyed by language so a switch re-renders text computed outside React too.
+  if (!session) return <LandingPage key={i18n.language} onSignedIn={setSession} />;
 
   return (
-    <div className="flex h-full flex-col text-fg">
+    <div key={i18n.language} className="flex h-full flex-col text-fg">
       {isWebDemo && <DemoBanner />}
       <div className="flex min-h-0 flex-1 gap-2 p-2">
         <NavRail

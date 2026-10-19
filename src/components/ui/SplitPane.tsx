@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
+import { isRtl } from "@/i18n/language";
 import { cn } from "@/lib/cn";
 
 interface SplitPaneProps {
@@ -29,10 +30,12 @@ export function SplitPane({
     const container = containerRef.current;
     if (!container) return;
     const rect = container.getBoundingClientRect();
+    // Right-to-left, the first pane sits on the right.
+    const rtl = isRtl();
     const onMove = (ev: PointerEvent) => {
       const pos = vertical
         ? (ev.clientY - rect.top) / rect.height
-        : (ev.clientX - rect.left) / rect.width;
+        : (rtl ? rect.right - ev.clientX : ev.clientX - rect.left) / rect.width;
       setRatio(Math.min(1 - min, Math.max(min, pos)));
     };
     const onUp = () => {
@@ -69,7 +72,7 @@ export function SplitPane({
         <span
           className={cn(
             "absolute z-10 group-hover:bg-accent/40",
-            vertical ? "inset-x-0 -top-1 h-2" : "inset-y-0 -left-1 w-2",
+            vertical ? "inset-x-0 -top-1 h-2" : "inset-y-0 -start-1 w-2",
           )}
         />
       </div>

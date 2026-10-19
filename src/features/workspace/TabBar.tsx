@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
 import { MethodBadge } from "@/components/ui/MethodBadge";
@@ -26,6 +27,7 @@ function useRenameTab() {
 }
 
 export function TabBar() {
+  const { t } = useTranslation();
   const tabs = useWorkspace((s) => s.tabs);
   const activeTabId = useWorkspace((s) => s.activeTabId);
   const activateTab = useWorkspace((s) => s.activateTab);
@@ -53,10 +55,18 @@ export function TabBar() {
               key={tab.id}
               align="start"
               items={[
-                { label: "Rename", icon: "edit", onSelect: () => setRenaming(tab.id) },
-                { label: "Duplicate", icon: "copy", onSelect: () => duplicateTab(tab.id) },
-                { label: "Close", icon: "x", onSelect: () => closeTab(tab.id) },
-                { label: "Close others", icon: "x", onSelect: () => closeOtherTabs(tab.id) },
+                { label: t("actions.rename"), icon: "edit", onSelect: () => setRenaming(tab.id) },
+                {
+                  label: t("actions.duplicate"),
+                  icon: "copy",
+                  onSelect: () => duplicateTab(tab.id),
+                },
+                { label: t("actions.close"), icon: "x", onSelect: () => closeTab(tab.id) },
+                {
+                  label: t("tabs.closeOthers"),
+                  icon: "x",
+                  onSelect: () => closeOtherTabs(tab.id),
+                },
               ]}
               trigger={({ toggle }) => (
                 <div
@@ -66,7 +76,7 @@ export function TabBar() {
                   title={
                     collection
                       ? `${collection.name} / ${tab.request.name}`
-                      : `${tab.request.name} (unsaved)`
+                      : t("tabs.unsaved", { name: tab.request.name })
                   }
                   onClick={() => activateTab(tab.id)}
                   onDoubleClick={() => setRenaming(tab.id)}
@@ -77,7 +87,7 @@ export function TabBar() {
                     toggle(e);
                   }}
                   className={cn(
-                    "group relative flex max-w-56 min-w-28 shrink-0 cursor-pointer items-center gap-2 border-r border-line pr-1 pl-3 text-sm",
+                    "group relative flex max-w-56 min-w-28 shrink-0 cursor-pointer items-center gap-2 border-e border-line ps-3 pe-1 text-sm",
                     active ? "bg-panel-2 text-fg" : "text-subtle hover:text-fg",
                   )}
                 >
@@ -87,7 +97,7 @@ export function TabBar() {
                     <input
                       autoFocus
                       defaultValue={tab.request.name}
-                      aria-label="Request name"
+                      aria-label={t("tabs.requestName")}
                       onFocus={(e) => e.target.select()}
                       onClick={(e) => e.stopPropagation()}
                       onBlur={(e) => {
@@ -110,13 +120,13 @@ export function TabBar() {
                       dirty && (
                         <span
                           className="size-1.5 rounded-full bg-subtle group-hover:hidden"
-                          title="Unsaved changes"
+                          title={t("tabs.unsavedChanges")}
                         />
                       )
                     )}
                     <button
                       type="button"
-                      aria-label={`Close ${tab.request.name}`}
+                      aria-label={t("tabs.closeTab", { name: tab.request.name })}
                       onClick={(e) => {
                         e.stopPropagation();
                         closeTab(tab.id);
@@ -138,11 +148,11 @@ export function TabBar() {
         <Menu
           align="start"
           items={[
-            { label: "HTTP request", icon: "globe", onSelect: () => newTab("http") },
-            { label: "gRPC request", icon: "server", onSelect: () => newTab("grpc") },
+            { label: t("tabs.httpRequest"), icon: "globe", onSelect: () => newTab("http") },
+            { label: t("tabs.grpcRequest"), icon: "server", onSelect: () => newTab("grpc") },
           ]}
           trigger={({ toggle }) => (
-            <IconButton icon="plus" label="New tab (Ctrl+N)" onClick={toggle} className="m-1" />
+            <IconButton icon="plus" label={t("tabs.newTab")} onClick={toggle} className="m-1" />
           )}
         />
       </div>

@@ -1,5 +1,6 @@
 import { m, useInView, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
 import { moodTextClass } from "@/components/ui/arioMood";
 import { cn } from "@/lib/cn";
@@ -37,7 +38,7 @@ function Tile({ field, strip, values, message, children }: TileProps) {
           strip,
         )}
       >
-        <span className="flex flex-wrap justify-between gap-x-3">
+        <span dir="ltr" className="flex flex-wrap justify-between gap-x-3">
           {values.map((v, i) => (
             <span key={i}>{v}</span>
           ))}
@@ -123,15 +124,15 @@ function Network() {
 }
 
 export default function Moods() {
+  const { t } = useTranslation("site");
   return (
     <m.section {...inView} className="page py-24 lg:py-40">
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <m.h2 variants={rise} className="text-title font-semibold lg:col-span-6">
-          Ario has feelings about 500s
+          {t("moods.title")}
         </m.h2>
         <m.p variants={rise} className="max-w-[52ch] lg:col-span-6 lg:pt-2">
-          Happy on a 2xx, curious on a redirect, upset on a 4xx and alarmed when the server breaks
-          or never answers. You know how a request went before you read the status line.
+          {t("moods.body")}
         </m.p>
       </div>
 
@@ -140,7 +141,7 @@ export default function Moods() {
           field="bg-panel"
           strip="bg-panel-2 text-fg"
           values={["GET", "/reports", "30 000 ms", "—"]}
-          message="Timed out"
+          message={t("moods.timedOut")}
         >
           <Timeout />
         </Tile>
@@ -164,7 +165,7 @@ export default function Moods() {
           field="bg-panel"
           strip="bg-fg text-canvas"
           values={["GET", "localhost:3000", "—", "—"]}
-          message="Connection refused"
+          message={t("moods.refused")}
         >
           <Network />
         </Tile>

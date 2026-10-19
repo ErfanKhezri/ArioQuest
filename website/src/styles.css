@@ -29,10 +29,30 @@
   --accent: oklch(0.55 0.16 255);
 }
 
+/*
+ * Persian: Vazirmatn, taller lines for its letters, and no negative tracking,
+ * which pulls joined Persian letters apart.
+ */
+:root[dir="rtl"] {
+  --font-sans: "Vazirmatn Variable", "Segoe UI", system-ui, sans-serif;
+  --text-hero--line-height: 1.3;
+  --text-title--line-height: 1.35;
+}
+
+:root[dir="rtl"] body * {
+  letter-spacing: normal;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 72px;
+  }
+
+  /* Nothing on the page may push it sideways on a phone; clip keeps the sticky nav working. */
+  html,
+  body {
+    overflow-x: clip;
   }
 
   body {

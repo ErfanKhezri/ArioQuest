@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Field, Input, Select } from "@/components/ui/controls";
@@ -23,6 +24,7 @@ function folderOptions(
 }
 
 export function SaveDialog({ tabId }: { tabId: string }) {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const tab = useWorkspace((s) => s.tabs.find((t) => t.id === tabId));
   const collections = useWorkspace((s) => s.collections);
@@ -33,7 +35,7 @@ export function SaveDialog({ tabId }: { tabId: string }) {
   const [collectionId, setCollectionId] = useState(
     tab?.origin?.collectionId ?? collections[0]?.id ?? NEW_COLLECTION,
   );
-  const [newCollectionName, setNewCollectionName] = useState("My collection");
+  const [newCollectionName, setNewCollectionName] = useState(t("defaults.myCollection"));
   const [folderId, setFolderId] = useState("");
 
   if (!tab) return null;
@@ -42,22 +44,22 @@ export function SaveDialog({ tabId }: { tabId: string }) {
   const save = () => {
     const target =
       collectionId === NEW_COLLECTION
-        ? createCollection(newCollectionName.trim() || "My collection")
+        ? createCollection(newCollectionName.trim() || t("defaults.myCollection"))
         : collectionId;
-    saveTabTo(tabId, target, folderId || null, name.trim() || "Untitled request");
-    notify.success("Saved to collection.");
+    saveTabTo(tabId, target, folderId || null, name.trim() || t("defaults.untitledRequest"));
+    notify.success(t("save.saved"));
   };
 
   return (
     <Modal
-      title="Save request"
+      title={t("save.title")}
       onClose={closeDialog}
       footer={
         <>
           <Button variant="ghost" onClick={closeDialog}>
-            Cancel
+            {t("actions.cancel")}
           </Button>
-          <Button onClick={save}>Save</Button>
+          <Button onClick={save}>{t("actions.save")}</Button>
         </>
       }
     >
@@ -68,10 +70,10 @@ export function SaveDialog({ tabId }: { tabId: string }) {
           save();
         }}
       >
-        <Field label="Request name">
+        <Field label={t("save.requestName")}>
           <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
-        <Field label="Collection">
+        <Field label={t("save.collection")}>
           <Select
             className="w-full"
             value={collectionId}
@@ -81,12 +83,12 @@ export function SaveDialog({ tabId }: { tabId: string }) {
             }}
             options={[
               ...collections.map((c) => ({ value: c.id, label: c.name })),
-              { value: NEW_COLLECTION, label: "+ New collection…" },
+              { value: NEW_COLLECTION, label: t("save.newCollectionOption") },
             ]}
           />
         </Field>
         {collectionId === NEW_COLLECTION && (
-          <Field label="New collection name">
+          <Field label={t("save.newCollectionName")}>
             <Input
               value={newCollectionName}
               onChange={(e) => setNewCollectionName(e.target.value)}
@@ -94,13 +96,13 @@ export function SaveDialog({ tabId }: { tabId: string }) {
           </Field>
         )}
         {collection && folderOptions(collection.items).length > 0 && (
-          <Field label="Folder">
+          <Field label={t("save.folder")}>
             <Select
               className="w-full"
               value={folderId}
               onChange={(e) => setFolderId(e.target.value)}
               options={[
-                { value: "", label: "(collection root)" },
+                { value: "", label: t("save.collectionRoot") },
                 ...folderOptions(collection.items),
               ]}
             />

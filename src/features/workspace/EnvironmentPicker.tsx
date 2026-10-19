@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
 import { useWorkspace } from "@/store/workspace";
 
 export function EnvironmentPicker() {
+  const { t } = useTranslation();
   const environments = useWorkspace((s) => s.environments);
   const activeId = useWorkspace((s) => s.activeEnvironmentId);
   const setActive = useWorkspace((s) => s.setActiveEnvironment);
@@ -13,7 +15,7 @@ export function EnvironmentPicker() {
       <label className="flex h-5 items-center gap-1 rounded-sm px-1 hover:bg-panel-2">
         <Icon name="globe" size={12} />
         <select
-          aria-label="Active environment"
+          aria-label={t("status.activeEnvironment")}
           value={activeId ?? ""}
           onChange={(e) => setActive(e.target.value || null)}
           className={cn(
@@ -21,7 +23,7 @@ export function EnvironmentPicker() {
             activeId ? "text-fg" : "text-subtle",
           )}
         >
-          <option value="">No environment</option>
+          <option value="">{t("status.noEnvironment")}</option>
           {environments.map((env) => (
             <option key={env.id} value={env.id}>
               {env.name}
@@ -35,7 +37,7 @@ export function EnvironmentPicker() {
         onClick={() => openDialog({ type: "environment", environmentId: activeId ?? "globals" })}
         className="rounded-sm px-1 hover:bg-panel-2 hover:text-fg"
       >
-        Variables
+        {t("status.variables")}
       </button>
     </div>
   );

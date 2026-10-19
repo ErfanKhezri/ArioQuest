@@ -1,21 +1,23 @@
 import { m, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { Icon } from "@/components/ui/Icon";
 import { MethodBadge } from "@/components/ui/MethodBadge";
 import { statusTextClass } from "@/components/ui/methodColors";
+import { isRtl } from "@/i18n/language";
 import { cn } from "@/lib/cn";
 import { Fragment } from "../components/Fragment";
-import { DEMO_URL } from "../lib/github";
 import { inView, press, rise, sleep } from "../lib/motion";
+import { DemoLink } from "../components/DemoLink";
 
 const REQUESTS = [
-  { name: "List posts", method: "GET", status: 200, ms: 142, tests: 2, failed: 0 },
-  { name: "Get post", method: "GET", status: 200, ms: 88, tests: 1, failed: 0 },
-  { name: "Create post", method: "POST", status: 201, ms: 318, tests: 2, failed: 0 },
-  { name: "Update post", method: "PUT", status: 200, ms: 201, tests: 1, failed: 0 },
-  { name: "Get missing post", method: "GET", status: 404, ms: 96, tests: 1, failed: 1 },
-  { name: "Delete post", method: "DELETE", status: 200, ms: 154, tests: 1, failed: 0 },
+  { name: "listPosts", method: "GET", status: 200, ms: 142, tests: 2, failed: 0 },
+  { name: "getPost", method: "GET", status: 200, ms: 88, tests: 1, failed: 0 },
+  { name: "createPost", method: "POST", status: 201, ms: 318, tests: 2, failed: 0 },
+  { name: "updatePost", method: "PUT", status: 200, ms: 201, tests: 1, failed: 0 },
+  { name: "getMissingPost", method: "GET", status: 404, ms: 96, tests: 1, failed: 1 },
+  { name: "deletePost", method: "DELETE", status: 200, ms: 154, tests: 1, failed: 0 },
 ] as const;
 
 type RowState = "waiting" | "running" | "done" | "skipped";
@@ -23,6 +25,7 @@ type RowState = "waiting" | "running" | "done" | "skipped";
 const allDone = (): RowState[] => REQUESTS.map(() => "done");
 
 function Stepper({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const { t } = useTranslation("site");
   const step =
     "inline-flex size-7 items-center justify-center rounded-sm text-muted hover:bg-panel-2 hover:text-fg disabled:opacity-40";
   return (
@@ -32,7 +35,7 @@ function Stepper({ value, onChange }: { value: number; onChange: (n: number) => 
         className={step}
         disabled={value <= 1}
         onClick={() => onChange(value - 1)}
-        aria-label="Fewer iterations"
+        aria-label={t("runner.fewer")}
       >
         −
       </button>
@@ -42,7 +45,7 @@ function Stepper({ value, onChange }: { value: number; onChange: (n: number) => 
         className={step}
         disabled={value >= 3}
         onClick={() => onChange(value + 1)}
-        aria-label="More iterations"
+        aria-label={t("runner.more")}
       >
         +
       </button>
@@ -51,6 +54,7 @@ function Stepper({ value, onChange }: { value: number; onChange: (n: number) => 
 }
 
 export default function Runner() {
+  const { t } = useTranslation("site");
   const reduced = useReducedMotion();
   const runId = useRef(0);
 
@@ -101,11 +105,10 @@ export default function Runner() {
     <m.section {...inView} className="page py-24 lg:py-40">
       <div className="mx-auto max-w-[1040px]">
         <m.h2 variants={rise} className="text-title font-semibold">
-          Run the whole collection
+          {t("runner.title")}
         </m.h2>
         <m.p variants={rise} className="mt-4 max-w-[56ch]">
-          Run a collection or folder in order, for several iterations, and see every request’s test
-          results. Change the settings on the right and run it again.
+          {t("runner.body")}
         </m.p>
 
         <m.div
@@ -124,14 +127,14 @@ export default function Runner() {
                   size={22}
                   className={running ? "text-accent" : failed ? "text-warning" : "text-success"}
                 />
-                <span className="font-medium">Getting started</span>
+                <span className="font-medium">{t("ui.collection")}</span>
                 <span className="text-muted tabular-nums">
-                  Iteration {iteration} of {iterations}
+                  {t("runner.iteration", { current: iteration, total: iterations })}
                 </span>
-                <span className="ml-auto tabular-nums">
-                  <span className="text-success">{passed} passed</span>
-                  <span className={cn("ml-3", failed ? "text-danger" : "text-muted")}>
-                    {failed} failed
+                <span className="ms-auto tabular-nums">
+                  <span className="text-success">{t("ui.passed", { count: passed })}</span>
+                  <span className={cn("ms-3", failed ? "text-danger" : "text-muted")}>
+                    {t("ui.failed", { count: failed })}
                   </span>
                 </span>
               </div>
@@ -166,7 +169,7 @@ export default function Runner() {
                           state === "skipped" ? "text-muted" : "text-fg",
                         )}
                       >
-                        {r.name}
+                        {t(`ui.requests.${r.name}`)}
                       </span>
                       {state === "done" && (
                         <m.span
@@ -175,17 +178,20 @@ export default function Runner() {
                           className="flex items-center gap-3 tabular-nums"
                         >
                           <span className={statusTextClass(r.status)}>{r.status}</span>
-                          <span className="hidden w-14 text-right text-muted sm:inline">
+                          <span dir="ltr" className="hidden w-14 text-end text-muted sm:inline">
                             {r.ms} ms
                           </span>
                           <span
-                            className={cn("w-10 text-right", fail ? "text-danger" : "text-success")}
+                            dir="ltr"
+                            className={cn("w-10 text-end", fail ? "text-danger" : "text-success")}
                           >
                             {r.tests - r.failed}/{r.tests}
                           </span>
                         </m.span>
                       )}
-                      {state === "skipped" && <span className="text-muted">Skipped</span>}
+                      {state === "skipped" && (
+                        <span className="text-muted">{t("runner.skipped")}</span>
+                      )}
                     </li>
                   );
                 })}
@@ -194,13 +200,13 @@ export default function Runner() {
 
             {/* settings */}
             <div className="flex flex-col bg-panel-2/60 py-3">
-              <p className="px-4 pb-2 text-xs font-medium text-muted">Run settings</p>
+              <p className="px-4 pb-2 text-xs font-medium text-muted">{t("runner.settings")}</p>
               <div className={row}>
-                Iterations
+                {t("runner.iterations")}
                 <Stepper value={iterations} onChange={setIterations} />
               </div>
               <div className={row}>
-                Delay (ms)
+                {t("runner.delay")}
                 <span className="inline-flex rounded-md border border-line bg-canvas p-0.5">
                   {[0, 250, 500].map((ms) => (
                     <button
@@ -219,7 +225,7 @@ export default function Runner() {
                 </span>
               </div>
               <label className={cn(row, "cursor-pointer")}>
-                Stop on first failure
+                {t("runner.stopOnFailure")}
                 <button
                   type="button"
                   role="switch"
@@ -231,9 +237,10 @@ export default function Runner() {
                   )}
                 >
                   <m.span
-                    animate={{ x: stopOnFailure ? 16 : 0 }}
+                    // Slides toward the end side, which is the left in Persian.
+                    animate={{ x: stopOnFailure ? (isRtl() ? -16 : 16) : 0 }}
                     transition={{ type: "spring", stiffness: 600, damping: 32 }}
-                    className="absolute top-0.5 left-0.5 size-4 rounded-full bg-white"
+                    className="absolute start-0.5 top-0.5 size-4 rounded-full bg-white"
                   />
                 </button>
               </label>
@@ -250,7 +257,7 @@ export default function Runner() {
                   )}
                 >
                   <Icon name={running ? "stop" : "play"} size={13} />
-                  {running ? "Stop" : "Run collection"}
+                  {running ? t("runner.stop") : t("runner.run")}
                 </m.button>
               </div>
             </div>
@@ -258,11 +265,15 @@ export default function Runner() {
         </m.div>
 
         <m.p variants={rise} className="text-small mt-6 text-muted">
-          The{" "}
-          <a href={DEMO_URL} className="text-fg underline underline-offset-4 hover:text-accent">
-            web demo
-          </a>{" "}
-          comes with a sample collection to run against JSONPlaceholder.
+          <Trans
+            t={t}
+            i18nKey="runner.demoNote"
+            components={{
+              demo: (
+                <DemoLink className="text-fg underline underline-offset-4 hover:text-accent" />
+              ),
+            }}
+          />
         </m.p>
       </div>
     </m.section>

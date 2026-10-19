@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
@@ -7,6 +8,7 @@ import { Segmented } from "@/components/ui/Tabs";
 import { looksLikeCurl, parseCurl } from "@/core/curl";
 import { importJson, type ImportResult } from "@/core/importers";
 import { countRequests } from "@/core/tree";
+import { t } from "@/i18n";
 import { pickFiles } from "@/lib/files";
 import { notify } from "@/store/toasts";
 import { useWorkspace } from "@/store/workspace";
@@ -15,15 +17,20 @@ type Mode = "file" | "curl" | "text";
 
 function summarize(result: ImportResult): string {
   const parts: string[] = [];
-  for (const c of result.collections)
-    parts.push(`collection "${c.name}" (${countRequests(c.items)} requests)`);
-  if (result.environments.length) parts.push(`${result.environments.length} environment(s)`);
-  if (result.protoSets.length) parts.push(`${result.protoSets.length} proto set(s)`);
-  if (result.globals?.length) parts.push(`${result.globals.length} global variable(s)`);
-  return parts.join(", ") || "nothing";
+  for (const c of result.collections) {
+    parts.push(t("import.summary.collection", { name: c.name, count: countRequests(c.items) }));
+  }
+  if (result.environments.length)
+    parts.push(t("import.summary.environments", { count: result.environments.length }));
+  if (result.protoSets.length)
+    parts.push(t("import.summary.protoSets", { count: result.protoSets.length }));
+  if (result.globals?.length)
+    parts.push(t("import.summary.globals", { count: result.globals.length }));
+  return parts.join(t("listSeparator")) || t("import.summary.nothing");
 }
 
 export function ImportDialog() {
+  const { t } = useTranslation();
   const closeDialog = useWorkspace((s) => s.closeDialog);
   const importData = useWorkspace((s) => s.importData);
   const newTab = useWorkspace((s) => s.newTab);
@@ -34,7 +41,7 @@ export function ImportDialog() {
 
   const apply = (result: ImportResult) => {
     importData(result);
-    notify.success(`Imported ${summarize(result)}.`);
+    notify.success(t("import.imported", { summary: summarize(result) }));
     showSection(result.collections.length ? "collections" : "environments");
     closeDialog();
   };
@@ -44,7 +51,7 @@ export function ImportDialog() {
     try {
       if (looksLikeCurl(raw)) {
         newTab("http", parseCurl(raw));
-        notify.success("Opened the cURL command as a new request.");
+        notify.success(t("import.curlOpened"));
         closeDialog();
         return;
       }
@@ -74,17 +81,17 @@ export function ImportDialog() {
 
   return (
     <Modal
-      title="Import"
+      title={t("import.title")}
       onClose={closeDialog}
       className="max-w-xl"
       footer={
         mode !== "file" && (
           <>
             <Button variant="ghost" onClick={closeDialog}>
-              Cancel
+              {t("actions.cancel")}
             </Button>
             <Button onClick={() => importText(text)} disabled={!text.trim()}>
-              Import
+              {t("actions.import")}
             </Button>
           </>
         )
@@ -98,9 +105,9 @@ export function ImportDialog() {
             setError(null);
           }}
           options={[
-            { value: "file", label: "File" },
+            { value: "file", label: t("import.modes.file") },
             { value: "curl", label: "cURL" },
-            { value: "text", label: "Paste JSON" },
+            { value: "text", label: t("import.modes.text") },
           ]}
         />
 
@@ -111,10 +118,8 @@ export function ImportDialog() {
             className="flex w-full flex-col items-center gap-2 rounded-md border border-dashed border-line px-6 py-10 text-center hover:border-accent/50 hover:bg-panel-2"
           >
             <Icon name="upload" size={20} className="text-subtle" />
-            <span className="text-sm font-medium">Choose files to import</span>
-            <span className="text-xs text-muted">
-              Collection files (v2.0 / v2.1), environment files and ArioQuest exports
-            </span>
+            <span className="text-sm font-medium">{t("import.chooseFiles")}</span>
+            <span className="text-xs text-muted">{t("import.supported")}</span>
           </button>
         )}
 
@@ -123,6 +128,7 @@ export function ImportDialog() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             spellCheck={false}
+            dir="ltr"
             rows={10}
             placeholder={
               mode === "curl"
@@ -135,9 +141,7 @@ export function ImportDialog() {
 
         {error && <ErrorNote>{error}</ErrorNote>}
 
-        <p className="text-xs text-subtle">
-          Tip: paste a cURL command straight into a request's URL bar to convert it.
-        </p>
+        <p className="text-xs text-subtle">{t("import.tip")}</p>
       </div>
     </Modal>
   );

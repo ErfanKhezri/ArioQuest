@@ -1,19 +1,16 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { CodeEditor, type EditorLanguage } from "@/components/editor/CodeEditor";
 import { ThemeMenu } from "@/components/editor/ThemeMenu";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
-import {
-  moodForGrpcStatus,
-  moodForHttpStatus,
-  moodLabel,
-  moodTextClass,
-} from "@/components/ui/arioMood";
+import { moodForGrpcStatus, moodForHttpStatus, moodTextClass } from "@/components/ui/arioMood";
 import { EmptyState, ErrorNote, IconButton } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/Icon";
 import { Kbd } from "@/components/ui/Kbd";
 import { statusTextClass } from "@/components/ui/methodColors";
 import { Segmented, Tabs } from "@/components/ui/Tabs";
 import type { GrpcResponseData, HttpResponseData, RunResult } from "@/core/types";
+import { i18n, t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { formatBytes, formatDuration } from "@/lib/files";
 import { notify } from "@/store/toasts";
@@ -47,12 +44,12 @@ function prettyBody(body: string, language: EditorLanguage): string {
 
 const copy = (text: string) =>
   navigator.clipboard.writeText(text).then(
-    () => notify.success("Copied to clipboard."),
-    () => notify.error("Could not access the clipboard."),
+    () => notify.success(t("notices.copied")),
+    () => notify.error(t("notices.clipboardFailed")),
   );
 
 const clock = (ts: number) =>
-  `${new Date(ts).toLocaleTimeString(undefined, { hour12: false })}.${String(ts % 1000).padStart(3, "0")}`;
+  `${new Date(ts).toLocaleTimeString(i18n.language, { hour12: false })}.${String(ts % 1000).padStart(3, "0")}`;
 
 function cookiesOf(response: HttpResponseData) {
   return response.headers
@@ -78,6 +75,7 @@ function Chip({ children, className }: { children: ReactNode; className?: string
 }
 
 export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelProps) {
+  const { t } = useTranslation();
   const result = useWorkspace((s) => s.results[tabId]);
   const running = useWorkspace((s) => Boolean(s.running[tabId]));
   const [section, setSection] = useState<Section>("body");
@@ -85,27 +83,26 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
   const toggle = (
     <IconButton
       icon={layout === "vertical" ? "columns" : "rows"}
-      label={layout === "vertical" ? "Show response on the right" : "Show response below"}
+      label={layout === "vertical" ? t("response.showRight") : t("response.showBelow")}
       onClick={onToggleLayout}
-      className="ml-auto"
+      className="ms-auto"
     />
   );
 
   if (!result) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3 text-xs text-subtle">
+        <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line ps-3 pe-1 text-xs text-subtle">
           {running && <Ario mood="thinking" size={20} className={moodTextClass.thinking} />}
-          {running ? "Sending…" : "Response"}
+          {running ? t("response.sending") : t("response.title")}
           {toggle}
         </div>
         {running ? (
-          <EmptyState title="Waiting for the response…" mood="thinking" className="flex-1" />
+          <EmptyState title={t("response.waiting")} mood="thinking" className="flex-1" />
         ) : (
-          <EmptyState title="No response yet" mood="sleepy" className="flex-1">
+          <EmptyState title={t("response.noResponse")} mood="sleepy" className="flex-1">
             <span className="inline-flex items-center gap-1">
-              Press <Kbd>Ctrl</Kbd>
-              <Kbd>Enter</Kbd> to send
+              <Trans i18nKey="response.pressToSend" components={{ kbd: <Kbd /> }} />
             </span>
           </EmptyState>
         )}
@@ -122,41 +119,42 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
         ? moodForGrpcStatus(outcome.response.statusName)
         : "error";
   const tabs: Array<{ id: Section; label: string; badge?: ReactNode }> = [
-    { id: "body", label: outcome.kind === "grpc" ? "Messages" : "Body" },
+    { id: "body", label: outcome.kind === "grpc" ? t("response.messages") : t("request.body") },
   ];
   if (outcome.kind === "http") {
     tabs.push(
-      { id: "headers", label: "Headers", badge: outcome.response.headers.length },
-      { id: "cookies", label: "Cookies", badge: cookiesOf(outcome.response).length },
+      { id: "headers", label: t("request.headers"), badge: outcome.response.headers.length },
+      { id: "cookies", label: t("response.cookies"), badge: cookiesOf(outcome.response).length },
     );
   }
   if (outcome.kind === "grpc") {
     tabs.push({
       id: "headers",
-      label: "Metadata",
+      label: t("request.metadata"),
       badge: outcome.response.headers.length + outcome.response.trailers.length,
     });
   }
   tabs.push({
     id: "tests",
-    label: "Tests",
+    label: t("request.tests"),
     badge: result.tests.length ? (
       <span className={passed === result.tests.length ? "text-success" : "text-danger"}>
-        {passed}/{result.tests.length} passed
+        {t("response.testsPassed", { passed, total: result.tests.length })}
       </span>
     ) : undefined,
   });
   // Console only appears when a script actually logged something.
-  if (result.logs.length) tabs.push({ id: "console", label: "Console", badge: result.logs.length });
+  if (result.logs.length)
+    tabs.push({ id: "console", label: t("response.console"), badge: result.logs.length });
   const current = tabs.some((t) => t.id === section) ? section : "body";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line pr-1 pl-3">
+      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-line ps-3 pe-1">
         <Ario
           mood={running ? "thinking" : mood}
           size={20}
-          label={`Ario is ${moodLabel[running ? "thinking" : mood]}`}
+          label={t("ario.is", { mood: t(`ario.moods.${running ? "thinking" : mood}`) })}
           className={moodTextClass[running ? "thinking" : mood]}
         />
         {outcome.kind === "http" && (
@@ -176,7 +174,7 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
             <Chip>{formatDuration(outcome.response.timeMs)}</Chip>
           </>
         )}
-        {outcome.kind === "error" && <Chip className="text-danger">Error</Chip>}
+        {outcome.kind === "error" && <Chip className="text-danger">{t("defaults.error")}</Chip>}
         {toggle}
       </div>
       <Tabs value={current} onChange={setSection} tabs={tabs} />
@@ -190,7 +188,7 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
         {current === "headers" && <HeadersSection result={result} />}
         {current === "cookies" && outcome.kind === "http" && (
           <div className="min-h-0 flex-1 overflow-y-auto pt-2">
-            <HeaderTable rows={cookiesOf(outcome.response)} empty="No cookies were set." />
+            <HeaderTable rows={cookiesOf(outcome.response)} empty={t("response.noCookies")} />
           </div>
         )}
         {current === "tests" && <TestsSection result={result} />}
@@ -201,6 +199,7 @@ export function ResponsePanel({ tabId, layout, onToggleLayout }: ResponsePanelPr
 }
 
 function BodySection({ result }: { result: RunResult }) {
+  const { t } = useTranslation();
   const { outcome } = result;
   const [view, setView] = useState<BodyView>("pretty");
   const [wrap, setWrap] = useState(false);
@@ -219,7 +218,7 @@ function BodySection({ result }: { result: RunResult }) {
   if (outcome.kind === "error") {
     return (
       <ErrorNote mood="error" className="m-3">
-        <p className="font-medium">Could not get a response</p>
+        <p className="font-medium">{t("response.noResponseError")}</p>
         <p className="mt-1 font-mono text-fg">{outcome.message}</p>
       </ErrorNote>
     );
@@ -237,22 +236,22 @@ function BodySection({ result }: { result: RunResult }) {
           value={view}
           onChange={setView}
           options={[
-            { value: "pretty", label: "Pretty" },
-            { value: "raw", label: "Raw" },
-            ...(canPreview ? [{ value: "preview" as const, label: "Preview" }] : []),
+            { value: "pretty", label: t("response.pretty") },
+            { value: "raw", label: t("response.raw") },
+            ...(canPreview ? [{ value: "preview" as const, label: t("response.preview") }] : []),
           ]}
         />
-        <span className="ml-auto flex items-center">
+        <span className="ms-auto flex items-center">
           <ThemeMenu />
           <IconButton
             icon="wrap"
-            label={wrap ? "Disable line wrap" : "Wrap lines"}
+            label={wrap ? t("response.unwrapLines") : t("response.wrapLines")}
             onClick={() => setWrap(!wrap)}
             className={wrap ? "text-accent" : ""}
           />
           <IconButton
             icon="copy"
-            label="Copy body"
+            label={t("response.copyBody")}
             onClick={() => void copy(shown)}
             disabled={!text}
           />
@@ -263,23 +262,23 @@ function BodySection({ result }: { result: RunResult }) {
           http.isBinary && http.bodyBase64 ? (
             <div className="flex h-full items-center justify-center overflow-auto p-4">
               <img
-                alt="Response preview"
+                alt={t("response.imagePreview")}
                 src={`data:${contentType || "image/png"};base64,${http.bodyBase64}`}
                 className="max-h-full max-w-full"
               />
             </div>
           ) : (
             <iframe
-              title="HTML preview"
+              title={t("response.htmlPreview")}
               sandbox=""
               srcDoc={http.body}
               className="h-full w-full bg-white"
             />
           )
         ) : http?.isBinary ? (
-          <EmptyState title="Binary response" mood="curious">
-            {formatBytes(http.size)} of binary data
-            {http.bodyBase64 && canPreview ? " — switch to Preview to view it." : "."}
+          <EmptyState title={t("response.binary")} mood="curious">
+            {t("response.binaryData", { size: formatBytes(http.size) })}
+            {http.bodyBase64 && canPreview ? t("response.switchToPreview") : "."}
           </EmptyState>
         ) : text ? (
           <CodeEditor
@@ -289,7 +288,7 @@ function BodySection({ result }: { result: RunResult }) {
             wrap={wrap}
           />
         ) : (
-          <p className="p-3 text-xs text-subtle">The response body is empty.</p>
+          <p className="p-3 text-xs text-subtle">{t("response.emptyBody")}</p>
         )}
       </div>
     </div>
@@ -298,6 +297,7 @@ function BodySection({ result }: { result: RunResult }) {
 
 /** Sent and received messages in order, with the final status. */
 function GrpcTimeline({ result, response }: { result: RunResult; response: GrpcResponseData }) {
+  const { t } = useTranslation();
   const sent = useMemo(() => {
     const body = result.sent?.body ?? "";
     try {
@@ -315,13 +315,13 @@ function GrpcTimeline({ result, response }: { result: RunResult; response: GrpcR
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-8 shrink-0 items-center px-3 text-xs text-subtle">
-        {sent.length} sent · {response.messages.length} received
+        {t("response.sentReceived", { sent: sent.length, received: response.messages.length })}
         <IconButton
           icon="copy"
-          label="Copy received messages"
+          label={t("response.copyReceived")}
           onClick={() => void copy(all)}
           disabled={!all}
-          className="ml-auto"
+          className="ms-auto"
         />
       </div>
       <ol className="selectable min-h-0 flex-1 overflow-y-auto border-t border-line">
@@ -345,7 +345,7 @@ function GrpcTimeline({ result, response }: { result: RunResult; response: GrpcR
           <span className="w-24 shrink-0 font-mono text-subtle">{clock(finishedAt)}</span>
           {response.ok ? (
             <span className="flex items-center gap-2 text-success">
-              <Ario mood="happy" size={18} className="text-success" /> Completed · OK
+              <Ario mood="happy" size={18} className="text-success" /> {t("response.completed")}
             </span>
           ) : (
             <ErrorNote
@@ -371,16 +371,20 @@ function TimelineItem({
   time: string;
   children: string;
 }) {
+  const { t } = useTranslation();
   return (
     <li className="flex items-start gap-2 border-b border-line px-3 py-2 text-xs">
       <Icon
         name={direction === "sent" ? "arrowUp" : "arrowDown"}
         size={14}
         className="mt-px shrink-0 text-subtle"
-        aria-label={direction}
+        aria-label={t(`response.${direction}`)}
       />
       <span className="w-24 shrink-0 font-mono text-subtle">{time}</span>
-      <pre className="min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-pre-wrap">
+      <pre
+        dir="ltr"
+        className="min-w-0 flex-1 overflow-x-auto text-left font-mono text-xs whitespace-pre-wrap"
+      >
         {children}
       </pre>
     </li>
@@ -389,7 +393,7 @@ function TimelineItem({
 
 function HeaderTable({
   rows,
-  empty = "None.",
+  empty = t("response.none"),
 }: {
   rows: Array<{ key: string; value: string }>;
   empty?: string;
@@ -400,7 +404,7 @@ function HeaderTable({
       <tbody>
         {rows.map((h, i) => (
           <tr key={`${h.key}-${i}`} className="border-b border-line">
-            <td className="h-8 w-1/3 pr-3 align-middle font-mono break-words text-muted">
+            <td className="h-8 w-1/3 pe-3 align-middle font-mono break-words text-muted">
               {h.key}
             </td>
             <td className="py-2 font-mono break-all">{h.value}</td>
@@ -416,36 +420,42 @@ function SectionTitle({ children }: { children: ReactNode }) {
 }
 
 function HeadersSection({ result }: { result: RunResult }) {
+  const { t } = useTranslation();
   const { outcome, sent } = result;
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
       {outcome.kind === "http" && <HeaderTable rows={outcome.response.headers} />}
       {outcome.kind === "grpc" && (
         <>
-          <SectionTitle>Headers</SectionTitle>
+          <SectionTitle>{t("request.headers")}</SectionTitle>
           <HeaderTable rows={outcome.response.headers} />
-          <SectionTitle>Trailers</SectionTitle>
+          <SectionTitle>{t("response.trailers")}</SectionTitle>
           <HeaderTable rows={outcome.response.trailers} />
         </>
       )}
       {sent && (
         <details className="px-3 pb-3 text-xs">
-          <summary className="cursor-pointer py-2 text-subtle hover:text-fg">Request sent</summary>
-          <p className="selectable mb-2 font-mono break-all">
+          <summary className="cursor-pointer py-2 text-subtle hover:text-fg">
+            {t("response.requestSent")}
+          </summary>
+          <p dir="ltr" className="selectable mb-2 text-left font-mono break-all">
             {sent.method} {sent.url}
           </p>
           <table className="selectable w-full table-fixed border-collapse">
             <tbody>
               {sent.headers.map((h, i) => (
                 <tr key={`${h.key}-${i}`} className="border-b border-line">
-                  <td className="h-8 w-1/3 pr-3 font-mono text-muted">{h.key}</td>
+                  <td className="h-8 w-1/3 pe-3 font-mono text-muted">{h.key}</td>
                   <td className="py-2 font-mono break-all">{h.value}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {sent.body && (
-            <pre className="selectable mt-2 max-h-80 overflow-auto rounded-md border border-line p-2 font-mono whitespace-pre-wrap">
+            <pre
+              dir="ltr"
+              className="selectable mt-2 max-h-80 overflow-auto rounded-md border border-line p-2 text-left font-mono whitespace-pre-wrap"
+            >
               {sent.body}
             </pre>
           )}
@@ -456,10 +466,11 @@ function HeadersSection({ result }: { result: RunResult }) {
 }
 
 function TestsSection({ result }: { result: RunResult }) {
+  const { t } = useTranslation();
   if (result.tests.length === 0) {
     return (
-      <EmptyState title="No tests ran" mood="curious" className="flex-1">
-        Add assertions in the request's Tests tab, or use aq.test() in a script.
+      <EmptyState title={t("response.noTests")} mood="curious" className="flex-1">
+        {t("response.noTestsHint")}
       </EmptyState>
     );
   }
@@ -470,8 +481,8 @@ function TestsSection({ result }: { result: RunResult }) {
       <li className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm">
         <Ario mood={mood} size={20} className={moodTextClass[mood]} />
         {failed
-          ? `${failed} of ${result.tests.length} failed`
-          : `All ${result.tests.length} passed`}
+          ? t("response.failedOf", { failed, total: result.tests.length })
+          : t("response.allPassed", { count: result.tests.length })}
       </li>
       {result.tests.map((t, i) => (
         <li key={i} className="flex items-start gap-2 border-b border-line px-3 py-2 text-xs">
@@ -494,7 +505,10 @@ function TestsSection({ result }: { result: RunResult }) {
 
 function ConsoleSection({ logs }: { logs: string[] }) {
   return (
-    <pre className="selectable min-h-0 flex-1 overflow-auto p-3 font-mono text-xs">
+    <pre
+      dir="ltr"
+      className="selectable min-h-0 flex-1 overflow-auto p-3 text-left font-mono text-xs"
+    >
       {logs.map((line, i) => (
         <div
           key={i}

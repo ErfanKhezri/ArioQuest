@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { moodForHttpStatus, moodTextClass } from "@/components/ui/arioMood";
 import { statusTextClass } from "@/components/ui/methodColors";
@@ -67,6 +68,7 @@ function JsonLine({ text }: { text: string }) {
 
 /** Requests being typed and answered, looping slowly. Static when motion is reduced. */
 export function LiveDemo() {
+  const { t } = useTranslation();
   const [roundIndex, setRoundIndex] = useState(0);
   const round = ROUNDS[roundIndex] as Round;
   const { sending, firstLine, last } = timeline(round);
@@ -95,7 +97,10 @@ export function LiveDemo() {
   const mood = step === sending ? "thinking" : moodForHttpStatus(round.status);
 
   return (
-    <div className="w-full max-w-md overflow-hidden rounded-md border border-line bg-panel/80 text-left backdrop-blur-sm">
+    <div
+      dir="ltr"
+      className="w-full max-w-md overflow-hidden rounded-md border border-line bg-panel/80 text-left backdrop-blur-sm"
+    >
       <div className="flex h-9 items-center gap-2 border-b border-line px-3 font-mono text-xs">
         <span className="font-semibold text-method-get">GET</span>
         <span className="min-w-0 flex-1 truncate">
@@ -105,7 +110,9 @@ export function LiveDemo() {
             <span className="ml-px inline-block h-3 w-px translate-y-0.5 bg-fg motion-safe:animate-caret" />
           )}
         </span>
-        <span className="rounded-sm bg-accent px-2 py-0.5 font-sans text-accent-fg">Send</span>
+        <span className="rounded-sm bg-accent px-2 py-0.5 font-sans text-accent-fg">
+          {t("actions.send")}
+        </span>
       </div>
       <div className="h-36 px-3 py-2 font-mono text-xs">
         {step >= sending && (
@@ -118,7 +125,7 @@ export function LiveDemo() {
               className={moodTextClass[mood]}
             />
             {step === sending ? (
-              <span className="text-subtle">Sending…</span>
+              <span className="text-subtle">{t("liveDemo.sending")}</span>
             ) : (
               <span
                 className={`rounded-sm border border-line px-1 ${statusTextClass(round.status)}`}

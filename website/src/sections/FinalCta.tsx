@@ -1,5 +1,6 @@
 import { m } from "motion/react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
 import { moodTextClass } from "@/components/ui/arioMood";
 import { cn } from "@/lib/cn";
@@ -16,11 +17,12 @@ function moodFor(target: EventTarget): ArioMood {
 }
 
 export default function FinalCta() {
+  const { t } = useTranslation("site");
   const [mood, setMood] = useState<ArioMood>("idle");
 
   return (
     <m.section {...inView} className="bg-panel">
-      <div className="page grid min-h-[80svh] items-center gap-12 py-24 lg:grid-cols-12 lg:gap-8">
+      <div className="page grid min-h-[80svh] grid-cols-1 items-center gap-12 py-24 lg:grid-cols-12 lg:gap-8">
         <div
           className="flex flex-col gap-8 lg:col-span-7"
           onPointerOver={(e) => setMood(moodFor(e.target))}
@@ -29,11 +31,10 @@ export default function FinalCta() {
           onBlur={() => setMood("idle")}
         >
           <m.h2 variants={rise} className="text-hero font-semibold">
-            Send your first request
+            {t("finalCta.title")}
           </m.h2>
           <m.p variants={rise} className="text-lead max-w-[46ch]">
-            Try it in the browser right now, or install the desktop app for gRPC and requests with
-            no CORS limits.
+            {t("finalCta.body")}
           </m.p>
           <m.div variants={rise}>
             <Actions />

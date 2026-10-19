@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario } from "@/components/ui/Ario";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
@@ -30,17 +31,17 @@ function RailButton({
         active ? "text-fg" : "text-subtle hover:text-fg",
       )}
     >
-      {active && <span className="absolute top-1.5 -left-2 h-5 w-0.5 rounded-full bg-accent" />}
+      {active && <span className="absolute -start-2 top-1.5 h-5 w-0.5 rounded-full bg-accent" />}
       <Icon name={icon} size={18} />
     </button>
   );
 }
 
-const sections: Array<{ id: SidebarSection; label: string; icon: IconName }> = [
-  { id: "collections", label: "Collections", icon: "folder" },
-  { id: "environments", label: "Environments", icon: "globe" },
-  { id: "history", label: "History", icon: "history" },
-  { id: "protos", label: "Proto files", icon: "layers" },
+const sections: Array<{ id: SidebarSection; icon: IconName }> = [
+  { id: "collections", icon: "folder" },
+  { id: "environments", icon: "globe" },
+  { id: "history", icon: "history" },
+  { id: "protos", icon: "layers" },
 ];
 
 interface NavRailProps {
@@ -51,6 +52,7 @@ interface NavRailProps {
 }
 
 export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }: NavRailProps) {
+  const { t } = useTranslation();
   const sidebar = useWorkspace((s) => s.sidebar);
   const showSection = useWorkspace((s) => s.showSection);
   const openDialog = useWorkspace((s) => s.openDialog);
@@ -71,7 +73,7 @@ export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }
         return (
           <RailButton
             key={item.id}
-            label={item.label}
+            label={t(`nav.${item.id}`)}
             icon={item.icon}
             active={active}
             // Clicking the open section again collapses the sidebar.
@@ -88,30 +90,34 @@ export function NavRail({ session, onSignOut, sidebarOpen, onSidebarOpenChange }
 
       <div className="mt-auto flex flex-col items-center gap-1">
         <RailButton
-          label="Search (Ctrl+K)"
+          label={t("nav.search")}
           icon="search"
           onClick={() => openDialog({ type: "palette" })}
         />
         <RailButton
-          label="Settings"
+          label={t("nav.settings")}
           icon="sliders"
           onClick={() => openDialog({ type: "settings" })}
         />
         <RailButton
-          label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+          label={theme === "dark" ? t("nav.lightTheme") : t("nav.darkTheme")}
           icon={theme === "dark" ? "sun" : "moon"}
           onClick={toggleTheme}
         />
         <Menu
           align="start"
           items={[
-            { label: `Sign out (${session.email})`, icon: "arrowRight", onSelect: onSignOut },
+            {
+              label: t("nav.signOut", { email: session.email }),
+              icon: "arrowRight",
+              onSelect: onSignOut,
+            },
           ]}
           trigger={({ toggle }) => (
             <button
               type="button"
               title={`${session.name} — ${session.email}`}
-              aria-label="Account"
+              aria-label={t("nav.account")}
               onClick={toggle}
               className="mt-1 flex size-7 items-center justify-center rounded-full border border-line bg-panel-2 text-xs text-muted uppercase hover:text-fg focus-visible:outline-2 focus-visible:outline-accent"
             >

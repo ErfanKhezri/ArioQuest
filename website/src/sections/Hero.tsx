@@ -7,6 +7,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Ario, type ArioMood } from "@/components/ui/Ario";
 import { moodForHttpStatus, moodTextClass } from "@/components/ui/arioMood";
 import { Icon } from "@/components/ui/Icon";
@@ -20,14 +21,13 @@ import { ease, group, rise, sleep } from "../lib/motion";
 // The sample collection from the web demo, against JSONPlaceholder.
 const ROUNDS = [
   {
-    name: "Get post",
+    name: "getPost",
     method: "GET",
     url: "{{baseUrl}}/posts/1",
     status: 200,
     statusText: "OK",
     meta: "142 ms · 292 B",
-    tests: "2/2 passed",
-    say: "200! Both tests passed.",
+    tests: { passed: 2, total: 2 },
     lines: [
       "{",
       '  "userId": 1,',
@@ -38,25 +38,23 @@ const ROUNDS = [
     ],
   },
   {
-    name: "Create post",
+    name: "createPost",
     method: "POST",
     url: "{{baseUrl}}/posts",
     status: 201,
     statusText: "Created",
     meta: "318 ms · 83 B",
-    tests: "2/2 passed",
-    say: "201, created. Tests pass.",
+    tests: { passed: 2, total: 2 },
     lines: ["{", '  "title": "Hello from ArioQuest",', '  "userId": 1,', '  "id": 101', "}"],
   },
   {
-    name: "Get missing post",
+    name: "getMissingPost",
     method: "GET",
     url: "{{baseUrl}}/posts/0",
     status: 404,
     statusText: "Not Found",
     meta: "96 ms · 2 B",
-    tests: "0/1 passed",
-    say: "404… that post isn't there.",
+    tests: { passed: 0, total: 1 },
     lines: ["{}"],
   },
 ] as const;
@@ -106,27 +104,28 @@ function useTimeline(playing: boolean) {
 }
 
 function AppMock({ frame }: { frame: Frame }) {
+  const { t } = useTranslation("site");
   const round = ROUNDS[frame.round]!;
   const sending = frame.phase === "sending";
   const done = frame.phase === "done";
 
   return (
-    <Fragment className="flex h-[440px] text-left sm:h-[480px]">
+    <Fragment className="flex h-[440px] text-start sm:h-[480px]">
       {/* sidebar */}
       <div className="hidden w-52 shrink-0 flex-col gap-0.5 bg-panel-2/60 p-2 text-xs md:flex">
         <div className="flex h-7 items-center gap-2 px-2 font-medium text-muted">
-          <Icon name="folder" size={13} /> Getting started
+          <Icon name="folder" size={13} /> {t("ui.collection")}
         </div>
         {ROUNDS.map((r, i) => (
           <div
             key={r.name}
             className={cn(
-              "flex h-7 items-center rounded-sm px-2 pl-6",
+              "flex h-7 items-center rounded-sm ps-6 pe-2",
               i === frame.round ? "bg-accent/15 text-fg" : "text-muted",
             )}
           >
             <MethodBadge method={r.method} />
-            <span className="truncate">{r.name}</span>
+            <span className="truncate">{t(`ui.requests.${r.name}`)}</span>
           </div>
         ))}
       </div>
@@ -136,23 +135,23 @@ function AppMock({ frame }: { frame: Frame }) {
         <div className="flex h-9 shrink-0 items-end gap-px bg-panel-2/60 px-1 text-xs">
           <div className="flex h-8 items-center gap-1 rounded-t-sm bg-panel px-3">
             <MethodBadge method={round.method} className="w-auto" />
-            <span className="text-fg">{round.name}</span>
+            <span className="text-fg">{t(`ui.requests.${round.name}`)}</span>
           </div>
           <div className="flex h-8 items-center gap-1 px-3 text-muted">
-            <MethodBadge method="GET" className="w-auto" /> List posts
+            <MethodBadge method="GET" className="w-auto" /> {t("ui.requests.listPosts")}
           </div>
         </div>
 
         {/* URL bar */}
         <div className="flex items-center gap-2 p-2">
           <div className="flex min-w-0 flex-1 items-center rounded-md border border-line bg-canvas">
-            <span className="border-r border-line px-2 py-1.5">
+            <span className="border-e border-line px-2 py-1.5">
               <MethodBadge method={round.method} className="w-auto" />
             </span>
             <span className="truncate px-2 font-mono text-xs">
               <VarText text={round.url.slice(0, frame.typed)} />
               {frame.phase === "typing" && (
-                <span className="ml-px inline-block h-3.5 w-px translate-y-0.5 animate-caret bg-fg" />
+                <span className="ms-px inline-block h-3.5 w-px translate-y-0.5 animate-caret bg-fg" />
               )}
             </span>
           </div>
@@ -169,51 +168,51 @@ function AppMock({ frame }: { frame: Frame }) {
             ) : (
               <Icon name="send" size={12} />
             )}
-            {sending ? "Sending" : "Send"}
+            {sending ? t("ui.sending") : t("ui.send")}
           </m.span>
         </div>
 
         <div className="flex gap-4 px-3 pb-2 text-xs text-muted">
-          <span>Params</span>
-          <span>Headers</span>
-          <span className={round.method === "POST" ? "text-fg" : undefined}>Body</span>
-          <span>Auth</span>
-          <span>Scripts</span>
-          <span className={round.method === "GET" ? "text-fg" : undefined}>Tests</span>
+          <span>{t("ui.params")}</span>
+          <span>{t("ui.headers")}</span>
+          <span className={round.method === "POST" ? "text-fg" : undefined}>{t("ui.body")}</span>
+          <span>{t("ui.auth")}</span>
+          <span>{t("ui.scripts")}</span>
+          <span className={round.method === "GET" ? "text-fg" : undefined}>{t("ui.tests")}</span>
         </div>
 
         {/* response */}
         <div className="flex min-h-0 flex-1 flex-col bg-canvas/60">
           <div className="flex h-9 shrink-0 items-center gap-3 px-3 text-xs">
-            <span className="font-medium text-fg">Response</span>
+            <span className="font-medium text-fg">{t("ui.response")}</span>
             {done && (
               <m.span
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3"
               >
-                <span className={cn("font-semibold", statusTextClass(round.status))}>
+                <span dir="ltr" className={cn("font-semibold", statusTextClass(round.status))}>
                   {round.status} {round.statusText}
                 </span>
-                <span className="text-muted tabular-nums">{round.meta}</span>
+                <span dir="ltr" className="text-muted tabular-nums">
+                  {round.meta}
+                </span>
                 <span
                   className={cn(
                     "hidden sm:inline",
                     round.status < 400 ? "text-success" : "text-warning",
                   )}
                 >
-                  Tests {round.tests}
+                  {t("ui.testsPassed", round.tests)}
                 </span>
               </m.span>
             )}
           </div>
           <div className="min-h-0 flex-1 px-3 font-mono text-xs leading-5">
             {frame.phase === "typing" && (
-              <p className="pt-6 text-center font-sans text-muted">No response yet</p>
+              <p className="pt-6 text-center font-sans text-muted">{t("ui.noResponse")}</p>
             )}
-            {sending && (
-              <p className="pt-6 text-center font-sans text-muted">Waiting for the response…</p>
-            )}
+            {sending && <p className="pt-6 text-center font-sans text-muted">{t("ui.waiting")}</p>}
             {round.lines.slice(0, frame.lines).map((line, i) => (
               <m.div
                 key={`${frame.round}-${i}`}
@@ -232,6 +231,7 @@ function AppMock({ frame }: { frame: Frame }) {
 
 /** Ario sits on the window's edge and reacts to every step of the request. */
 function Mascot({ frame }: { frame: Frame }) {
+  const { t } = useTranslation("site");
   const round = ROUNDS[frame.round]!;
   const mood: ArioMood =
     frame.phase === "typing"
@@ -241,10 +241,10 @@ function Mascot({ frame }: { frame: Frame }) {
         : moodForHttpStatus(round.status);
   const line =
     frame.phase === "typing"
-      ? "Where are we going?"
+      ? t("hero.typing")
       : frame.phase === "sending"
-        ? "Sending…"
-        : round.say;
+        ? t("hero.sending")
+        : t(`hero.say.${round.name}`);
   const reaction =
     frame.phase !== "done"
       ? {}
@@ -263,7 +263,7 @@ function Mascot({ frame }: { frame: Frame }) {
         <Ario
           mood={mood}
           animate={frame.phase === "typing" ? "idle" : undefined}
-          label={`Ario is ${line}`}
+          label={t("hero.arioSays", { line })}
           className={cn(
             "size-24 transition-colors duration-500 sm:size-36 lg:size-44",
             moodTextClass[mood],
@@ -278,7 +278,7 @@ function Mascot({ frame }: { frame: Frame }) {
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.3, ease }}
           aria-live="polite"
-          className="text-small mb-10 rounded-md rounded-bl-none bg-panel-2 px-3 py-2 font-medium sm:mb-16"
+          className="text-small mb-10 rounded-md rounded-es-none bg-panel-2 px-3 py-2 font-medium sm:mb-16"
         >
           {line}
         </m.p>
@@ -288,6 +288,7 @@ function Mascot({ frame }: { frame: Frame }) {
 }
 
 export function Hero() {
+  const { t } = useTranslation("site");
   const ref = useRef<HTMLElement>(null);
   const mockRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -305,27 +306,48 @@ export function Hero() {
       initial="hidden"
       animate="show"
       variants={group}
-      className="page grid gap-10 pt-10 pb-24 sm:pt-16 lg:grid-cols-12 lg:gap-x-8 lg:pb-36"
+      className="page relative isolate grid grid-cols-1 gap-8 pt-8 pb-24 sm:gap-10 sm:pt-16 lg:grid-cols-12 lg:gap-x-8 lg:pb-36"
     >
-      <m.h1 variants={rise} className="text-hero font-semibold lg:col-span-12">
-        Meet your API sidekick.
-      </m.h1>
+      {/* A soft glow behind the first screen on phones, where the headline stands alone. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-140 bg-[radial-gradient(ellipse_70%_55%_at_30%_25%,color-mix(in_oklch,var(--accent)_28%,transparent),transparent_70%)] lg:hidden"
+      />
+
+      <div className="flex flex-col gap-5 lg:col-span-12">
+        <m.p
+          variants={rise}
+          className="text-small inline-flex items-center gap-2 self-start rounded-full border border-line bg-panel/70 px-3 py-1 text-muted backdrop-blur-sm lg:hidden"
+        >
+          <span className="relative flex size-2">
+            <span className="absolute inset-0 animate-ping rounded-full bg-success/60" />
+            <span className="relative size-2 rounded-full bg-success" />
+          </span>
+          {t("hero.eyebrow")}
+        </m.p>
+        <m.h1 variants={rise} className="text-hero font-semibold">
+          {t("hero.title")}
+        </m.h1>
+      </div>
 
       <div className="flex flex-col gap-8 lg:col-span-4 lg:pt-44">
         <m.p variants={rise} className="text-lead max-w-[34ch] text-fg">
-          ArioQuest is a Windows API client for HTTP and gRPC. Send requests, run your test
-          scripts and whole collections, and Ario tells you how each one went.
+          {t("hero.lead")}
         </m.p>
         <m.div variants={rise}>
           <Actions />
         </m.div>
       </div>
 
-      <m.div variants={rise} className="relative lg:col-span-8">
-        <m.div style={{ y: arioY }} className="relative z-10 -mb-3 ml-4 sm:ml-10">
+      <m.div variants={rise} className="relative mt-4 lg:col-span-8 lg:mt-0">
+        <m.div style={{ y: arioY }} className="relative z-10 ms-4 -mb-3 sm:ms-10">
           <Mascot frame={frame} />
         </m.div>
-        <m.div ref={mockRef} style={{ y: mockY }}>
+        <m.div
+          ref={mockRef}
+          style={{ y: mockY }}
+          className="rounded-md shadow-[0_24px_60px_-20px_color-mix(in_oklch,var(--accent)_45%,transparent)] ring-1 ring-line lg:shadow-none lg:ring-0"
+        >
           <AppMock frame={frame} />
         </m.div>
       </m.div>

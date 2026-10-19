@@ -1,5 +1,6 @@
 import { newAssertion, newExtraction, newHttpRequest, newKeyValue } from "@/core/factory";
 import type { Collection, Environment } from "@/core/types";
+import { t } from "@/i18n";
 import { uid } from "@/lib/id";
 
 /** Example content created on first launch so the app isn't empty. */
@@ -11,7 +12,7 @@ export function seedWorkspace(): { collection: Collection; environment: Environm
   };
 
   const listPosts = newHttpRequest({
-    name: "List posts",
+    name: t("seed.listPosts"),
     url: "{{baseUrl}}/posts?_limit=5",
     params: [newKeyValue("_limit", "5")],
     assertions: [
@@ -22,7 +23,7 @@ export function seedWorkspace(): { collection: Collection; environment: Environm
   });
 
   const getPost = newHttpRequest({
-    name: "Get post",
+    name: t("seed.getPost"),
     url: "{{baseUrl}}/posts/{{postId}}",
     testScript: [
       'aq.test("responds with the requested post", () => {',
@@ -34,7 +35,7 @@ export function seedWorkspace(): { collection: Collection; environment: Environm
   });
 
   const createPost = newHttpRequest({
-    name: "Create post",
+    name: t("seed.createPost"),
     method: "POST",
     url: "{{baseUrl}}/posts",
     preScript: 'aq.variables.set("title", `Hello from ArioQuest ${Date.now()}`);',
@@ -54,8 +55,8 @@ export function seedWorkspace(): { collection: Collection; environment: Environm
 
   const collection: Collection = {
     id: uid("col"),
-    name: "Getting started",
-    description: "Example requests with assertions, variable extraction and scripts.",
+    name: t("seed.collection"),
+    description: t("seed.description"),
     items: [
       { type: "request", id: uid("item"), request: listPosts },
       { type: "request", id: uid("item"), request: getPost },

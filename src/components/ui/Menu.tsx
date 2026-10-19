@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { isRtl } from "@/i18n/language";
 import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "./Icon";
 
@@ -37,7 +38,9 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
       return;
     }
     const menu = menuRef.current.getBoundingClientRect();
-    let left = align === "end" ? anchor.right - menu.width : anchor.left;
+    // "start"/"end" follow the reading direction, so menus flip for Persian.
+    const alignRight = (align === "end") !== isRtl();
+    let left = alignRight ? anchor.right - menu.width : anchor.left;
     left = Math.max(8, Math.min(left, window.innerWidth - menu.width - 8));
     let top = anchor.bottom + 4;
     if (top + menu.height > window.innerHeight - 8) top = Math.max(8, anchor.top - menu.height - 4);
@@ -69,7 +72,7 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
           <div
             ref={menuRef}
             role="menu"
-            className="fixed z-[60] min-w-44 glass rounded-md border border-line p-1"
+            className="glass fixed z-[60] min-w-44 rounded-md border border-line p-1"
             style={position ?? { top: -9999, left: -9999 }}
           >
             {items.map((item) => (
@@ -85,7 +88,7 @@ export function Menu({ items, trigger, align = "end" }: MenuProps) {
                     item.onSelect();
                   }}
                   className={cn(
-                    "flex h-7 w-full items-center gap-2 rounded-sm px-2 text-left text-sm hover:bg-panel-2 disabled:opacity-40",
+                    "flex h-7 w-full items-center gap-2 rounded-sm px-2 text-start text-sm hover:bg-panel-2 disabled:opacity-40",
                     item.danger ? "text-danger" : "text-fg",
                   )}
                 >
