@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Spinner } from "@/components/ui/controls";
 import { Tabs } from "@/components/ui/Tabs";
-import { AuthError, DEFAULT_ACCOUNT, signIn, signUp, type Session } from "@/lib/auth";
+import { AuthError, signIn, signUp, type Session } from "@/lib/auth";
 
 type Mode = "signin" | "signup";
 export type FieldName = "name" | "email" | "password";
@@ -105,12 +105,10 @@ export function LoginCard({
           </label>
         )}
         <label className="block">
-          <span className="mb-1 block text-xs text-muted">
-            {mode === "signin" ? t("login.emailOrUsername") : t("login.email")}
-          </span>
+          <span className="mb-1 block text-xs text-muted">{t("login.email")}</span>
           <Input
             autoFocus={mode === "signin"}
-            type={mode === "signin" ? "text" : "email"}
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             name="email"
@@ -165,23 +163,6 @@ export function LoginCard({
           {mode === "signin" ? t("login.signIn") : t("login.createAccount")}
         </Button>
         {error && !error.field && <FieldError message={error.message} />}
-        {mode === "signin" && (
-          <p className="text-center text-xs text-subtle">
-            {t("login.firstTime")}{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setEmail(DEFAULT_ACCOUNT.username);
-                setPassword(DEFAULT_ACCOUNT.password);
-                setError(null);
-              }}
-              className="text-accent hover:underline"
-            >
-              {t("login.useDefaultAccount")}
-            </button>{" "}
-            ({DEFAULT_ACCOUNT.username} / {DEFAULT_ACCOUNT.password})
-          </p>
-        )}
       </form>
     </div>
   );

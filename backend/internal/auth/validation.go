@@ -23,19 +23,19 @@ func normalizeEmail(email string) string {
 // trimmed and normalized. It returns a *FieldError for the first problem it finds.
 func validateSignUp(input SignUpInput) error {
 	if input.Name == "" {
-		return &FieldError{Field: "name", Message: "Enter your name."}
+		return &FieldError{Field: "name", Code: "name_required", Message: "Enter your name."}
 	}
 	if utf8.RuneCountInString(input.Name) > maxNameLength {
-		return &FieldError{Field: "name", Message: "Name is too long."}
+		return &FieldError{Field: "name", Code: "name_too_long", Message: "Name is too long."}
 	}
 	if !isValidEmail(input.Email) {
-		return &FieldError{Field: "email", Message: "Enter a valid email address."}
+		return &FieldError{Field: "email", Code: "email_invalid", Message: "Enter a valid email address."}
 	}
 	if utf8.RuneCountInString(input.Password) < minPasswordLength {
-		return &FieldError{Field: "password", Message: "Password must be at least 8 characters."}
+		return &FieldError{Field: "password", Code: "password_too_short", Message: "Password must be at least 8 characters."}
 	}
 	if len(input.Password) > maxPasswordBytes {
-		return &FieldError{Field: "password", Message: "Password is too long."}
+		return &FieldError{Field: "password", Code: "password_too_long", Message: "Password is too long."}
 	}
 	return nil
 }

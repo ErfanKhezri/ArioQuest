@@ -12,9 +12,11 @@ var (
 )
 
 // FieldError is a validation error that belongs to one input field, so the app
-// can show Message right under that field.
+// can show Message right under that field. Code is a fixed name for the error,
+// like "password_too_short", that the app translates.
 type FieldError struct {
 	Field   string
+	Code    string
 	Message string
 }
 

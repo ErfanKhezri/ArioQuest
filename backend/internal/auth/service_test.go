@@ -15,26 +15,31 @@ func TestSignUpValidation(t *testing.T) {
 		description string
 		input       SignUpInput
 		wantField   string
+		wantCode    string
 	}{
 		{
 			description: "empty name",
 			input:       SignUpInput{Name: "  ", Email: "a@b.co", Password: "secret123"},
 			wantField:   "name",
+			wantCode:    "name_required",
 		},
 		{
 			description: "no @ in email",
 			input:       SignUpInput{Name: "A", Email: "not-an-email", Password: "secret123"},
 			wantField:   "email",
+			wantCode:    "email_invalid",
 		},
 		{
 			description: "no dot in email domain",
 			input:       SignUpInput{Name: "A", Email: "a@localhost", Password: "secret123"},
 			wantField:   "email",
+			wantCode:    "email_invalid",
 		},
 		{
 			description: "short password",
 			input:       SignUpInput{Name: "A", Email: "a@b.co", Password: "short"},
 			wantField:   "password",
+			wantCode:    "password_too_short",
 		},
 	}
 
@@ -48,6 +53,9 @@ func TestSignUpValidation(t *testing.T) {
 			}
 			if fieldError.Field != testCase.wantField {
 				t.Fatalf("field = %q, want %q", fieldError.Field, testCase.wantField)
+			}
+			if fieldError.Code != testCase.wantCode {
+				t.Fatalf("code = %q, want %q", fieldError.Code, testCase.wantCode)
 			}
 		})
 	}

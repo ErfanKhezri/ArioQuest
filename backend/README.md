@@ -70,8 +70,21 @@ cat /opt/ario-api/version.txt             # installed commit
 ## Endpoints
 
 Request and response bodies are JSON. Errors look like
-`{"error": "Wrong email or password.", "field": "password"}`; `field` is present when the error
-belongs to one form field (`name`, `email` or `password`).
+`{"code": "invalid_credentials", "error": "Wrong email or password.", "field": "password"}`.
+`code` is a fixed name the app translates into the user's language; `error` is the English
+message; `field` is present when the error belongs to one form field (`name`, `email` or
+`password`).
+
+| Code                                      | Status   | When                              |
+| ----------------------------------------- | -------- | --------------------------------- |
+| `name_required`, `name_too_long`          | 400      | sign-up                           |
+| `email_invalid`                           | 400      | sign-up                           |
+| `password_too_short`, `password_too_long` | 400      | sign-up                           |
+| `email_taken`                             | 409      | sign-up                           |
+| `invalid_credentials`                     | 401      | sign-in                           |
+| `unauthenticated`                         | 401      | missing, unknown or expired token |
+| `invalid_json`, `body_too_large`          | 400, 413 | any request                       |
+| `internal`                                | 500      | anything unexpected (logged)      |
 
 | Method | Path             | Body                      | Success                    |
 | ------ | ---------------- | ------------------------- | -------------------------- |
@@ -86,6 +99,31 @@ belongs to one form field (`name`, `email` or `password`).
 Sign-up errors: `400` for invalid input, `409` when the email already has an account.
 Sign-in returns `401` for a wrong email or password. A token is valid for 30 days or until
 sign-out.
+
+## Database
+
+SQLite, in one file (`/var/lib/ario-api/ario.db` on the server, `ario.db` locally). The tables
+are created by [`migrations.go`](internal/platform/database/migrations.go); keep this diagram
+in sync when you add a migration.
+
+```mermaid
+erDiagram
+    users ||--o{ sessions : "signs in with"
+
+    users {
+        INTEGER id PK
+        TEXT name
+        TEXT email UK "lowercase"
+        TEXT password_hash "bcrypt, never the password"
+        INTEGER created_at "Unix seconds"
+    }
+
+    sessions {
+        TEXT token_hash PK "SHA-256 of the token, never the token"
+        INTEGER user_id FK "deleted with the user"
+        INTEGER expires_at "Unix seconds, 30 days after sign-in"
+    }
+```
 
 ## Layout
 
