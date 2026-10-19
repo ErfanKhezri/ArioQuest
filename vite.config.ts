@@ -5,12 +5,10 @@ import { defineConfig } from "vite";
 
 const host = process.env.TAURI_DEV_HOST;
 
-// The browser demo (`--mode demo`) is served under the website at <SITE_BASE>app/.
-const siteBase = process.env.SITE_BASE ?? "/";
-
 // https://v2.tauri.app/start/frontend/vite/
 export default defineConfig(({ mode }) => ({
-  base: mode === "demo" ? `${siteBase}app/` : "/",
+  // The browser demo (`--mode demo`) is served under the website at /app/.
+  base: mode === "demo" ? "/app/" : "/",
   // `pnpm dev` runs the app and the demo side by side; each needs its own dependency cache.
   cacheDir: mode === "demo" ? "node_modules/.vite-demo" : "node_modules/.vite",
   plugins: [react(), tailwindcss()],
